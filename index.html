@@ -555,7 +555,7 @@
     transform:scale(0.95);
   }
   .pad-actions{
-    display:flex; flex-direction:column; gap:4px;
+    display:flex; flex-direction:row; gap:4px; width:100%;
   }
 
   /* ---- 드래그 편집 모드 ---- */
@@ -706,10 +706,13 @@
     pointer-events:none;
   }
   body.mobile-landscape .pad-left {
-    display:flex; flex-direction:row; gap:8px; pointer-events:auto;
+    display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:center;
   }
   body.mobile-landscape .pad-right {
-    display:flex; flex-direction:column; gap:8px; pointer-events:auto; justify-content:flex-end;
+    display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:flex-end;
+  }
+  body.mobile-landscape .pad-right .mpad-btn {
+    width:100%;
   }
   body.mobile-landscape .mpad-btn{
     font-size:11px; padding:18px 14px;
@@ -1215,7 +1218,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <div class="map-wrap">
     <div class="action-toast" id="actionToast"></div>
-    <svg id="trackSvg" viewBox="0 -140 1550 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+    <svg id="trackSvg" viewBox="0 -140 1550 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="-140" width="1550" height="900" fill="#0f1626"/>
       <text x="20" y="650" class="zone-label">◀ 양회기지(의왕방향)</text>
       <text x="1290" y="650" class="zone-label">본선(터널방향) ▶</text>
@@ -1312,22 +1315,6 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     </div>
 
     <!-- 조작키 안내판: 좌측 하단 빈 공간에 보기 좋게 배치 -->
-    <div class="key-board overlay-panel tr" id="keyBoardPanel" style="top:8px; right:8px;">
-      <div class="ov-head" id="keyBoardHead">
-        <span>⌨️ 조작키 안내</span>
-        <span class="ov-caret" id="keyBoardCaret">▾</span>
-      </div>
-      <div class="ov-body" id="keyBoardBody">
-        <div class="key-row"><span class="key-badge">←</span><span class="key-badge">→</span><span class="key-desc">가속(관성 있음)</span></div>
-        <div class="key-row"><span class="key-badge wide">Space</span><span class="key-desc">제동</span></div>
-        <div class="key-row"><span class="key-badge wide">Tab</span><span class="key-desc">전환기 선택</span></div>
-        <div class="key-row"><span class="key-badge wide">Enter</span><span class="key-desc">전환기 전환</span></div>
-        <div class="key-row"><span class="key-badge wide">Ctrl</span><span class="key-desc">화차 연결/분리</span></div>
-        <div class="key-row"><span class="key-badge wide">Shift</span><span class="key-desc">주의기적</span></div>
-        <div class="key-row sub">마우스 클릭으로도 조작 가능</div>
-      </div>
-      <div class="ov-summary">← → Space Tab Enter Ctrl Shift — 클릭해서 펼치기</div>
-    </div>
 
     <!-- 마우스 조작 버튼: 우측 하단, 위 HUD와 겹치지 않게. 상단 그립을 드래그해 위치 이동 가능 -->
     <div class="control-pad desktop-pad overlay-panel" id="controlPad" style="bottom:8px; right:8px;">
@@ -2978,17 +2965,7 @@ function makeFixedPanelDraggable(panel, handle){
 // ---- 개통 진로(statusPanel) 옆에 조작키 안내(keyBoardPanel)가 겹치지 않도록 왼쪽에 나란히 배치 ----
 function layoutTopRightPanels(){
   const status = document.getElementById('statusPanel');
-  const kb = document.getElementById('keyBoardPanel');
-  if(!status || !kb) return;
-  if(kb.dataset.userMoved === '1') return; // 사용자가 직접 옮겼으면 자동 배치 건너뜀
-  const mapEl = document.querySelector('.map-wrap');
-  if(!mapEl) return;
-  const mapRect = mapEl.getBoundingClientRect();
-  const statusRect = status.getBoundingClientRect();
-  if(statusRect.width === 0){ requestAnimationFrame(layoutTopRightPanels); return; }
-  const gap = 8;
-  kb.style.top = Math.round(statusRect.top - mapRect.top) + 'px';
-  kb.style.right = Math.round((mapRect.right - statusRect.left) + gap) + 'px';
+  if(!status) return;
 }
 window.addEventListener('resize', layoutTopRightPanels);
 
@@ -3000,14 +2977,6 @@ makePanelDraggable(document.getElementById('statusPanel'), document.getElementBy
   requestAnimationFrame(layoutTopRightPanels);
 });
 makePanelDraggable(document.getElementById('controlPad'), document.getElementById('padGrip'), null);
-makePanelDraggable(document.getElementById('keyBoardPanel'), document.getElementById('keyBoardHead'), ()=>{
-  document.getElementById('keyBoardPanel').classList.toggle('collapsed');
-});
-document.getElementById('keyBoardCaret').addEventListener('pointerdown', (e)=> e.stopPropagation());
-document.getElementById('keyBoardCaret').addEventListener('click', (e)=>{
-  e.stopPropagation();
-  document.getElementById('keyBoardPanel').classList.toggle('collapsed');
-});
 makePanelDraggable(document.getElementById('carSelectPanel'), document.getElementById('carSelectHead'), null);
 
 // ---- 패널 투명도 조절: 누를 때마다 더 투명해져서 뒤의 선로가 선명하게 비친다 (흐림 효과 없음) ----
