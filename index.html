@@ -1285,6 +1285,32 @@ let missionState = null; // setCurrentEdge(엔진 초기화 시 바로 호출됨
 const switchLabelOverride = {}; // 전환기 표시번호(관리자 수정 + 60B/60A 같은 새 전환기 라벨)도 초기화 중 바로 참조하므로 최상단 선언
 let _missionLastTrack = null;
 function clearCarSelection(){ selectedParkedIndex=null; selectedAttachedIndex=null; _engineOnlySelected=false; }
+
+// ---- 모바일 카메라(로코 추적) ----
+const CAMERA = {
+  active: false,
+  overviewMode: false,
+  x: 0, y: 0,
+  targetX: 0, targetY: 0,
+  w: 550, h: 330,
+};
+const CAMERA_W_PORTRAIT = 420;
+const CAMERA_W_LANDSCAPE = 560;
+const CAMERA_LERP = 0.14;
+const YARD_BOUNDS = { minX: 60, maxX: 1500, minY: -20, maxY: 660 };
+
+function updateCamera(dt){
+  if(!CAMERA.active || CAMERA.overviewMode){ return; }
+  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
+  CAMERA.targetX = Math.max(YARD_BOUNDS.minX+halfW, Math.min(YARD_BOUNDS.maxX-halfW, engineXY.x));
+  CAMERA.targetY = Math.max(YARD_BOUNDS.minY+halfH, Math.min(YARD_BOUNDS.maxY-halfH, engineXY.y));
+  const k = 1 - Math.pow(1-CAMERA_LERP, dt*60);
+  CAMERA.x += (CAMERA.targetX - CAMERA.x) * k;
+  CAMERA.y += (CAMERA.targetY - CAMERA.y) * k;
+  const viewBoxStr = `${(CAMERA.x-halfW).toFixed(1)} ${(CAMERA.y-halfH).toFixed(1)} ${CAMERA.w} ${CAMERA.h}`;
+  document.getElementById('trackSvg').setAttribute('viewBox', viewBoxStr);
+}
+
 // ---- 화면(가로+세로) 크기에 맞춰 시뮬레이터 크기를 계산 (PC: 가로/세로 모두 화면 안에, 모바일: 가로폭에 정확히 맞춤) ----
 function fitMapToViewport(){
   const mapWrap = document.querySelector('.map-wrap');
@@ -1304,11 +1330,17 @@ function fitMapToViewport(){
     let h = w/ratio;
     mapWrap.style.width = w+'px';
     mapWrap.style.height = h+'px';
+    CAMERA.active = true;
+    CAMERA.w = CAMERA_W_LANDSCAPE;
+    CAMERA.h = CAMERA.w * (h / w);
   } else if(isPortraitMobile){
     const w = window.innerWidth - 16;
     const h = w/ratio;
     mapWrap.style.width = w+'px';
     mapWrap.style.height = h+'px';
+    CAMERA.active = true;
+    CAMERA.w = CAMERA_W_PORTRAIT;
+    CAMERA.h = CAMERA.w * (h / w);
   } else {
     const titleEl = document.querySelector('h1');
     const topOffset = titleEl ? titleEl.getBoundingClientRect().top : 40;
@@ -1319,6 +1351,8 @@ function fitMapToViewport(){
     if(h > availH){ h = availH; w = h*ratio; }
     mapWrap.style.width = Math.max(w,320)+'px';
     mapWrap.style.height = Math.max(h,100)+'px';
+    CAMERA.active = false;
+    document.getElementById('trackSvg').setAttribute('viewBox', '0 -140 1550 900');
   }
 }
 window.addEventListener('resize', fitMapToViewport);
@@ -4100,6 +4134,7 @@ function loop(ts){
     stepEngine(dt);
   }
 
+  updateCamera(dt);
   renderEngine();
   renderCars();
   updateHud();
