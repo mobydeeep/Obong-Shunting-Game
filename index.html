@@ -5082,24 +5082,25 @@ document.getElementById('adminMissionTrackNote').textContent =
 let deferredPrompt = null;
 const installBtn = document.getElementById('installBtn');
 
-// beforeinstallprompt 이벤트: Android Chrome에서만 발생
+// beforeinstallprompt 이벤트: 설치 가능한 상태에서 발생
 window.addEventListener('beforeinstallprompt', (event) => {
+  console.log('✅ PWA 설치 가능 상태');
   event.preventDefault(); // 기본 설치 프롬프트 차단
   deferredPrompt = event;
   installBtn.classList.add('visible'); // 설치 버튼 표시
-  console.log('PWA 설치 가능한 상태');
 
   // URL에 ?install=true 파라미터가 있으면 자동으로 설치 프롬프트 표시
   const params = new URLSearchParams(window.location.search);
   if (params.get('install') === 'true') {
+    console.log('🔄 자동 설치 프롬프트 실행');
     setTimeout(() => {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(({ outcome }) => {
-        console.log('자동 설치 선택:', outcome);
+      event.prompt();
+      event.userChoice.then(({ outcome }) => {
+        console.log('설치 선택:', outcome);
         deferredPrompt = null;
         installBtn.classList.remove('visible');
       });
-    }, 500);
+    }, 300);
   }
 });
 
