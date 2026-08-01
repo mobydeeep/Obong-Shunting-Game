@@ -517,6 +517,7 @@
   }
   .mpad-btn.move{ background:linear-gradient(180deg,#005BAC,#003D7A); border-bottom-color:#0f2c8a; }
   .mpad-btn.brake{ background:linear-gradient(180deg,#dc2626,#b91c1c); border-bottom-color:#7a1414; }
+  .mpad-btn.horn{ background:linear-gradient(180deg,#f97316,#ea580c); border-bottom-color:#a83a06; }
   .mpad-btn.couple{ background:linear-gradient(180deg,#16a34a,#0f7a37); border-bottom-color:#0a4f24; }
   .mpad-btn.sw{ background:linear-gradient(180deg,#c9972f,#a87c22); border-bottom-color:#6e5215; }
   .mpad-btn:active{ transform:translateY(2px); }
@@ -647,9 +648,15 @@
 
   /* 우측 세로 조작 스트립 */
   body.mobile-landscape .mobile-pad{
-    display:grid !important; grid-template-columns:1fr 1fr; grid-auto-rows:1fr;
+    display:grid !important; grid-template-columns:1fr; grid-auto-rows:auto;
     position:fixed; top:0; right:0; bottom:0; left:auto; width:88px; height:100vh;
     padding:34px 4px 4px; gap:4px; border-top:none; border-left:1px solid #2a3350;
+  }
+  body.mobile-landscape .mobile-pad-row-move {
+    display:grid !important; grid-template-columns:1fr !important; grid-template-rows:1fr 1fr 1fr !important; gap:4px !important;
+  }
+  body.mobile-landscape .mobile-pad-row-action {
+    display:grid !important; grid-template-columns:1fr !important; grid-template-rows:1fr 1fr !important; gap:4px !important;
   }
   body.mobile-landscape .mpad-btn{ font-size:9px; padding:2px; }
 
@@ -714,6 +721,12 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <button class="music-toggle-btn" id="musicToggleBtn">🔊</button>
   <button class="game-toggle-btn" id="gameStartBtn" style="display:none;">🎯 게임 시작</button>
   <button class="game-toggle-btn danger" id="gameEndBtn" style="display:none;">⏹ 게임 종료</button>
+
+  <!-- 세로 화면 안내 배너 -->
+  <div class="rotate-hint">
+    <span class="rotate-hint-icon">🔄</span>
+    <span>화면을 가로로 돌려주세요</span>
+  </div>
 
   <div class="admin-pw-box" id="adminPwBox">
     <div class="admin-pw-card">
@@ -1257,12 +1270,15 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <!-- 스마트폰 전용 하단 고정 조작바 (PC에서는 숨김) -->
   <div class="mobile-pad" id="mobilePad">
-    <button class="mpad-btn move" id="mBtnLeft">◀</button>
-    <button class="mpad-btn brake" id="mBtnBrake">■<br>제동</button>
-    <button class="mpad-btn move" id="mBtnRight">▶</button>
-    <button class="mpad-btn sw" id="mBtnTab">전환기<br>선택</button>
-    <button class="mpad-btn sw" id="mBtnEnter">전환기<br>전환</button>
-    <button class="mpad-btn couple" id="mBtnSpace">연결<br>분리</button>
+    <div class="mobile-pad-row mobile-pad-row-move" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
+      <button class="mpad-btn move" id="mBtnLeft">◀</button>
+      <button class="mpad-btn brake" id="mBtnBrake">■<br>제동</button>
+      <button class="mpad-btn move" id="mBtnRight">▶</button>
+    </div>
+    <div class="mobile-pad-row mobile-pad-row-action" style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+      <button class="mpad-btn horn" id="mBtnHorn">📣<br>기적</button>
+      <button class="mpad-btn couple" id="mBtnSpace">🔗<br>연결/분리</button>
+    </div>
   </div>
 
 <script>
@@ -3095,8 +3111,7 @@ document.getElementById('btnSpace').addEventListener('click', ()=>{ if(gameStart
 bindHold('mBtnLeft','ArrowLeft');
 bindHold('mBtnRight','ArrowRight');
 bindHold('mBtnBrake',' ');
-document.getElementById('mBtnTab').addEventListener('click', ()=>{ if(gameStarted && !gameOver) selectNextSwitch(); });
-document.getElementById('mBtnEnter').addEventListener('click', ()=>{ if(gameStarted && !gameOver) toggleSelectedSwitch(); });
+document.getElementById('mBtnHorn').addEventListener('click', ()=>{ triggerWarningHorn(); });
 document.getElementById('mBtnSpace').addEventListener('click', ()=>{ if(gameStarted && !gameOver) performCarAction(); });
 
 
