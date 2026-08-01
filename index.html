@@ -689,7 +689,7 @@
     display:flex; flex-direction:row; gap:8px; pointer-events:auto;
   }
   body.mobile-landscape .pad-right {
-    display:flex; flex-direction:column; gap:8px; pointer-events:auto;
+    display:flex; flex-direction:column; gap:8px; pointer-events:auto; justify-content:flex-end;
   }
   body.mobile-landscape .mpad-btn{
     font-size:11px; padding:18px 14px;
@@ -4744,6 +4744,13 @@ function startMission(retrySnapshot){
   document.getElementById('missionPanel').style.display = '';
   document.getElementById('gameStartBtn').style.display = 'none';
   document.getElementById('gameEndBtn').style.display = '';
+  // 모바일 랜드스케이프에서 게임 시작 시 패널 자동 접기
+  if (document.body.classList.contains('mobile-landscape')) {
+    const kbPanel = document.getElementById('keyBoardPanel');
+    const stPanel = document.getElementById('statusPanel');
+    if (kbPanel && !kbPanel.classList.contains('collapsed')) kbPanel.classList.add('collapsed');
+    if (stPanel && !stPanel.classList.contains('collapsed')) stPanel.classList.add('collapsed');
+  }
   renderMissionTasks();
   layoutTopLeftPanels();
 }
