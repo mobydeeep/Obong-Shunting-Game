@@ -785,6 +785,17 @@
   body.mobile-landscape .start-name-row input{ width:180px; font-size:12px; padding:8px 12px; }
   body.mobile-landscape .start-howto{ font-size:11px; padding:10px 12px; max-width:100%; }
   body.mobile-landscape .start-keys{ font-size:9px; margin-top:12px; }
+
+  /* PWA 설치 버튼 */
+  #installBtn{
+    display:none; padding:12px 24px; font-size:16px; font-weight:800;
+    background:linear-gradient(90deg, #00B2E3, #005BAC); color:#fff;
+    border:none; border-radius:8px; cursor:pointer; transition:all .3s ease;
+    box-shadow:0 4px 12px rgba(0,91,172,.3);
+  }
+  #installBtn:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,91,172,.4); }
+  #installBtn:active{ transform:translateY(0); }
+  #installBtn.visible{ display:inline-block; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -828,6 +839,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <button class="music-toggle-btn" id="musicToggleBtn">🔊</button>
   <button class="game-toggle-btn" id="gameStartBtn" style="display:none;">🎯 게임 시작</button>
   <button class="game-toggle-btn danger" id="gameEndBtn" style="display:none;">⏹ 게임 종료</button>
+  <button id="installBtn">📥 앱 설치하기</button>
 
   <!-- 세로 화면 안내 배너 -->
   <div class="rotate-hint">
@@ -5067,6 +5079,38 @@ document.getElementById('adminMissionTrackNote').textContent =
 
 </script>
 <script>
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+
+// beforeinstallprompt 이벤트: Android Chrome에서만 발생
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault(); // 기본 설치 프롬프트 차단
+  deferredPrompt = event;
+  installBtn.classList.add('visible'); // 설치 버튼 표시
+  console.log('PWA 설치 가능한 상태');
+});
+
+// 설치 버튼 클릭
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+
+  // 설치 프롬프트 표시
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log('사용자 설치 선택:', outcome);
+
+  deferredPrompt = null;
+  installBtn.classList.remove('visible'); // 설치 버튼 숨김
+});
+
+// 앱 설치 완료
+window.addEventListener('appinstalled', () => {
+  console.log('✅ 앱 설치 완료!');
+  deferredPrompt = null;
+  installBtn.classList.remove('visible');
+});
+
+// Service Worker 등록
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then((reg) => {
@@ -5074,7 +5118,6 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type === 'CACHE_UPDATED') {
           console.log('🔄 게임이 자동으로 업데이트되었습니다! (v' + event.data.version + ')');
-          // 필요하면 여기에 사용자 알림 UI 추가 가능
         }
       });
     });
