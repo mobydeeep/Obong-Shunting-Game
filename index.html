@@ -695,7 +695,7 @@
     top:4px !important; left:50% !important; transform:translateX(-50%);
     padding:4px 10px !important; font-size:9.5px !important;
   }
-  body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; margin:0 !important; border:none !important; }
+  body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; width:100vw !important; height:100vh !important; margin:0 !important; border:none !important; overflow:visible !important; }
 
   /* 좌우 조작 스트립 */
   body.mobile-landscape .mobile-pad{
@@ -707,12 +707,22 @@
   }
   body.mobile-landscape .pad-left {
     display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:center;
+    justify-content:flex-end; flex:1;
+  }
+  body.mobile-landscape .pad-left .mpad-btn {
+    width:56px; height:56px; padding:0; font-size:24px;
   }
   body.mobile-landscape .pad-right {
     display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:flex-end;
   }
   body.mobile-landscape .pad-right .mpad-btn {
-    width:100%;
+    width:56px; height:56px; padding:0; font-size:24px;
+  }
+  body.mobile-landscape .pad-actions {
+    display:flex; flex-direction:row; gap:4px; width:100%;
+  }
+  body.mobile-landscape .mpad-btn-small {
+    width:auto; height:36px; padding:0 8px; font-size:10px;
   }
   body.mobile-landscape .mpad-btn{
     font-size:11px; padding:18px 14px;
@@ -1404,8 +1414,10 @@ function fitMapToViewport(){
   const mapWrap = document.querySelector('.map-wrap');
   if(!mapWrap) return;
   const ratio = 1550/900;
-  const isLandscapeMobile = window.innerHeight <= 520 && window.innerWidth <= 1000;
-  const isPortraitMobile = window.innerWidth <= 760;
+  // 모바일 기기 판정 (사용자 에이전트 기반, 창 크기 이중 확인)
+  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isLandscapeMobile = isMobileDevice && window.innerHeight <= 520 && window.innerWidth <= 1000;
+  const isPortraitMobile = isMobileDevice && window.innerWidth <= 760;
   const isMobile = isPortraitMobile || isLandscapeMobile;
   document.body.classList.toggle('mobile-landscape', isLandscapeMobile);
   document.body.classList.toggle('mobile-portrait', isPortraitMobile && !isLandscapeMobile);
