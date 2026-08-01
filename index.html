@@ -689,12 +689,18 @@ let firebaseReady = false;
 const rankRecordsCache = {};
 firebase.initializeApp(FIREBASE_CONFIG);
 firebaseDb = firebase.database();
-firebaseDb.ref('rankRecords').on('value', (snapshot) => {
+firebaseDb.ref('rankRecords').get().then((snapshot) => {
   const data = snapshot.val() || {};
   Object.assign(rankRecordsCache, data);
+  console.log('Firebase: Initial data loaded', rankRecordsCache);
   firebaseReady = true;
-}, (error) => {
-  console.error('Firebase load error:', error);
+  firebaseDb.ref('rankRecords').on('value', (snapshot) => {
+    const data = snapshot.val() || {};
+    Object.assign(rankRecordsCache, data);
+    console.log('Firebase: Real-time update', rankRecordsCache);
+  });
+}).catch((error) => {
+  console.error('Firebase init error:', error);
   firebaseReady = true;
 });
 </script>
@@ -4369,8 +4375,13 @@ function loadRankRecords(){
 }
 function saveRankRecords(records){
   Object.assign(rankRecordsCache, records);
-  if (firebaseReady && firebaseDb) {
-    firebaseDb.ref('rankRecords').set(records).catch(err => console.error('Firebase save error:', err));
+  if (firebaseDb) {
+    console.log('Firebase: Saving records...', records);
+    firebaseDb.ref('rankRecords').set(records)
+      .then(() => console.log('Firebase: Save successful'))
+      .catch(err => console.error('Firebase save error:', err));
+  } else {
+    console.warn('Firebase not ready yet');
   }
 }
 function updateRankRecord(name, {timeDelta=0, opsDelta=0, playInc=0, derailInc=0, breachInc=0, fatalityInc=0}){
