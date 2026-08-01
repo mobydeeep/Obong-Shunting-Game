@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape, user-scalable=no">
 <title>오봉역 양회기지 입환 게임 - 1단계: 선로맵 v4</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#005BAC">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="오봉 입환게임">
 <style>
   :root{
     --page-bg-1:#0d1220;
@@ -5059,6 +5065,11 @@ document.getElementById('adminMissionHistoryClearBtn').addEventListener('click',
 document.getElementById('adminMissionTrackNote').textContent =
   '사용 가능한 선로명: ' + MISSION_TRACKS.join(', ');
 
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+}
 </script>
 </body>
 </html>

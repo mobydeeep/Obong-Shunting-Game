@@ -1,0 +1,16 @@
+{
+  "name": "오봉역 양회기지 입환게임",
+  "short_name": "오봉 입환게임",
+  "description": "코레일 오봉역 양회기지 입환수송원 교육용 웹 게임",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0d16",
+  "theme_color": "#005BAC",
+  "lang": "ko",
+  "icons": [
+    {"src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "assets/icons/icon-256.png", "sizes": "256x256", "type": "image/png"}
+  ]
+}
