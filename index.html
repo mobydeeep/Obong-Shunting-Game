@@ -672,6 +672,32 @@
   body.mobile-landscape .mission-format-line{ font-size:7.5px !important; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
 </style>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBv4YaI-6nUz3Phg0B_yWUquWWVZKCMk68",
+  authDomain: "obong-shunting-game.firebaseapp.com",
+  databaseURL: "https://obong-shunting-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "obong-shunting-game",
+  storageBucket: "obong-shunting-game.firebasestorage.app",
+  messagingSenderId: "650189855540",
+  appId: "1:650189855540:web:4ada4760116c369b606361"
+};
+let firebaseDb = null;
+let firebaseReady = false;
+const rankRecordsCache = {};
+firebase.initializeApp(FIREBASE_CONFIG);
+firebaseDb = firebase.database();
+firebaseDb.ref('rankRecords').on('value', (snapshot) => {
+  const data = snapshot.val() || {};
+  Object.assign(rankRecordsCache, data);
+  firebaseReady = true;
+}, (error) => {
+  console.error('Firebase load error:', error);
+  firebaseReady = true;
+});
+</script>
 </head>
 <body>
   <div class="credit-tag">제작 : <span class="korail-mark">K</span><span class="korail-name">Korail</span> 임승진</div>
@@ -4339,10 +4365,13 @@ function loadMissionConfig(){
 // ---- 랭킹(수송원별 기록) ----
 const RANK_STORAGE_KEY = 'obong_operator_rank_v1';
 function loadRankRecords(){
-  try{ return JSON.parse(localStorage.getItem(RANK_STORAGE_KEY)) || {}; }catch(e){ return {}; }
+  return rankRecordsCache;
 }
 function saveRankRecords(records){
-  try{ localStorage.setItem(RANK_STORAGE_KEY, JSON.stringify(records)); }catch(e){}
+  Object.assign(rankRecordsCache, records);
+  if (firebaseReady && firebaseDb) {
+    firebaseDb.ref('rankRecords').set(records).catch(err => console.error('Firebase save error:', err));
+  }
 }
 function updateRankRecord(name, {timeDelta=0, opsDelta=0, playInc=0, derailInc=0, breachInc=0, fatalityInc=0}){
   if(!name) return;
