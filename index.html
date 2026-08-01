@@ -47,6 +47,12 @@
     box-shadow:0 12px 34px rgba(0,91,172,.18), 0 0 0 1px rgba(0,178,227,.08), 0 2px 8px rgba(0,0,0,.08);
     overflow:hidden;
   }
+  body.mobile-landscape .map-wrap{
+    position:fixed; inset:0;
+    width:100vw; height:100vh;
+    border:none; border-radius:0; box-shadow:none;
+    z-index:1;
+  }
   svg{display:block; width:100%; height:100%;}
   .track-line{ fill:none; stroke:var(--rail); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; shape-rendering:geometricPrecision; }
   .track-line-outline{ fill:none; stroke:var(--rail-dark); stroke-width:7; stroke-linecap:round; stroke-linejoin:round; shape-rendering:geometricPrecision; }
@@ -499,21 +505,56 @@
     width:100%; text-align:center; letter-spacing:6px; font-size:20px; padding:10px;
     border-radius:8px; border:1px solid #2a3350; background:#1a2338; color:#fff; margin:14px 0;
   }
-  /* ---- 모바일 전용 하단 고정 조작바 (기본: 숨김, PC 유지) ---- */
+  /* ---- 모바일 전용 오버레이 조작바 (게임 화면 위에 반투명) ---- */
   .mobile-pad{
     display:none;
-    position:fixed; left:0; right:0; bottom:0; z-index:40;
-    background:rgba(10,15,25,.96); backdrop-filter:blur(6px);
-    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-    grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;
-    gap:6px;
-    border-top:1px solid #2a3350;
-    box-shadow:0 -4px 16px rgba(0,0,0,.4);
+    position:fixed; inset:0; z-index:20;
+    flex-direction:row; align-items:flex-end; justify-content:space-between;
+    padding:16px; gap:12px;
+    pointer-events:none;
+  }
+  .pad-left, .pad-right{
+    display:flex; gap:8px; pointer-events:auto;
+  }
+  .pad-left{
+    flex-direction:row;
+  }
+  .pad-right{
+    flex-direction:row;
   }
   .mpad-btn{
-    grid-column:span 1; padding:12px 2px; border:none; border-radius:10px;
-    font-size:11px; font-weight:800; color:#fff; line-height:1.15; cursor:pointer;
-    background:linear-gradient(180deg,#3b4457,#232a38); border-bottom:3px solid #12161f;
+    border:none; border-radius:12px;
+    font-size:12px; font-weight:800; color:#fff; cursor:pointer;
+    padding:16px 12px;
+    background:rgba(0, 91, 172, 0.5);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.15);
+    transition:all .2s ease;
+    flex:1; min-width:48px; aspect-ratio:1;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .mpad-btn:active{
+    background:rgba(0, 91, 172, 0.8);
+    transform:scale(0.95);
+  }
+  .mpad-btn.brake{
+    background:rgba(220, 38, 38, 0.5);
+  }
+  .mpad-btn.brake:active{
+    background:rgba(220, 38, 38, 0.8);
+  }
+  .mpad-btn.horn{
+    background:rgba(249, 115, 22, 0.5);
+  }
+  .mpad-btn.horn:active{
+    background:rgba(249, 115, 22, 0.8);
+  }
+  .mpad-btn.couple{
+    background:rgba(22, 163, 74, 0.5);
+  }
+  .mpad-btn.couple:active{
+    background:rgba(22, 163, 74, 0.8);
   }
   .mpad-btn.move{ background:linear-gradient(180deg,#005BAC,#003D7A); border-bottom-color:#0f2c8a; }
   .mpad-btn.brake{ background:linear-gradient(180deg,#dc2626,#b91c1c); border-bottom-color:#7a1414; }
@@ -624,8 +665,16 @@
     font-size:24px; font-weight:800; color:#ffd23f; text-align:center;
     max-width:80vw; line-height:1.5;
   }
-  body.mobile-portrait.game-started h1,
-  body.mobile-portrait.game-started .sub{ display:none; }
+  body.mobile-portrait {
+    overflow:hidden;
+    background:#0a0d16;
+  }
+  body.mobile-portrait > * {
+    display:none;
+  }
+  body.mobile-portrait .rotate-hint {
+    display:flex !important;
+  }
 
   /* ---- 가로(랜드스케이프) 모바일: 진짜 게임 화면처럼 재배치 — 조작은 우측 세로 스트립, 정보는 좌측 콤팩트 ---- */
   body.mobile-landscape{ padding:0 !important; }
@@ -654,17 +703,19 @@
 
   /* 우측 세로 조작 스트립 */
   body.mobile-landscape .mobile-pad{
-    display:grid !important; grid-template-columns:1fr; grid-auto-rows:auto;
-    position:fixed; top:0; right:0; bottom:0; left:auto; width:88px; height:100vh;
-    padding:34px 4px 4px; gap:4px; border-top:none; border-left:1px solid #2a3350;
+    display:flex !important; flex-direction:row; align-items:flex-end; justify-content:space-between;
+    position:fixed; inset:0; width:100vw; height:100vh;
+    padding:20px; gap:16px; z-index:20;
+    background:none; border:none; box-shadow:none;
   }
-  body.mobile-landscape .mobile-pad-row-move {
-    display:grid !important; grid-template-columns:1fr !important; grid-template-rows:1fr 1fr 1fr !important; gap:4px !important;
+  body.mobile-landscape .pad-left,
+  body.mobile-landscape .pad-right {
+    display:flex; gap:10px; pointer-events:auto;
   }
-  body.mobile-landscape .mobile-pad-row-action {
-    display:grid !important; grid-template-columns:1fr !important; grid-template-rows:1fr 1fr !important; gap:4px !important;
+  body.mobile-landscape .mpad-btn{
+    font-size:11px; padding:18px 14px;
+    min-width:56px; aspect-ratio:1;
   }
-  body.mobile-landscape .mpad-btn{ font-size:9px; padding:2px; }
 
   /* HUD: 좌측 상단에 아주 작게, 트랙과 안 겹치도록 살짝 띄워서 */
   body.mobile-landscape .hud-panel.overlay-panel{
@@ -1300,14 +1351,15 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <!-- 스마트폰 전용 하단 고정 조작바 (PC에서는 숨김) -->
   <div class="mobile-pad" id="mobilePad">
-    <div class="mobile-pad-row mobile-pad-row-move" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
+    <div class="pad-left">
       <button class="mpad-btn move" id="mBtnLeft">◀</button>
-      <button class="mpad-btn brake" id="mBtnBrake">■<br>제동</button>
+      <button class="mpad-btn brake" id="mBtnBrake">■</button>
       <button class="mpad-btn move" id="mBtnRight">▶</button>
     </div>
-    <div class="mobile-pad-row mobile-pad-row-action" style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-      <button class="mpad-btn horn" id="mBtnHorn">📣<br>기적</button>
-      <button class="mpad-btn couple" id="mBtnSpace">🔗<br>연결/분리</button>
+    <div class="pad-right">
+      <button class="mpad-btn brake" id="mBtnStop">정지</button>
+      <button class="mpad-btn horn" id="mBtnHorn">기적</button>
+      <button class="mpad-btn couple" id="mBtnSpace">연결</button>
     </div>
   </div>
 
@@ -3148,6 +3200,7 @@ document.getElementById('btnSpace').addEventListener('click', ()=>{ if(gameStart
 bindHold('mBtnLeft','ArrowLeft');
 bindHold('mBtnRight','ArrowRight');
 bindHold('mBtnBrake',' ');
+bindHold('mBtnStop',' ');
 document.getElementById('mBtnHorn').addEventListener('click', ()=>{ triggerWarningHorn(); });
 document.getElementById('mBtnSpace').addEventListener('click', ()=>{ if(gameStarted && !gameOver) performCarAction(); });
 
