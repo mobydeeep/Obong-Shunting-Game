@@ -5068,7 +5068,17 @@ document.getElementById('adminMissionTrackNote').textContent =
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      // Service Worker에서 업데이트 메시지 수신
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'CACHE_UPDATED') {
+          console.log('🔄 게임이 자동으로 업데이트되었습니다! (v' + event.data.version + ')');
+          // 필요하면 여기에 사용자 알림 UI 추가 가능
+        }
+      });
+    });
+  });
 }
 </script>
 </body>
