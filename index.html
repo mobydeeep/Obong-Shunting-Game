@@ -520,48 +520,24 @@
     flex-direction:row;
   }
   .pad-right{
-    flex-direction:row;
+    flex-direction:column;
   }
   .mpad-btn{
     border:none; border-radius:12px;
     font-size:12px; font-weight:800; color:#fff; cursor:pointer;
     padding:16px 12px;
-    background:rgba(0, 91, 172, 0.5);
+    background:rgba(255,255,255,0.1);
     backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.2);
     transition:all .2s ease;
     flex:1; min-width:48px; aspect-ratio:1;
     display:flex; align-items:center; justify-content:center;
     text-align:center;
   }
   .mpad-btn:active{
-    background:rgba(0, 91, 172, 0.8);
+    background:rgba(255,255,255,0.25);
     transform:scale(0.95);
   }
-  .mpad-btn.brake{
-    background:rgba(220, 38, 38, 0.5);
-  }
-  .mpad-btn.brake:active{
-    background:rgba(220, 38, 38, 0.8);
-  }
-  .mpad-btn.horn{
-    background:rgba(249, 115, 22, 0.5);
-  }
-  .mpad-btn.horn:active{
-    background:rgba(249, 115, 22, 0.8);
-  }
-  .mpad-btn.couple{
-    background:rgba(22, 163, 74, 0.5);
-  }
-  .mpad-btn.couple:active{
-    background:rgba(22, 163, 74, 0.8);
-  }
-  .mpad-btn.move{ background:linear-gradient(180deg,#005BAC,#003D7A); border-bottom-color:#0f2c8a; }
-  .mpad-btn.brake{ background:linear-gradient(180deg,#dc2626,#b91c1c); border-bottom-color:#7a1414; }
-  .mpad-btn.horn{ background:linear-gradient(180deg,#f97316,#ea580c); border-bottom-color:#a83a06; }
-  .mpad-btn.couple{ background:linear-gradient(180deg,#16a34a,#0f7a37); border-bottom-color:#0a4f24; }
-  .mpad-btn.sw{ background:linear-gradient(180deg,#c9972f,#a87c22); border-bottom-color:#6e5215; }
-  .mpad-btn:active{ transform:translateY(2px); }
 
   /* ---- 드래그 편집 모드 ---- */
   .edit-hint-badge{
@@ -699,18 +675,21 @@
     top:4px !important; left:50% !important; transform:translateX(-50%);
     padding:4px 10px !important; font-size:9.5px !important;
   }
-  body.mobile-landscape .map-wrap{ margin:34px 0 0 4px; }
+  body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; margin:0 !important; border:none !important; }
 
-  /* 우측 세로 조작 스트립 */
+  /* 좌우 조작 스트립 */
   body.mobile-landscape .mobile-pad{
     display:flex !important; flex-direction:row; align-items:flex-end; justify-content:space-between;
     position:fixed; inset:0; width:100vw; height:100vh;
-    padding:20px; gap:16px; z-index:20;
+    padding:16px; gap:12px; z-index:20;
     background:none; border:none; box-shadow:none;
+    pointer-events:none;
   }
-  body.mobile-landscape .pad-left,
+  body.mobile-landscape .pad-left {
+    display:flex; flex-direction:row; gap:8px; pointer-events:auto;
+  }
   body.mobile-landscape .pad-right {
-    display:flex; gap:10px; pointer-events:auto;
+    display:flex; flex-direction:column; gap:8px; pointer-events:auto;
   }
   body.mobile-landscape .mpad-btn{
     font-size:11px; padding:18px 14px;
@@ -729,9 +708,9 @@
   body.mobile-landscape .hud-item .label{ font-size:6.5px; }
   body.mobile-landscape .hud-item .value{ font-size:9px; }
 
-  /* 미션 패널: 우측 조작바를 침범하지 않도록 폭 제한, 낮은 높이로 */
+  /* 미션 패널: HUD 패널 아래에 배치, 높이 제한 */
   body.mobile-landscape .mission-panel.overlay-panel{
-    top:34px !important; left:4px !important; max-width:150px !important; max-height:none;
+    top:auto !important; bottom:88px !important; left:4px !important; max-width:150px !important; max-height:200px;
   }
   body.mobile-landscape .mission-format-line{ font-size:7.5px !important; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
