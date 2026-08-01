@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape, user-scalable=no, viewport-fit=cover">
 <title>오봉역 양회기지 입환 게임 - 1단계: 선로맵 v4</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#005BAC">
@@ -29,7 +29,13 @@
     --sw-open:#16a34a;
   }
   *{box-sizing:border-box;}
-  html,body{ height:100%; }
+  html,body{
+    height:100%;
+    width:100%;
+    padding:0;
+    margin:0;
+    position:fixed;
+  }
   body{
     margin:0;
     background:radial-gradient(ellipse 90% 60% at 50% 0%, #0e2340 0%, #0a0d16 55%), #0a0d16;
