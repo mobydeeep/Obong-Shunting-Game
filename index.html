@@ -707,7 +707,7 @@
   }
   body.mobile-landscape .pad-left {
     display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:center;
-    justify-content:flex-end; flex:1;
+    justify-content:flex-end; position:absolute; left:16px; bottom:16px;
   }
   body.mobile-landscape .pad-left .mpad-btn {
     width:56px; height:56px; padding:0; font-size:24px;
@@ -731,8 +731,9 @@
 
   /* HUD: 좌측 상단에 아주 작게, 트랙과 안 겹치도록 살짝 띄워서 */
   body.mobile-landscape .hud-panel.overlay-panel{
-    position:fixed !important; top:34px !important; bottom:auto !important;
-    left:4px !important; right:auto !important; width:auto !important; max-width:none !important;
+    position:fixed !important; bottom:90px !important; top:auto !important;
+    left:50% !important; right:auto !important; transform:translateX(-50%) !important;
+    width:auto !important; max-width:none !important;
     border-radius:8px !important; background:rgba(10,15,25,.85) !important; border:1px solid #2a3350;
     padding:3px 6px !important;
   }
@@ -744,9 +745,10 @@
   /* 상태 패널 숨김 - 게임화면과 겹침 */
   body.mobile-landscape .status-panel{ display:none !important; }
 
-  /* 미션 패널: HUD 패널 아래에 배치, 높이 제한 */
+  /* 미션 패널: 좌상단에 배치, 높이 제한, 투명도 높임 */
   body.mobile-landscape .mission-panel.overlay-panel{
-    top:auto !important; bottom:88px !important; left:4px !important; max-width:150px !important; max-height:200px;
+    top:34px !important; bottom:auto !important; left:4px !important; max-width:150px !important; max-height:200px;
+    background:rgba(15,22,38,0.3) !important;
   }
   body.mobile-landscape .mission-format-line{ font-size:7.5px !important; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
@@ -2843,7 +2845,10 @@ function updateMainWorker(dt){
     mainWorkerVisible = !mainWorkerVisible;
     if(mainWorkerVisible){
       initMainWorkerPosition();
-      showToast('⚠️ 본선에 직원이 있습니다. Shift키를 눌러 주의기적을 울려주세요', 2600);
+      const msg = document.body.classList.contains('mobile-landscape')
+        ? '⚠️ 본선에 직원이 있습니다. 기적 버튼을 눌러주세요'
+        : '⚠️ 본선에 직원이 있습니다. Shift키를 눌러 주의기적을 울려주세요';
+      showToast(msg, 2600);
     }
     mainWorkerScheduleNextToggle();
   }
