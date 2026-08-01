@@ -538,6 +538,25 @@
     background:rgba(255,255,255,0.25);
     transform:scale(0.95);
   }
+  .mpad-btn-small{
+    border:none; border-radius:8px;
+    font-size:10px; font-weight:700; color:#fff; cursor:pointer;
+    padding:8px 6px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.2);
+    transition:all .2s ease;
+    flex:1; min-width:36px; aspect-ratio:1;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .mpad-btn-small:active{
+    background:rgba(255,255,255,0.25);
+    transform:scale(0.95);
+  }
+  .pad-actions{
+    display:flex; flex-direction:column; gap:4px;
+  }
 
   /* ---- 드래그 편집 모드 ---- */
   .edit-hint-badge{
@@ -603,6 +622,7 @@
     .hud-item .label{ font-size:7.5px; }
     .hud-item .value{ font-size:10px; }
     .key-legend{ display:none; } /* 모바일에서는 하단바로 대체하므로 키 설명 숨김 */
+    .key-board{ display:none; } /* 모바일에서는 조작키 안내 패널 제거 */
     .status-panel table{ font-size:9.5px; }
     .control-pad.overlay-panel.br{ display:none; } /* 모바일은 하단 고정바를 사용 */
 
@@ -653,7 +673,7 @@
   }
 
   /* ---- 가로(랜드스케이프) 모바일: 진짜 게임 화면처럼 재배치 — 조작은 우측 세로 스트립, 정보는 좌측 콤팩트 ---- */
-  body.mobile-landscape{ padding:0 !important; }
+  body.mobile-landscape{ padding:0 !important; display:block !important; }
   body.mobile-landscape .desktop-pad{ display:none !important; }
   body.mobile-landscape h1,
   body.mobile-landscape .sub,
@@ -707,6 +727,9 @@
   body.mobile-landscape .hud-item{ padding:2px 4px; }
   body.mobile-landscape .hud-item .label{ font-size:6.5px; }
   body.mobile-landscape .hud-item .value{ font-size:9px; }
+
+  /* 상태 패널 숨김 - 게임화면과 겹침 */
+  body.mobile-landscape .status-panel{ display:none !important; }
 
   /* 미션 패널: HUD 패널 아래에 배치, 높이 제한 */
   body.mobile-landscape .mission-panel.overlay-panel{
@@ -1332,13 +1355,14 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <div class="mobile-pad" id="mobilePad">
     <div class="pad-left">
       <button class="mpad-btn move" id="mBtnLeft">◀</button>
-      <button class="mpad-btn brake" id="mBtnBrake">■</button>
-      <button class="mpad-btn move" id="mBtnRight">▶</button>
     </div>
     <div class="pad-right">
-      <button class="mpad-btn brake" id="mBtnStop">정지</button>
-      <button class="mpad-btn horn" id="mBtnHorn">기적</button>
-      <button class="mpad-btn couple" id="mBtnSpace">연결</button>
+      <button class="mpad-btn move" id="mBtnRight">▶</button>
+      <div class="pad-actions">
+        <button class="mpad-btn-small brake" id="mBtnStop">정지</button>
+        <button class="mpad-btn-small horn" id="mBtnHorn">기적</button>
+        <button class="mpad-btn-small couple" id="mBtnSpace">연결</button>
+      </div>
     </div>
   </div>
 
@@ -4744,13 +4768,6 @@ function startMission(retrySnapshot){
   document.getElementById('missionPanel').style.display = '';
   document.getElementById('gameStartBtn').style.display = 'none';
   document.getElementById('gameEndBtn').style.display = '';
-  // 모바일 랜드스케이프에서 게임 시작 시 패널 자동 접기
-  if (document.body.classList.contains('mobile-landscape')) {
-    const kbPanel = document.getElementById('keyBoardPanel');
-    const stPanel = document.getElementById('statusPanel');
-    if (kbPanel && !kbPanel.classList.contains('collapsed')) kbPanel.classList.add('collapsed');
-    if (stPanel && !stPanel.classList.contains('collapsed')) stPanel.classList.add('collapsed');
-  }
   renderMissionTasks();
   layoutTopLeftPanels();
 }
