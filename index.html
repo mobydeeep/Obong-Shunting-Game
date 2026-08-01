@@ -731,7 +731,7 @@
 
   /* HUD: 좌측 상단에 아주 작게, 트랙과 안 겹치도록 살짝 띄워서 */
   body.mobile-landscape .hud-panel.overlay-panel{
-    position:fixed !important; bottom:90px !important; top:auto !important;
+    position:fixed !important; bottom:20px !important; top:auto !important;
     left:50% !important; right:auto !important; transform:translateX(-50%) !important;
     width:auto !important; max-width:none !important;
     border-radius:8px !important; background:rgba(10,15,25,.85) !important; border:1px solid #2a3350;
@@ -1356,12 +1356,12 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <button class="mpad-btn move" id="mBtnLeft">◀</button>
     </div>
     <div class="pad-right">
-      <button class="mpad-btn move" id="mBtnRight">▶</button>
       <div class="pad-actions">
         <button class="mpad-btn-small brake" id="mBtnStop">정지</button>
         <button class="mpad-btn-small horn" id="mBtnHorn">기적</button>
         <button class="mpad-btn-small couple" id="mBtnSpace">연결</button>
       </div>
+      <button class="mpad-btn move" id="mBtnRight">▶</button>
     </div>
   </div>
 
