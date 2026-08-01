@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape, user-scalable=no">
 <title>오봉역 양회기지 입환 게임 - 1단계: 선로맵 v4</title>
 <style>
   :root{
@@ -608,16 +608,22 @@
 
     /* 세로 모드에서만: 화면 위쪽에 살짝 걸치는 회전 안내 배너 */
     .rotate-hint{
-      display:none; align-items:center; gap:8px; position:fixed; top:78px; left:8px; right:8px; z-index:39;
-      background:#2a2410; border:1px solid rgba(201,151,47,.5); border-radius:10px;
-      padding:7px 10px; color:#f5e2ad; font-size:11px; font-weight:700;
-      box-shadow:0 4px 14px rgba(0,0,0,.4);
+      display:none; position:fixed; inset:0; z-index:999;
+      background:rgba(10,15,25,.96); backdrop-filter:blur(8px);
+      flex-direction:column; align-items:center; justify-content:center; gap:20px;
+      pointer-events:auto;
     }
-    .rotate-hint-icon{ font-size:18px; animation:rotateHintSpin 2.4s ease-in-out infinite; }
+    .rotate-hint-icon{ font-size:72px; animation:rotateHintSpin 2.4s ease-in-out infinite; }
     @keyframes rotateHintSpin{ 0%,60%,100%{ transform:rotate(0deg); } 30%{ transform:rotate(-90deg); } }
   }
   /* 회전 안내는 세로로 든 폰(mobile-portrait 클래스, JS가 판단)일 때만 노출 — 폭 기준 미디어쿼리에 의존하지 않음 */
-  body.mobile-portrait .rotate-hint{ display:flex; }
+  body.mobile-portrait .rotate-hint{
+    display:flex;
+  }
+  body.mobile-portrait .rotate-hint span:last-child{
+    font-size:24px; font-weight:800; color:#ffd23f; text-align:center;
+    max-width:80vw; line-height:1.5;
+  }
   body.mobile-portrait.game-started h1,
   body.mobile-portrait.game-started .sub{ display:none; }
 
@@ -678,6 +684,30 @@
   }
   body.mobile-landscape .mission-format-line{ font-size:7.5px !important; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
+
+  /* 시작 화면: 모바일 가로 레이아웃 (캐릭터 좌측 + 콘텐츠 우측) */
+  body.mobile-landscape .start-overlay{
+    display:flex !important; align-items:center; justify-content:space-between; gap:16px;
+    background:linear-gradient(90deg, #16213f 0%, #0a0f1f 70%);
+  }
+  body.mobile-landscape .start-char-img{
+    display:block !important; position:static; order:1;
+    width:28%; height:auto; max-width:none;
+    flex-shrink:0; margin:0;
+    object-fit:contain; object-position:center;
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,.5));
+  }
+  body.mobile-landscape .start-content{
+    order:2; flex:1; width:auto; max-width:none;
+    gap:10px;
+  }
+  body.mobile-landscape .start-badge{ font-size:11px; margin-bottom:6px; }
+  body.mobile-landscape .start-overlay h2{ font-size:22px; margin:0 0 6px; }
+  body.mobile-landscape .start-overlay p{ font-size:11px; margin:0 0 14px; max-width:100%; }
+  body.mobile-landscape .start-btn{ padding:10px 28px; font-size:14px; }
+  body.mobile-landscape .start-name-row input{ width:180px; font-size:12px; padding:8px 12px; }
+  body.mobile-landscape .start-howto{ font-size:11px; padding:10px 12px; max-width:100%; }
+  body.mobile-landscape .start-keys{ font-size:9px; margin-top:12px; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -1373,6 +1403,13 @@ function fitMapToViewport(){
 }
 window.addEventListener('resize', fitMapToViewport);
 fitMapToViewport();
+
+// ---- 모바일: 가로 화면 강제 ----
+if(screen.orientation && screen.orientation.lock){
+  screen.orientation.lock('landscape-primary').catch(err => {
+    console.log('orientation lock not supported:', err);
+  });
+}
 
 function layoutBottomRightPanels(){
   const pad = document.getElementById('controlPad');
