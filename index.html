@@ -714,12 +714,15 @@
   }
   body.mobile-landscape .pad-right {
     display:flex; flex-direction:column; gap:8px; pointer-events:auto; align-items:flex-end;
+    position:absolute; right:16px; bottom:16px;
   }
   body.mobile-landscape .pad-right .mpad-btn {
     width:56px; height:56px; padding:0; font-size:24px;
+    order:2;
   }
   body.mobile-landscape .pad-actions {
-    display:flex; flex-direction:row; gap:4px; width:100%;
+    display:flex; flex-direction:row; gap:4px;
+    order:1;
   }
   body.mobile-landscape .mpad-btn-small {
     width:auto; height:36px; padding:0 8px; font-size:10px;
@@ -734,7 +737,7 @@
     position:fixed !important; bottom:20px !important; top:auto !important;
     left:50% !important; right:auto !important; transform:translateX(-50%) !important;
     width:auto !important; max-width:none !important;
-    border-radius:8px !important; background:rgba(10,15,25,.85) !important; border:1px solid #2a3350;
+    border-radius:8px !important; background:rgba(10,15,25,0.2) !important; border:1px solid rgba(42,51,80,0.3);
     padding:3px 6px !important;
   }
   body.mobile-landscape .hud-grid{ grid-template-columns:repeat(4,auto); gap:6px; }
