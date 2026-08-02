@@ -88,12 +88,12 @@
   .facility-label{ fill:rgba(255,255,255,.35); font-size:9px; font-weight:600; }
   /* 밝은 지반 위에서는 흰 반투명 글자·점선이 보이지 않는다 */
   body.mobile-landscape .facility-label{
-    fill:#4a3f2c !important; font-size:12px; font-weight:800;
-    stroke:rgba(255,255,255,.85) !important; stroke-width:2.4px !important;
+    fill:#fff !important; font-size:12px; font-weight:800;
+    stroke:rgba(10,18,32,.8) !important; stroke-width:2.6px !important;
   }
   body.mobile-landscape .facility-box{
-    fill:rgba(198,182,150,.55) !important;
-    stroke:rgba(110,92,60,.75) !important;
+    fill:rgba(255,255,255,.22) !important;
+    stroke:rgba(255,255,255,.7) !important;
     stroke-width:2 !important; stroke-dasharray:none !important;
   }
   .main-label{ fill:#a9d4ff; font-size:11px; }
@@ -151,8 +151,8 @@
   /* 지반 배경판 — 데스크톱은 원래 어두운 배경이라 필요 없다 */
   #groundGroup{ display:none; }
   body.mobile-landscape #groundGroup{ display:block; }
-    /* 반투명이라 배경이 비치되, 선로가 도면처럼 읽힐 만큼은 덮어야 한다 */
-  .ground-plate{ fill:rgba(233,224,200,.9); stroke:rgba(120,104,78,.55); stroke-width:3; }
+    /* 흰색으로 아주 옅게 — 배경 일러스트가 그대로 보이면서 선로 영역만 살짝 밝아진다 */
+  .ground-plate{ fill:rgba(255,255,255,.30); stroke:none; }
   /* 밝은 배경 위에서는 어두운 글자가 묻힌다 — 흰 글자에 진한 외곽선 */
   /* 원·화차 위에 얹히는 흰 글자들은 흰 외곽선을 쓰면 사라진다 — 어두운 외곽선으로 */
   body.mobile-landscape .switch-num,
@@ -866,10 +866,10 @@
     /* display에 !important를 주면 안 된다 — 인라인 display:none으로 숨기는 로직을
        덮어써서 시작·종료 버튼이 동시에 보이게 된다 */
     align-items:center; justify-content:center; border-radius:20px; line-height:40px;
-    background:linear-gradient(180deg,#1b3564,#0d1c38) !important;
-    border:2.5px solid #f0b429 !important;
-    box-shadow:0 4px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.35) !important;
-    color:#ffdf7e;
+    background:linear-gradient(180deg,#fffdf5,#f2e3c2) !important;
+    border:2.5px solid #d9a441 !important;
+    box-shadow:0 4px 0 #b9863098, 0 6px 14px rgba(0,0,0,.3) !important;
+    color:#263a5e;
   }
   body.mobile-landscape .game-toggle-btn.danger{
     background:linear-gradient(180deg,#a41f1f,#6d1010) !important;
@@ -917,11 +917,11 @@
      지반 밖(하늘·잔디)에 걸리는 글자도 같은 처리로 대비가 확보된다. */
   body.mobile-landscape #trackSvg text{
     paint-order:stroke fill;
-    stroke:rgba(255,255,255,.9); stroke-width:2.6px; stroke-linejoin:round;
+    stroke:rgba(10,18,32,.85); stroke-width:2.8px; stroke-linejoin:round;
   }
   body.mobile-landscape .track-label,
   body.mobile-landscape .main-label,
-  body.mobile-landscape .zone-label{ fill:#26313f; }
+  body.mobile-landscape .zone-label{ fill:#fff; }
   /* 배경 일러스트. 지도(SVG)는 이 위에 투명하게 얹힌다. */
   body.mobile-landscape{
     background:#7ec8f0 url('assets/bg-game.jpg') center/cover no-repeat fixed !important;
@@ -1065,24 +1065,39 @@
   body.mobile-landscape .mission-panel.overlay-panel,
   body.mobile-landscape .car-select-panel.overlay-panel,
   body.mobile-landscape .hud-panel.overlay-panel{
-    background:linear-gradient(180deg, rgba(28,74,74,.58), rgba(16,48,52,.62)) !important;
-    border:2px solid rgba(150,220,210,.45) !important;
+    background:linear-gradient(180deg, rgba(255,244,205,.44), rgba(250,232,178,.48)) !important;
+    border:2px solid rgba(255,236,175,.6) !important;
     border-radius:16px !important;
-    box-shadow:0 6px 18px rgba(0,0,0,.35) !important;
-    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    box-shadow:0 6px 18px rgba(0,0,0,.3) !important;
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
   }
-  /* 반투명해진 만큼 글자에 그림자를 줘서 배경과 섞이지 않게 한다 */
+  /* 배경이 밝은 연노랑이므로 글자는 진한 남색. 흰 글자 + 검은 그림자는 읽히지 않는다. */
   body.mobile-landscape .overlay-panel,
   body.mobile-landscape .overlay-panel *{
-    text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.7);
+    color:#22304a;
+    text-shadow:0 1px 2px rgba(255,255,255,.85);
   }
-  body.mobile-landscape .ov-head{ color:#eafff8; }
+  body.mobile-landscape .ov-head{ color:#1a2740; font-weight:800; }
+  body.mobile-landscape .ov-summary{ color:#33507a !important; }
+  body.mobile-landscape .hud-item .label{ color:#5a6a86 !important; }
+  body.mobile-landscape .hud-item .value{ color:#1a2740 !important; }
+  body.mobile-landscape .hud-item .value.speed{ color:#136b3a !important; }
+  body.mobile-landscape .mission-format-line span{ color:#22304a !important; }
+  body.mobile-landscape .mission-format-line span.done{ color:#137a44 !important; }
+  body.mobile-landscape .cs-section-label,
+  body.mobile-landscape .cs-hint{ color:#3a4a66 !important; }
+  body.mobile-landscape .car-btn{ color:#1a2740 !important; }
+  body.mobile-landscape .tut-title{ color:#0f5b7a !important; }
+  body.mobile-landscape .tut-desc{ color:#22304a !important; }
+  body.mobile-landscape .rank-table th{ color:#0f5b7a !important; }
+  body.mobile-landscape .rank-table td{ color:#22304a !important; }
+  body.mobile-landscape .mini-btn{ color:#3a4a66 !important; }
   body.mobile-landscape .car-btn{
-    background:rgba(12,44,48,.55) !important; border-color:rgba(150,220,210,.4) !important;
+    background:rgba(255,248,220,.4) !important; border-color:rgba(255,236,175,.6) !important;
   }
   body.mobile-landscape .car-btn.on{ background:#f0b429 !important; color:#1a1306 !important; }
   body.mobile-landscape .hud-item{
-    background:rgba(12,44,48,.5) !important; border:1px solid rgba(150,220,210,.35) !important;
+    background:rgba(255,248,220,.34) !important; border:1px solid rgba(255,236,175,.5) !important;
     border-radius:10px;
   }
   /* HUD 캐릭터: 패널 왼쪽 밖으로 걸치게 세운다 (참고 이미지) */
@@ -1099,15 +1114,15 @@
   body.mobile-landscape .hud-panel .ov-head{ justify-content:center; font-size:10.5px; padding:2px 6px; min-height:0; }
   /* 튜토리얼·랭킹은 전체 화면 오버레이라 별도 지정 */
   body.mobile-landscape .tutorial-panel{
-    background:linear-gradient(180deg, rgba(28,74,74,.72), rgba(16,48,52,.76)) !important;
-    border:2px solid rgba(150,220,210,.45) !important;
+    background:linear-gradient(180deg, rgba(255,244,205,.62), rgba(250,232,178,.66)) !important;
+    border:2px solid rgba(255,236,175,.6) !important;
   }
   body.mobile-landscape .tut-card{
-    background:rgba(12,44,48,.45) !important; border-color:rgba(150,220,210,.3) !important;
+    background:rgba(255,248,220,.36) !important; border-color:rgba(255,236,175,.45) !important;
   }
   body.mobile-landscape .rank-panel{
-    background:linear-gradient(180deg, rgba(28,74,74,.80), rgba(16,48,52,.84)) !important;
-    border:2px solid rgba(150,220,210,.45) !important;
+    background:linear-gradient(180deg, rgba(255,244,205,.72), rgba(250,232,178,.76)) !important;
+    border:2px solid rgba(255,236,175,.6) !important;
   }
   /* 투명도 버튼(◐)은 모바일에서 감춘다 — 패널이 이미 반투명이고, 헤더 폭만 잡아먹는다 */
   body.is-mobile .ov-btns .mini-btn[id$="OpacityBtn"]{ display:none !important; }
@@ -1660,7 +1675,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       </div>
     </div>
 
-    <div class="car-select-panel overlay-panel" id="carSelectPanel" style="display:none; top:4px; left:8px;">
+    <div class="car-select-panel overlay-panel minimized" id="carSelectPanel" style="display:none; top:4px; left:8px;">
       <div class="ov-head drag-handle" id="carSelectHead">
         <span>🚃 화차 선택 <span id="carSelectTrackName"></span></span>
         <div class="ov-btns">
@@ -1706,7 +1721,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     </div>
 
     <!-- 운전 HUD: 본선 하단, 우측 하단 컨트롤 패드와 나란히(겹치지 않게) 배치. 헤더를 드래그해 위치 이동 가능 -->
-    <div class="hud-panel overlay-panel" id="hudPanel" style="bottom:8px; right:230px;">
+    <div class="hud-panel overlay-panel collapsed" id="hudPanel" style="bottom:8px; right:230px;">
       <img class="hud-char" src="assets/hud-char.png" alt="">
       <div class="ov-head drag-handle" id="hudHeadToggle">
         <span>🎮 운전 HUD</span>
