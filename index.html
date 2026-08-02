@@ -28,6 +28,20 @@
     --sw-right:#f0b429;
     --sw-open:#16a34a;
   }
+  /* ---- z-index 계층 (숫자를 바꿀 땐 이 표를 함께 갱신할 것) ----
+       5   제작자 표기(장식)
+       20  오버레이 패널(미션·화차선택·HUD·개통진로)
+       30  조작 패드(모바일 ◀▶·정지·기적·연결)
+       45  액션 토스트
+       70  상단 토글 버튼
+       71  편집모드 배지
+       80  랭킹 / Admin 패널
+       90  Admin 비밀번호
+       200 튜토리얼
+       210 시작화면
+       300 사고 / 미션성공 오버레이
+       주의: .map-wrap에는 z-index를 주지 않는다. 쌓임 맥락이 생기면 그 안의
+       패널들이 통째로 한 층에 갇혀 위 순서가 무의미해진다. */
   *{box-sizing:border-box;}
   html,body{
     height:100%;
@@ -59,12 +73,10 @@
     box-shadow:0 12px 34px rgba(0,91,172,.18), 0 0 0 1px rgba(0,178,227,.08), 0 2px 8px rgba(0,0,0,.08);
     overflow:hidden;
   }
-  body.mobile-landscape .map-wrap{
-    position:fixed; inset:0;
-    width:100vw; height:100vh;
-    border:none; border-radius:0; box-shadow:none;
-    z-index:1;
-  }
+  /* 모바일 가로: 지도를 화면 전체로.
+     z-index를 주면 안 된다 — 쌓임 맥락이 생겨서 이 안에 든 오버레이 패널(z 20~25)이
+     통째로 한 층에 갇히고, 바깥의 조작 패드·상단 버튼보다 항상 아래로 깔린다.
+     아래 785행 부근에도 같은 선택자가 있었는데 그쪽으로 합쳤다. */
   svg{display:block; width:100%; height:100%; touch-action:none;}
   .track-line{ fill:none; stroke:var(--rail); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; shape-rendering:geometricPrecision; }
   .track-line-outline{ fill:none; stroke:var(--rail-dark); stroke-width:7; stroke-linecap:round; stroke-linejoin:round; shape-rendering:geometricPrecision; }
@@ -167,9 +179,12 @@
     padding:7px 10px; font-size:11.5px; font-weight:800; color:#8FE6F5; cursor:pointer; user-select:none;
     touch-action:none; -webkit-user-select:none;
   }
-  @media (max-width: 760px){
-    .ov-head{ padding:10px 12px; min-height:44px; }
-  }
+  /* 터치 기기용 헤더 여유. 예전엔 @media(max-width:760px)에 있었는데,
+     가로로 든 폰은 대부분 폭이 844~932px이라 그 쿼리가 아예 적용되지 않았다.
+     기기 판정(body.is-mobile)으로 옮겨야 실제로 먹는다.
+     가로모드에서 44px는 세로 예산을 너무 먹으므로 36px로 둔다 — 헤더는 드래그·접기용이라
+     오탭 비용이 낮고, 안의 버튼들은 히트영역을 따로 넓힌다. */
+  body.is-mobile .ov-head{ padding:8px 10px; min-height:36px; }
   .ov-caret{ font-size:10px; color:#6b7690; transition:transform .15s ease; }
   .overlay-panel.collapsed .ov-caret{ transform:rotate(-90deg); }
   .ov-body{ padding:0 10px 10px; }
@@ -219,7 +234,7 @@
 
   /* ---- 시작 오버레이 ---- */
   .start-overlay{
-    position:fixed; inset:0; z-index:50; overflow:hidden;
+    position:fixed; inset:0; z-index:210; overflow:hidden;
     background:radial-gradient(circle at 50% 30%, #16213f 0%, #0a0f1f 70%);
     color:#e8edf3; transition:opacity .4s ease;
   }
@@ -270,7 +285,7 @@
 
   /* ---- 탈선(게임오버) 오버레이 ---- */
   .crash-overlay{
-    position:fixed; inset:0; z-index:60; display:none;
+    position:fixed; inset:0; z-index:300; display:none;
     background:radial-gradient(circle at 50% 30%, #3a0f14 0%, #180507 75%);
     flex-direction:column; align-items:center; justify-content:center;
     color:#ffe3e3; text-align:center;
@@ -331,7 +346,7 @@
     position:absolute; left:50%; top:75px; transform:translateX(-50%) translateY(-10px);
     background:rgba(15,22,38,.92); color:#ffe08a; font-weight:800; font-size:13px;
     padding:8px 18px; border-radius:20px; border:1px solid #c9972f;
-    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; z-index:25;
+    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; z-index:45;
   }
   .action-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   .car-hopper{ cursor:pointer; }
@@ -394,7 +409,7 @@
   .game-toggle-btn:hover{ filter:brightness(1.15); }
   .game-toggle-btn.danger{ background:linear-gradient(135deg,#b91c1c,#dc2626); border-color:#dc2626; box-shadow:0 4px 10px rgba(220,38,38,.4); }
   .credit-tag{
-    position:fixed; bottom:6px; right:10px; z-index:65;
+    position:fixed; bottom:6px; right:10px; z-index:5;
     display:flex; align-items:center; gap:5px;
     font-family:'Pretendard','Malgun Gothic','Segoe UI',sans-serif;
     font-size:10px; font-weight:600; letter-spacing:.2px; color:#8a97ab;
@@ -762,13 +777,19 @@
   body.mobile-landscape .tut-desc{ font-size:10.5px; line-height:1.5; }
   body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
-  body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; width:100vw !important; height:100vh !important; margin:0 !important; border:none !important; overflow:visible !important; }
+  /* 지도를 화면 전체로. z-index는 절대 주지 말 것(위 62행 주석 참고) */
+  body.mobile-landscape .map-wrap{
+    position:fixed !important; inset:0;
+    width:100vw !important; height:100vh !important; margin:0 !important;
+    border:none !important; border-radius:0 !important; box-shadow:none !important;
+    overflow:visible !important;
+  }
 
   /* 좌우 조작 스트립 */
   body.mobile-landscape .mobile-pad{
     display:flex !important; flex-direction:row; align-items:flex-end; justify-content:space-between;
     position:fixed; inset:0; width:100vw; height:100vh;
-    padding:16px; gap:12px; z-index:20;
+    padding:16px; gap:12px; z-index:30;
     background:none; border:none; box-shadow:none;
     pointer-events:none;
   }
@@ -5112,10 +5133,8 @@ function layoutTopLeftPanels(){
   const mapEl = document.querySelector('.map-wrap');
   if(!mapEl) return;
   const mapRect = mapEl.getBoundingClientRect();
-  // 선로 그림이 실제로 그려지는 영역은 SVG viewBox 기준 y:0~760 이며, 그 위 y:-140~0 구간은
-  // 오버레이 패널용으로 비워둔 여백이다. 화차 선택창이 이 여백을 넘어서면 선로를 가리게 되므로,
-  // 지도 실제 렌더링 높이에 맞춰 여백의 픽셀 높이를 계산해 본문 최대높이를 그 안으로 제한한다.
-  const topSafeZonePx = mapRect.height * (140/900);
+  const isMobile = document.body.classList.contains('mobile-landscape');
+
   if(carSelect.dataset.userMoved !== '1'){
     if(mission.style.display !== 'none'){
       const missionRect = mission.getBoundingClientRect();
@@ -5123,6 +5142,14 @@ function layoutTopLeftPanels(){
         carSelect.style.top = Math.round(missionRect.top - mapRect.top) + 'px';
         carSelect.style.left = Math.round(missionRect.right - mapRect.left + 8) + 'px';
       }
+    } else if(isMobile){
+      // 미션 패널이 없을 때 top:4px로 올리면 좌상단 시작/종료 버튼과 정면으로 겹친다.
+      // 그 버튼의 실제 아래쪽을 재서 그 밑으로 보낸다(버튼 크기가 바뀌어도 따라간다).
+      const topBtn = [document.getElementById('gameStartBtn'), document.getElementById('gameEndBtn')]
+        .find(b => b && getComputedStyle(b).display !== 'none');
+      const btnBottom = topBtn ? topBtn.getBoundingClientRect().bottom : 0;
+      carSelect.style.top = Math.round(Math.max(4, btnBottom - mapRect.top + 6)) + 'px';
+      carSelect.style.left = '4px';
     } else {
       carSelect.style.top = '4px';
       carSelect.style.left = '8px';
@@ -5134,11 +5161,24 @@ function layoutTopLeftPanels(){
     const head = carSelect.querySelector('.ov-head');
     const actionRow = carSelect.querySelector('.cs-action-row');
     const otherH = (head ? head.getBoundingClientRect().height : 30) + (actionRow ? actionRow.getBoundingClientRect().height : 34) + 16;
-    const avail = Math.round(topSafeZonePx - csTop - otherH);
-    body.style.maxHeight = Math.max(56, Math.min(avail, 190)) + 'px';
+    let avail;
+    if(isMobile){
+      // 모바일은 카메라가 viewBox를 매 프레임 덮어써서 "상단 -140 여백"이 화면에 없다.
+      // 데스크톱 식(높이×140/900)을 그대로 쓰면 60px 남짓이 나오고, 헤더+버튼행을 빼면
+      // 음수가 되어 목록이 항상 하한 56px로 눌린다. 화면 높이 기준으로 새로 잡는다.
+      // 지도는 손가락으로 끌 수 있으므로 패널이 선로를 조금 가려도 복구 가능하다.
+      avail = Math.round(window.innerHeight * 0.45 - csTop - otherH);
+      body.style.maxHeight = Math.max(88, Math.min(avail, 220)) + 'px';
+    } else {
+      // 데스크톱: 선로 그림은 viewBox y:0~760이고 그 위 y:-140~0은 패널용 여백이다.
+      // 그 여백 안으로 본문 높이를 제한해 선로를 가리지 않게 한다.
+      avail = Math.round(mapRect.height * (140/900) - csTop - otherH);
+      body.style.maxHeight = Math.max(56, Math.min(avail, 190)) + 'px';
+    }
   }
 }
 window.addEventListener('resize', layoutTopLeftPanels);
+window.addEventListener('orientationchange', layoutTopLeftPanels);
 
 document.getElementById('gameStartBtn').addEventListener('click', ()=>{
   if(!gameStarted){ showToast('⚠️ 먼저 "게임 시작"을 눌러주세요', 1500); return; }
