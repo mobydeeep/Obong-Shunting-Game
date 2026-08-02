@@ -1038,7 +1038,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">① 이동 방법</div>
-            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile">화면 <b>좌측 아래 ◀</b>, <b>우측 아래 ▶</b> 버튼으로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <b>정지</b> 버튼으로 제동해야 합니다.<br>맵은 <b>손가락으로 끌어</b> 다른 구역을 볼 수 있고, <b>두 손가락을 모으면 축소</b>됩니다. 손을 떼고 2초가 지나면 기관차 위치로 되돌아옵니다.</span></div>
+            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile"><b>◀ ▶</b> 버튼으로 움직입니다. 관성이 있으니 <b>정지</b>를 미리 눌러 제동하세요.<br>지도는 <b>끌어서</b> 이동, <b>두 손가락을 모으면</b> 축소됩니다.</span></div>
           </div>
         </div>
 
@@ -1089,7 +1089,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">④ 양회수송원</div>
-            <div class="tut-desc">양회기지 내에서 선로취급을 하는 수송원으로, 301~310호 전환기 주변을 천천히 배회하다가 이따금 전환기를 무작위로 취급합니다. 인적오류 가능성이 있으니 진로를 항상 다시 확인하세요.</div>
+            <div class="tut-desc">301~310호 전환기 주변을 돌아다니며 가끔 전환기를 무작위로 바꿉니다. 출발 전 진로를 반드시 다시 확인하세요.</div>
           </div>
         </div>
 
@@ -1151,7 +1151,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">⑧ 레벨 안내</div>
-            <div class="tut-desc">랭킹의 <b>해결한 입환수 − (탈선+후부돌파+사상사고)</b>가 10 늘어날 때마다 레벨이 1씩 오릅니다(시작 Lv.1).<br>
+            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가 10 늘 때마다 레벨이 1 오릅니다.<br>
             <span style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;&nbsp;<span style="color:#4ade80;font-weight:800;">Lv.6~10</span>&nbsp;&nbsp;<span style="color:#a78bfa;font-weight:800;">Lv.11~15</span><br>
             <span style="color:#60a5fa;font-weight:800;">Lv.16~20</span>&nbsp;&nbsp;<span style="color:#b5651d;font-weight:800;">Lv.21~25</span>&nbsp;&nbsp;<span style="color:#ff9f1c;font-weight:800;">Lv.26~30</span><br>
             <span style="color:#ff6fb0;font-weight:800;">Lv.31~35</span>&nbsp;&nbsp;<span style="color:#fff59d;font-weight:800;">Lv.36 이상</span></div>
@@ -1346,7 +1346,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <div class="crash-overlay" id="crashOverlay">
     <h2 id="crashTitle">💥 탈선! 사고발생!</h2>
-    <p id="crashDesc">선로전환기 취급주의 — 진로가 열려있지 않은 전환기를 통과했습니다.</p>
+    <p id="crashDesc">진로가 열리지 않은 전환기를 통과했습니다.</p>
     <button class="restart-btn" id="restartBtn">🔄 다시 시작</button>
   </div>
 
@@ -1358,7 +1358,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <div><div class="label">선로이동횟수</div><div class="value" id="missionSuccessMoves">-</div></div>
     </div>
     <button class="restart-btn" id="missionNextBtn">🎯 다음 미션</button>
-    <button class="restart-btn retry-btn" id="missionRetryBtn">🔁 방금한 입환 다시해보기</button>
+    <button class="restart-btn retry-btn" id="missionRetryBtn">🔁 다시하기</button>
   </div>
 
   <audio id="bgMusic" loop preload="auto"><source src="assets/bgm.mp3" type="audio/mpeg"></audio>
@@ -1372,21 +1372,20 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     <div class="start-badge">OBONG STATION · 양회기지 입환 게임</div>
     <h2>🚂 오봉역 양회기지 입환게임</h2>
     <p>오봉역 양회기지 입환수송원을 위한 교육용 게임입니다.<br>
-       현장에 나가기 전,<br>
-       선로전환기 취급과 선로별 화차 입환(연결·분리·이동)을<br>
-       직접 조작해보며 익힐 수 있습니다.</p>
+       현장에 나가기 전, 선로전환기 취급과<br>
+       화차 입환을 직접 해보며 익히세요.</p>
     <div class="start-howto">
       <b>▶ 이렇게 플레이하세요</b><br>
-      1. 방향키로 기관차를 몰아 원하는 선로로 이동<br>
-      2. 전환기를 클릭(또는 Tab+Enter)해 진로 구성<br>
-      3. 화차 근처에 가면 뜨는 선택창에서 화차를 골라 Ctrl로 연결·분리<br>
-      4. 화면 상단 <b>🎯 게임 시작</b> 버튼을 누르면 미션이 시작됩니다
+      1. <span class="only-desktop">방향키</span><span class="only-mobile">◀ ▶ 버튼</span>로 기관차를 이동<br>
+      2. 전환기를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span>해 진로 구성<br>
+      3. 화차를 고르고 <span class="only-desktop">Ctrl</span><span class="only-mobile">연결 버튼</span>로 연결·분리<br>
+      4. 상단 <b>🎯 게임 시작</b>을 누르면 미션 시작
     </div>
     <div class="start-name-row">
       <input type="text" id="operatorNameInput" placeholder="수송원 이름을 입력하세요" maxlength="12">
     </div>
     <button class="start-btn" id="startBtn" disabled>게임 시작</button>
-    <div class="start-keys">← → 가속(관성 있음) · Space 제동 · Tab 전환기 선택 · Enter 전환기 전환 · Ctrl 화차 연결/분리 · Shift 주의기적 · 클릭으로도 조작 가능</div>
+    <div class="start-keys"><span class="only-desktop">← → 가속 · Space 제동 · Tab 전환기 선택 · Enter 전환 · Ctrl 연결·분리 · Shift 주의기적 · 클릭으로도 조작 가능</span><span class="only-mobile">◀ ▶ 이동 · 정지 · 기적 · 연결 · 지도는 끌어서 이동</span></div>
     </div>
   </div>
 
@@ -1446,7 +1445,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
         </div>
         <div class="cs-action-row">
           <button class="cs-small-btn ghost" id="engineDetachAllBtn">🚂 기관차만 분리</button>
-          <button class="cs-small-btn primary" id="carSelectSpaceBtn">✅ 연결/분리 (Ctrl)</button>
+          <button class="cs-small-btn primary" id="carSelectSpaceBtn">✅ 연결 / 분리<span class="only-desktop"> (Ctrl)</span></button>
         </div>
       </div>
     </div>
@@ -1979,7 +1978,7 @@ function refreshYardSwitch(id){
   updateStatusTable();
 }
 function toggleYardSwitch(id){
-  if(isNodeOccupied(id)){ showToast('🚫 화차/기관차가 전환기 위에 있어 취급할 수 없습니다', 1400); return; }
+  if(isNodeOccupied(id)){ showToast('🚫 전환기 위에 차량이 있습니다', 1400); return; }
   switchState[id] = switchState[id]==='L' ? 'R' : 'L';
   refreshYardSwitch(id);
 }
@@ -2107,7 +2106,7 @@ Object.keys(mainTree).forEach(idStr=>{
 const trunkSeg = poly([[switchX[301],switchY[301]],[mainX[31],getMainY(31)]], 'track-line');
 
 function toggleMainSwitch(id){
-  if(isNodeOccupied(id)){ showToast('🚫 화차/기관차가 전환기 위에 있어 취급할 수 없습니다', 1400); return; }
+  if(isNodeOccupied(id)){ showToast('🚫 전환기 위에 차량이 있습니다', 1400); return; }
   mainState[id] = mainState[id]==='a' ? 'b' : 'a';
   refreshMainRoute();
 }
@@ -2118,7 +2117,7 @@ Object.keys(mainTree).forEach(idStr=>{
   g.style.cursor='pointer';
   const title=document.createElementNS(svgNS,'title');
   const n=mainTree[id];
-  title.textContent = `${id}번 전기전환기\n갈래 A: ${n.a}\n갈래 B: ${n.b}\n(클릭 시 개통 경로가 녹색으로 표시됩니다)`;
+  title.textContent = `${id}번 전기전환기\n갈래 A: ${n.a}\n갈래 B: ${n.b}\n(선택하면 개통 진로가 초록색으로 표시)`;
   g.appendChild(title);
   const ring=document.createElementNS(svgNS,'circle');
   ring.setAttribute('id','main-ring-'+id);
@@ -2471,7 +2470,7 @@ rightLadderSwitches.forEach(id=>{
   g.style.cursor='pointer';
   const title=document.createElementNS(svgNS,'title');
   const info = rightLadderLegInfo[id];
-  title.textContent = `${switchLabelOverride[id]||id}번 전기전환기\n갈래 A: ${info.a}\n갈래 B: ${info.b}\n(클릭 시 개통 경로가 녹색으로 표시됩니다)`;
+  title.textContent = `${switchLabelOverride[id]||id}번 전기전환기\n갈래 A: ${info.a}\n갈래 B: ${info.b}\n(선택하면 개통 진로가 초록색으로 표시)`;
   g.appendChild(title);
   const ring=document.createElementNS(svgNS,'circle');
   ring.setAttribute('id','main-ring-'+id);
@@ -2644,7 +2643,7 @@ function stepEngine(dt){
       return;
     }
     const result = crossNode(nodeX, roleAtX);
-    if(result.crash){ triggerCrash('💥 탈선! 사고발생!', '선로전환기 취급주의 — 진로가 열려있지 않은 전환기를 통과했습니다.'); return; }
+    if(result.crash){ triggerCrash('💥 탈선! 사고발생!', '진로가 열리지 않은 전환기를 통과했습니다.'); return; }
     setCurrentEdge(result.edge, result.enterAtA ? overshoot : result.edge.len - overshoot);
     newPos = posOnEdge;
   }
@@ -3097,7 +3096,7 @@ function updateMainWorker(dt){
   mainWorkerG.setAttribute('transform', `translate(${mainWorkerPos.x},${mainWorkerPos.y})`);
 
   if(!gameOver && isNearMovingVehicle(mainWorkerPos, MAIN_WORKER_COLLISION_DIST)){
-    triggerCrash('🚑 사상사고 발생', '본선 직원이 기관차/화차와 접촉했습니다. 즉시 서행·경적 등 안전 조치가 필요합니다.');
+    triggerCrash('🚑 사상사고 발생', '본선 직원과 접촉했습니다. 서행과 주의기적으로 예방하세요.');
   }
 }
 document.getElementById('adminMainWorkerToggle').addEventListener('change', (e)=>{
@@ -3740,7 +3739,7 @@ let carActionBusy = false;
 function performCarAction(){
   if(!gameStarted || gameOver || carActionBusy) return;
   const track = activeCarTrack();
-  if(!track){ showToast('⚠️ 화차 근처로 더 가까이 다가세요', 1400); return; }
+  if(!track){ showToast('⚠️ 화차에 더 가까이 가세요', 1400); return; }
 
   if(selectedParkedIndex !== null){
     const arr = trackCars[track];
@@ -3756,7 +3755,7 @@ function performCarAction(){
     const halfLenFront = attachedCars.length ? CAR_LEN/2 : 24; // 기관차는 화차보다 조금 더 김
     const requiredGap = halfLenFront + CAR_LEN/2 + 12; // 살짝 여유를 둔 접촉 허용치
     if(nearestGap > requiredGap){
-      showToast('⚠️ 화차와 더 가까이 다가가야 연결할 수 있습니다', 1400);
+      showToast('⚠️ 더 붙어야 연결됩니다', 1400);
       return;
     }
     carActionBusy = true;
@@ -3800,7 +3799,7 @@ function performCarAction(){
   if(selectedAttachedIndex !== null){
     // 선택(주황 표시)된 부분(기관차~선택한 화차)은 그대로 연결된 채 남고, 선택되지 않은 나머지(더 먼 화차들)만 분리된다.
     const removed = attachedCars.slice(selectedAttachedIndex + 1);
-    if(removed.length === 0){ showToast('분리할 화차가 없습니다 (선택한 화차까지는 계속 연결됩니다)', 1300); return; }
+    if(removed.length === 0){ showToast('분리할 화차가 없습니다', 1300); return; }
     const arr = trackCars[track] || (trackCars[track]=[]);
     if(arr.length + removed.length > MAX_CARS_PER_TRACK){
       showToast(`❌ 선로 용량 초과! (최대 ${MAX_CARS_PER_TRACK}량)`, 1400);
@@ -3825,7 +3824,7 @@ function performCarAction(){
     return;
   }
 
-  showToast('먼저 화차를 클릭해 범위를 선택하세요', 1200);
+  showToast('화차를 먼저 선택하세요', 1200);
 }
 
 // ---- 화차 렌더링 ----
