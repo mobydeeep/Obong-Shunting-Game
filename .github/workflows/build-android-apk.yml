@@ -33,6 +33,17 @@ jobs:
       - name: Install Bubblewrap globally
         run: npm install -g @bubblewrap/cli
 
+      - name: Configure Bubblewrap paths (skip interactive JDK/SDK prompts)
+        run: |
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          EOF
+          cat ~/.bubblewrap/config.json
+
       - name: Check if keystore Secrets exist
         id: keystore_check
         run: |
