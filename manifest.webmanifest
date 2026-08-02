@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#0a0d16",
-  "theme_color": "#005BAC",
+  "theme_color": "#0a0d16",
   "lang": "ko",
   "display_override": ["standalone", "browser"],
   "icons": [
