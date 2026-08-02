@@ -107,14 +107,14 @@ jobs:
             "enableNotifications": false,
             "startUrl": "/Obong-Shunting-Game/index.html",
             "iconUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/assets/icons/icon-512.png",
-            "maskableIconUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/assets/icons/icon-512.png",
+
             "signingKey": {
               "path": "../release.keystore",
               "alias": "release_key"
             },
             "splashScreenFadeOutDuration": 300,
-            "appVersionName": "1.1.0",
-            "appVersionCode": 2,
+            "appVersionName": "1.2.0",
+            "appVersionCode": 3,
             "shortcuts": [],
             "generatorApp": "bubblewrap-cli",
             "webManifestUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest",

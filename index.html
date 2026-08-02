@@ -86,6 +86,16 @@
   .track-line-outline.open{ stroke:#0d3d20; stroke-width:10; }
   .track-label{ fill:#e8edf3; font-size:13px; font-weight:bold; }
   .facility-label{ fill:rgba(255,255,255,.35); font-size:9px; font-weight:600; }
+  /* 밝은 지반 위에서는 흰 반투명 글자·점선이 보이지 않는다 */
+  body.mobile-landscape .facility-label{
+    fill:#4a3f2c !important; font-size:12px; font-weight:800;
+    stroke:rgba(255,255,255,.85) !important; stroke-width:2.4px !important;
+  }
+  body.mobile-landscape .facility-box{
+    fill:rgba(198,182,150,.55) !important;
+    stroke:rgba(110,92,60,.75) !important;
+    stroke-width:2 !important; stroke-dasharray:none !important;
+  }
   .main-label{ fill:#a9d4ff; font-size:11px; }
   .zone-label{ fill:#5b6b8a; font-size:14px; font-weight:bold; letter-spacing:2px; }
   .switch-num{ fill:#fff; font-size:10px; font-weight:bold; text-anchor:middle; }
@@ -114,10 +124,10 @@
     display:flex; align-items:center; justify-content:center;
     width:36px; height:36px; margin:0 0 6px auto; padding:0;
     border-radius:50%; font-size:17px; line-height:1; cursor:pointer;
-    background:linear-gradient(180deg,#1b3564,#0d1c38);
-    border:2px solid #4b7fc4; color:#fff;
+    background:linear-gradient(180deg,#fffdf5,#f2e3c2);
+    border:2.5px solid #d9a441; color:#263a5e;
     box-shadow:0 3px 0 rgba(0,0,0,.3), 0 5px 12px rgba(0,0,0,.3);
-    order:0; position:relative;
+    order:0; position:relative; opacity:.86;
   }
   body.mobile-landscape .mpad-recenter::after{ content:''; position:absolute; inset:-6px; }
   body.mobile-landscape .mpad-recenter:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.3); }
@@ -141,8 +151,8 @@
   /* 지반 배경판 — 데스크톱은 원래 어두운 배경이라 필요 없다 */
   #groundGroup{ display:none; }
   body.mobile-landscape #groundGroup{ display:block; }
-  .ground-yard{ fill:rgba(232,222,200,.97); stroke:rgba(120,104,78,.9); stroke-width:3; }
-  .ground-main{ fill:rgba(206,224,184,.95); stroke:rgba(104,120,80,.85); stroke-width:3; }
+    /* 반투명이라 배경이 비치되, 선로가 도면처럼 읽힐 만큼은 덮어야 한다 */
+  .ground-plate{ fill:rgba(233,224,200,.9); stroke:rgba(120,104,78,.55); stroke-width:3; }
   /* 밝은 배경 위에서는 어두운 글자가 묻힌다 — 흰 글자에 진한 외곽선 */
   /* 원·화차 위에 얹히는 흰 글자들은 흰 외곽선을 쓰면 사라진다 — 어두운 외곽선으로 */
   body.mobile-landscape .switch-num,
@@ -847,7 +857,7 @@
        덮어써서 시작·종료 버튼이 동시에 보이게 된다 */
     align-items:center; justify-content:center; border-radius:20px; line-height:40px;
     background:linear-gradient(180deg,#1b3564,#0d1c38) !important;
-    border:2px solid #f0b429 !important;
+    border:2.5px solid #f0b429 !important;
     box-shadow:0 4px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.35) !important;
     color:#ffdf7e;
   }
@@ -856,14 +866,17 @@
     border-color:#ff9c9c !important; color:#ffe4e4;
   }
   /* 상단 아이콘 버튼도 밝은 배경에서 또렷하게 */
+  /* 참고 이미지: 크림색 바탕 + 금색 테두리 + 진한 남색 글자 */
   body.mobile-landscape .rank-toggle-btn,
   body.mobile-landscape .home-toggle-btn,
   body.mobile-landscape .tutorial-toggle-btn,
   body.mobile-landscape .music-toggle-btn{
-    background:linear-gradient(180deg,#1b3564,#0d1c38) !important;
-    border:2px solid #4b7fc4 !important;
-    box-shadow:0 3px 0 rgba(0,0,0,.3), 0 5px 12px rgba(0,0,0,.3) !important;
+    background:linear-gradient(180deg,#fffdf5,#f2e3c2) !important;
+    border:2.5px solid #d9a441 !important;
+    box-shadow:0 3px 0 #b9863098, 0 5px 12px rgba(0,0,0,.28) !important;
+    color:#263a5e !important;
   }
+  body.mobile-landscape .music-toggle-btn.muted{ color:#8b7d63 !important; }
   body.mobile-landscape .game-toggle-btn .btn-label{ display:none; }
   .game-toggle-btn .btn-short{ display:none; }
   body.mobile-landscape .game-toggle-btn .btn-short{ display:inline; }
@@ -949,7 +962,7 @@
     position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
   }
   body.mobile-landscape .mpad-btn-small .mpad-icon{
-    display:block; width:var(--mbtn); height:auto;
+    display:block; width:var(--mbtn); height:auto; opacity:.86;
     filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
   }
   body.mobile-landscape .mpad-btn-small:active .mpad-icon{ transform:translateY(2px) scale(.96); }
@@ -1003,12 +1016,12 @@
   /* 균등분할(1fr)로 4칸을 나누면 항목마다 너무 좁아져 값이 전부 말줄임된다.
      대신 덜 중요한 "진행 구간"을 빼고 3칸을 내용 크기(auto)로 둔다. */
   body.mobile-landscape .hud-secondary{ display:none; }
-  body.mobile-landscape .hud-grid{ grid-template-columns:repeat(3,auto); gap:8px; }
-  body.mobile-landscape .hud-item{ padding:3px 8px; min-width:0; }
+  body.mobile-landscape .hud-grid{ grid-template-columns:repeat(3,auto); gap:5px; }
+  body.mobile-landscape .hud-item{ padding:2px 6px; min-width:0; }
   body.mobile-landscape .hud-item .label,
   body.mobile-landscape .hud-item .value{ white-space:nowrap; }
-  body.mobile-landscape .hud-item .label{ font-size:10px; }
-  body.mobile-landscape .hud-item .value{ font-size:13px; }
+  body.mobile-landscape .hud-item .label{ font-size:9px; }
+  body.mobile-landscape .hud-item .value{ font-size:11.5px; }
 
   /* 상태 패널 숨김 - 게임화면과 겹침 */
   body.mobile-landscape .status-panel{ display:none !important; }
@@ -1029,7 +1042,14 @@
   }
   body.mobile-landscape .car-select-panel .car-btn{ font-size:12px; padding:9px 12px; border-radius:8px; }
   body.mobile-landscape .car-select-panel .cs-small-btn{ font-size:12px; padding:11px 6px; border-radius:8px; }
-  body.mobile-landscape .mission-format-line{ font-size:11px !important; }
+  body.mobile-landscape .mission-format-line{
+    font-size:9.5px !important; line-height:1.35; padding:4px 6px; gap:5px;
+  }
+  /* 미션 목록이 패널 높이를 넘으면 스크롤되게 하고, 각 줄은 칸 안에서 줄바꿈시킨다 */
+  body.mobile-landscape .mission-panel .ov-body{
+    max-height:calc(min(200px, 40vh) - 34px); overflow-y:auto; overflow-x:hidden;
+  }
+  body.mobile-landscape .mission-task-list{ gap:2px; }
   /* ---- 패널 공통 색: 참고 이미지의 청록 계열, 배경이 비치도록 반투명 ---- */
   body.mobile-landscape .overlay-panel,
   body.mobile-landscape .mission-panel.overlay-panel,
@@ -1057,14 +1077,16 @@
   }
   /* HUD 캐릭터: 패널 왼쪽 밖으로 걸치게 세운다 (참고 이미지) */
   .hud-char{ display:none; }
-  body.mobile-landscape .hud-panel.overlay-panel{ overflow:visible; padding-left:44px !important; }
+  body.mobile-landscape .hud-panel.overlay-panel{
+    overflow:visible; padding:3px 6px 3px 34px !important;
+  }
   body.mobile-landscape .hud-char{
-    display:block; position:absolute; left:-26px; bottom:-4px;
-    height:calc(100% + 22px); width:auto; pointer-events:none;
+    display:block; position:absolute; left:-22px; bottom:-3px;
+    height:calc(100% + 14px); width:auto; pointer-events:none;
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.45));
   }
   body.mobile-landscape .hud-title-icon{ display:none; }
-  body.mobile-landscape .hud-panel .ov-head{ justify-content:center; font-size:12px; }
+  body.mobile-landscape .hud-panel .ov-head{ justify-content:center; font-size:10.5px; padding:2px 6px; min-height:0; }
   /* 튜토리얼·랭킹은 전체 화면 오버레이라 별도 지정 */
   body.mobile-landscape .tutorial-panel{
     background:linear-gradient(180deg, rgba(28,74,74,.72), rgba(16,48,52,.76)) !important;
@@ -1619,9 +1641,17 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <!-- 지반 배경판: 양회기지(좌측 구내)와 본선(우측 사다리)에 각각 깔아
            일러스트 배경 위에서도 선로가 도면처럼 읽히게 한다. 모바일에서만 보인다. -->
       <g id="groundGroup">
-        <!-- 실측 범위: 양회기지 x10~780 / y12~554, 본선 x766~1510 / y365~572 -->
-        <rect class="ground-yard" x="-6" y="-6" width="798" height="578" rx="30"/>
-        <rect class="ground-main" x="750" y="348" width="790" height="242" rx="30"/>
+        <!-- 양회기지(x10~780, y12~554)와 본선(x766~1510, y365~572)을 하나의 면으로 잇는다.
+             두 사각형을 겹쳐 두면 경계선이 화면 한가운데를 가로질러 어색하므로,
+             모서리를 둥글린 단일 path로 그리고 반투명하게 깐다. -->
+        <path class="ground-plate" d="
+          M 40,-10 H 700
+          C 782,-10 800,70 806,300
+          C 812,336 848,342 892,342
+          H 1500 Q 1540,342 1540,382
+          V 552 Q 1540,592 1500,592
+          H 40 Q 0,592 0,552
+          V 30 Q 0,-10 40,-10 Z"/>
       </g>
       <g id="facilityGroup"></g>
       <g id="tracksGroup"></g>
@@ -2123,11 +2153,12 @@ Object.keys(tree).forEach(idStr=>{
 function facilityRect(x,y,w,h,label){
   const r = document.createElementNS(svgNS,'rect');
   r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',w); r.setAttribute('height',h);
+  r.setAttribute('class','facility-box');
   r.setAttribute('fill','rgba(255,255,255,.05)');
   r.setAttribute('stroke','rgba(255,255,255,.18)');
   r.setAttribute('stroke-width','1');
   r.setAttribute('stroke-dasharray','3,2');
-  r.setAttribute('rx','2');
+  r.setAttribute('rx','4');
   document.getElementById('facilityGroup').appendChild(r);
   if(label){
     const t = text(x+w/2, y+h/2+4, label, 'facility-label', 'middle');
@@ -2889,8 +2920,8 @@ engineG.setAttribute('id','engineNode');
 const engineImg = document.createElementNS(svgNS,'image');
 engineImg.setAttribute('class','loco-img');
 engineImg.setAttribute('href','assets/loco.png');
-engineImg.setAttribute('x',-24); engineImg.setAttribute('y',-8.5);
-engineImg.setAttribute('width',48); engineImg.setAttribute('height',24);
+engineImg.setAttribute('x',-24); engineImg.setAttribute('y',-10);
+engineImg.setAttribute('width',48); engineImg.setAttribute('height',22);
 engineImg.setAttribute('preserveAspectRatio','xMidYMid meet');
 engineG.appendChild(engineImg);
 

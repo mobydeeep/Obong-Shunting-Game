@@ -15,7 +15,8 @@ const CACHE_ASSETS = [
   './assets/worker-yard.png',
   './assets/worker-main.png',
   './assets/icons/icon-192.png',
-  './assets/icons/icon-256.png'
+  './assets/icons/icon-256.png',
+  './assets/icons/icon-512.png'
 ];
 const EXTERNAL_HOSTS = ['firebaseio.com', 'firebasedatabase.app', 'gstatic.com'];
 
