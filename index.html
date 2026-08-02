@@ -439,8 +439,34 @@
     padding:18px 20px; box-shadow:0 20px 50px rgba(0,0,0,.5);
   }
   .tutorial-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; font-size:16px; color:#e8edf3; }
+  .tutorial-head-btns{ display:flex; align-items:center; gap:8px; }
   .tutorial-body{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   @media (max-width:640px){ .tutorial-body{ grid-template-columns:1fr; } }
+
+  /* 조작 안내 문구는 기기에 따라 다르게 보여준다 (키보드 vs 화면 버튼) */
+  .only-mobile{ display:none; }
+  body.is-mobile .only-mobile{ display:inline; }
+  body.is-mobile .only-desktop{ display:none; }
+
+  /* 튜토리얼: 모바일에서는 한 장씩 순서대로 */
+  .tut-nav, .tut-skip-btn{ display:none; }
+  body.is-mobile .tutorial-body{ grid-template-columns:1fr; }
+  body.is-mobile .tut-card{ display:none; }
+  body.is-mobile .tut-card.tut-active{ display:flex; }
+  body.is-mobile .tut-skip-btn{
+    display:inline-block; background:transparent; border:1px solid #3a4460; color:#8b98a8;
+    padding:5px 10px; border-radius:14px; font-size:11px; font-weight:700; cursor:pointer;
+  }
+  body.is-mobile .tut-nav{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px;
+  }
+  .tut-nav-btn{
+    background:#2a3350; border:1px solid #3a4568; color:#e8edf3;
+    padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;
+  }
+  .tut-nav-btn.primary{ background:linear-gradient(135deg,#003D7A,#005BAC); border-color:#1a8fd4; }
+  .tut-nav-btn:disabled{ opacity:.35; cursor:default; }
+  .tut-step-label{ font-size:11px; font-weight:800; color:#8b98a8; letter-spacing:.5px; }
   .tut-card{
     display:flex; gap:12px; align-items:center; background:#1a2338; border:1px solid #232c42;
     border-radius:12px; padding:12px;
@@ -695,7 +721,9 @@
   body.mobile-landscape .sub,
   body.mobile-landscape .start-howto,
   body.mobile-landscape .key-legend{ display:none !important; }
-  body.mobile-landscape .admin-toggle-btn,
+  /* 모바일에서는 관리자 버튼을 노출하지 않는다(오조작 방지 + 상단 공간 확보) */
+  body.is-mobile .admin-toggle-btn{ display:none !important; }
+
   body.mobile-landscape .rank-toggle-btn,
   body.mobile-landscape .home-toggle-btn,
   body.mobile-landscape .tutorial-toggle-btn{
@@ -705,15 +733,27 @@
   body.mobile-landscape .home-toggle-btn{ right:4px !important; }
   body.mobile-landscape .tutorial-toggle-btn{ right:152px !important; }
   body.mobile-landscape .music-toggle-btn{ top:4px !important; right:224px !important; width:24px !important; height:24px !important; font-size:11px !important; }
-  body.mobile-landscape .admin-toggle-btn{ left:4px !important; }
+  /* 제작자 표시: 좌측 하단 ◀ 버튼(56px) 위쪽으로 올려 버튼과 겹치지 않게 한다 */
   body.mobile-landscape .credit-tag{
-    display:block !important; position:fixed; bottom:20px; right:16px;
-    left:auto; top:auto; transform:none; font-size:8px; opacity:0.6;
+    display:block !important; position:fixed; bottom:82px; left:16px;
+    right:auto; top:auto; transform:none; font-size:8px; opacity:0.6;
   }
+  /* 관리자 버튼이 사라진 좌측 상단으로 이동 — 가운데 두면 좁은 화면에서 우측 버튼들과 겹친다 */
   body.mobile-landscape .game-toggle-btn{
-    top:4px !important; left:50% !important; transform:translateX(-50%);
+    top:4px !important; left:4px !important; transform:none !important;
     padding:4px 10px !important; font-size:9.5px !important;
   }
+
+  /* 튜토리얼 패널: 가로 모바일은 세로 공간이 좁으므로 전체적으로 축소 */
+  body.mobile-landscape .tutorial-overlay{ padding:8px; }
+  body.mobile-landscape .tutorial-panel{ width:96vw; max-height:94vh; padding:10px 12px; border-radius:12px; }
+  body.mobile-landscape .tutorial-head{ font-size:13px; margin-bottom:8px; }
+  body.mobile-landscape .tut-card{ padding:10px; gap:10px; }
+  body.mobile-landscape .tut-icon{ width:58px; height:44px; }
+  body.mobile-landscape .tut-title{ font-size:12px; }
+  body.mobile-landscape .tut-desc{ font-size:10.5px; line-height:1.5; }
+  body.mobile-landscape .tut-nav{ margin-top:8px; }
+  body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
   body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; width:100vw !important; height:100vh !important; margin:0 !important; border:none !important; overflow:visible !important; }
 
   /* 좌우 조작 스트립 */
@@ -769,9 +809,18 @@
 
   /* 미션 패널: 좌상단에 배치, 높이 제한, 투명도 높임 */
   body.mobile-landscape .mission-panel.overlay-panel{
-    top:34px !important; bottom:auto !important; left:4px !important; max-width:150px !important; max-height:200px;
+    top:34px !important; bottom:auto !important; left:4px !important; max-width:150px !important;
+    /* 화면이 짧은 기기에서 좌측 하단 제작자 표시·조작버튼까지 내려오지 않도록 비율로 제한 */
+    max-height:min(200px, 40vh);
     background:rgba(15,22,38,0.3) !important;
   }
+  /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
+     화면 오른쪽 밖으로 밀려나거나 우측 버튼 위로 겹치지 않게 한다 */
+  body.mobile-landscape .car-select-panel.overlay-panel{
+    max-width:calc(100vw - 175px) !important;
+  }
+  body.mobile-landscape .car-select-panel .car-btn{ font-size:9.5px; padding:4px 6px; }
+  body.mobile-landscape .car-select-panel .cs-small-btn{ font-size:9px; padding:4px 3px; }
   body.mobile-landscape .mission-format-line{ font-size:7.5px !important; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
 
@@ -899,7 +948,10 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     <div class="tutorial-panel">
       <div class="tutorial-head">
         <b>🎓 게임 튜토리얼</b>
-        <button class="admin-close-btn" id="tutorialCloseBtn">✕</button>
+        <div class="tutorial-head-btns">
+          <button class="tut-skip-btn" id="tutSkipBtn">건너뛰기</button>
+          <button class="admin-close-btn" id="tutorialCloseBtn">✕</button>
+        </div>
       </div>
       <div class="tutorial-body">
 
@@ -917,7 +969,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">① 이동 방법</div>
-            <div class="tut-desc">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</div>
+            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile">화면 <b>좌측 아래 ◀</b>, <b>우측 아래 ▶</b> 버튼으로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <b>정지</b> 버튼으로 제동해야 합니다.<br>맵은 <b>손가락으로 끌어</b> 다른 구역을 볼 수 있고, <b>두 손가락을 모으면 축소</b>됩니다. 손을 떼고 2초가 지나면 기관차 위치로 되돌아옵니다.</span></div>
           </div>
         </div>
 
@@ -932,7 +984,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">② 선로 취급 방법</div>
-            <div class="tut-desc"><b>전환기를 마우스로 클릭</b>하면 진로가 전환됩니다. 파란색(L)·주황색(R) 두 진로 중 하나로 열립니다. 기관차·화차가 근처에 있으면 취급할 수 없습니다.<br>* 양회기지 진입방향 기준 색상이며, 본선방향으로 나올때 보이는 실제 색상은 반대입니다.</div>
+            <div class="tut-desc"><b>전환기를 <span class="only-desktop">마우스로 클릭</span><span class="only-mobile">손가락으로 탭</span></b>하면 진로가 전환됩니다. 파란색(L)·주황색(R) 두 진로 중 하나로 열립니다. 기관차·화차가 근처에 있으면 취급할 수 없습니다.<br>* 양회기지 진입방향 기준 색상이며, 본선방향으로 나올때 보이는 실제 색상은 반대입니다.</div>
           </div>
         </div>
 
@@ -949,7 +1001,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">③ 연결·분리 방법</div>
-            <div class="tut-desc">화차 가까이 다가가면 화차 선택창이 뜹니다. 원하는 화차를 고르고 <span class="key-badge wide">Ctrl</span>을 누르면 연결하거나 분리합니다. 실제로 화차 끝까지 붙어야 연결됩니다.</div>
+            <div class="tut-desc">화차 가까이 다가가면 화차 선택창이 뜹니다. 원하는 화차를 고르고 <span class="only-desktop"><span class="key-badge wide">Ctrl</span>을 누르면</span><span class="only-mobile">우측 아래 <b>연결</b> 버튼을 누르면</span> 연결하거나 분리합니다. 실제로 화차 끝까지 붙어야 연결됩니다.</div>
           </div>
         </div>
 
@@ -986,7 +1038,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">⑤ 본선 직원</div>
-            <div class="tut-desc">본선 선로에 있는 직원으로, 열차운행여부를 모를 수 있어 위험합니다. 접촉하면 사상사고로 게임이 종료됩니다. 가까이 있으면 <span class="key-badge wide">Shift</span>로 주의기적을 울려 대피시키세요.</div>
+            <div class="tut-desc">본선 선로에 있는 직원으로, 열차운행여부를 모를 수 있어 위험합니다. 접촉하면 사상사고로 게임이 종료됩니다. 가까이 있으면 <span class="only-desktop"><span class="key-badge wide">Shift</span>로</span><span class="only-mobile">우측 아래 <b>기적</b> 버튼으로</span> 주의기적을 울려 대피시키세요.</div>
           </div>
         </div>
 
@@ -1014,7 +1066,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <div class="tut-text">
             <div class="tut-title">⑦ 본선 진로 확인</div>
-            <div class="tut-desc">본선 진로는 전환기를 하나씩 조작하지 않고, 지도에 표시된 <b>원하는 본선(본17~본12 등) 선로나 번호를 마우스로 클릭</b>하면 필요한 전환기가 한 번에 맞춰지며 그 진로가 <b>초록색</b>으로 개통 표시됩니다. 출발 전 목표 본선이 초록색으로 켜졌는지 꼭 확인하세요.</div>
+            <div class="tut-desc">본선 진로는 전환기를 하나씩 조작하지 않고, 지도에 표시된 <b>원하는 본선(본17~본12 등) 선로나 번호를 <span class="only-desktop">마우스로 클릭</span><span class="only-mobile">손가락으로 탭</span></b>하면 필요한 전환기가 한 번에 맞춰지며 그 진로가 <b>초록색</b>으로 개통 표시됩니다. 출발 전 목표 본선이 초록색으로 켜졌는지 꼭 확인하세요.</div>
           </div>
         </div>
 
@@ -1037,6 +1089,12 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </div>
         </div>
 
+      </div>
+
+      <div class="tut-nav" id="tutNav">
+        <button class="tut-nav-btn" id="tutPrevBtn">◀ 이전</button>
+        <span class="tut-step-label" id="tutStepLabel">1 / 8</span>
+        <button class="tut-nav-btn primary" id="tutNextBtn">다음 ▶</button>
       </div>
     </div>
   </div>
@@ -1512,6 +1570,8 @@ function fitMapToViewport(){
   const isMobile = isPortraitMobile || isLandscapeMobile;
   document.body.classList.toggle('mobile-landscape', isLandscapeMobile);
   document.body.classList.toggle('mobile-portrait', isPortraitMobile && !isLandscapeMobile);
+  // 가로·세로를 가리지 않는 "모바일" 공통 표식 — 안내문구/튜토리얼 전환에 사용
+  document.body.classList.toggle('is-mobile', isMobile);
   if(isLandscapeMobile){
     // 가로모드: 우측에 세로 조작바를 두므로 그만큼 폭을 빼고, 화면 높이에 꽉 맞춘다
     const controlW = 92;
@@ -3130,7 +3190,7 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   const bgMusic = document.getElementById('bgMusic');
   bgMusic.volume = 0.5;
   bgMusic.play().catch(()=>{}); // 자동재생이 막힐 경우 조용히 무시(음소거 버튼으로 수동 재생 가능)
-  document.getElementById('tutorialOverlay').style.display = 'flex'; // 최초 입장 시 튜토리얼을 바로 보여준다
+  openTutorial(); // 최초 입장 시 튜토리얼을 바로 보여준다(모바일이면 1단계부터)
 });
 function softRestartEngine(){
   gameOver = false;
@@ -4752,14 +4812,48 @@ document.getElementById('adminRecordClearAllBtn').addEventListener('click', ()=>
   if(typeof renderRankTable === 'function') renderRankTable();
 });
 document.getElementById('tutorialToggleBtn').addEventListener('click', ()=>{
-  document.getElementById('tutorialOverlay').style.display = 'flex';
+  openTutorial();
 });
-document.getElementById('tutorialCloseBtn').addEventListener('click', ()=>{
-  document.getElementById('tutorialOverlay').style.display = 'none';
-});
+document.getElementById('tutorialCloseBtn').addEventListener('click', closeTutorial);
 document.getElementById('tutorialOverlay').addEventListener('click', (e)=>{
-  if(e.target.id === 'tutorialOverlay') document.getElementById('tutorialOverlay').style.display = 'none';
+  if(e.target.id === 'tutorialOverlay') closeTutorial();
 });
+
+// ---- 튜토리얼: 모바일에서는 카드를 한 장씩 순서대로 보여준다 ----
+// (데스크톱은 CSS에서 전체를 격자로 펼치므로 아래 상태는 무시된다)
+const TUT_CARDS = Array.from(document.querySelectorAll('#tutorialOverlay .tut-card'));
+let tutStep = 0;
+
+function renderTutorialStep(){
+  if(!TUT_CARDS.length) return;
+  tutStep = Math.max(0, Math.min(TUT_CARDS.length-1, tutStep));
+  TUT_CARDS.forEach((card, i)=> card.classList.toggle('tut-active', i === tutStep));
+  const label = document.getElementById('tutStepLabel');
+  const prev = document.getElementById('tutPrevBtn');
+  const next = document.getElementById('tutNextBtn');
+  if(label) label.textContent = (tutStep+1) + ' / ' + TUT_CARDS.length;
+  if(prev) prev.disabled = (tutStep === 0);
+  if(next) next.textContent = (tutStep === TUT_CARDS.length-1) ? '시작하기' : '다음 ▶';
+  const panel = document.querySelector('#tutorialOverlay .tutorial-panel');
+  if(panel) panel.scrollTop = 0;
+}
+function openTutorial(){
+  tutStep = 0;
+  renderTutorialStep();
+  document.getElementById('tutorialOverlay').style.display = 'flex';
+}
+function closeTutorial(){
+  document.getElementById('tutorialOverlay').style.display = 'none';
+}
+document.getElementById('tutPrevBtn').addEventListener('click', ()=>{
+  if(tutStep > 0){ tutStep--; renderTutorialStep(); }
+});
+document.getElementById('tutNextBtn').addEventListener('click', ()=>{
+  if(tutStep < TUT_CARDS.length-1){ tutStep++; renderTutorialStep(); }
+  else closeTutorial();
+});
+document.getElementById('tutSkipBtn').addEventListener('click', closeTutorial);
+renderTutorialStep();
 document.querySelectorAll('.rank-table th').forEach(th=>{
   th.addEventListener('click', ()=>{
     const key = th.getAttribute('data-key');
