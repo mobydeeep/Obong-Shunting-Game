@@ -1,7 +1,7 @@
 name: Build Android APK (v4)
 
 on:
-  workflow_ddispatch:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
