@@ -562,6 +562,16 @@
     border-radius:12px; padding:12px;
   }
   .tut-icon{ width:80px; height:60px; flex:none; }
+  /* 실제 게임 그림을 쓰는 튜토리얼 아이콘 */
+  .tut-icon-row{ display:flex; align-items:center; justify-content:center; gap:6px; }
+  .tut-pic{ object-fit:contain; display:block; }
+  .tut-pic-wide{ width:58px; height:auto; }
+  .tut-pic-btn{ width:34px; height:auto; }
+  .tut-pic-tall{ height:56px; width:auto; }
+  body.mobile-landscape .tut-icon-row{ width:58px; gap:4px; }
+  body.mobile-landscape .tut-pic-wide{ width:42px; }
+  body.mobile-landscape .tut-pic-btn{ width:26px; }
+  body.mobile-landscape .tut-pic-tall{ height:42px; }
   .tut-title{ font-size:13px; font-weight:800; color:#4DD4EF; margin-bottom:4px; }
   .tut-desc{ font-size:11.5px; line-height:1.55; color:#c7d2e0; }
   .key-badge{
@@ -1266,20 +1276,13 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <div class="tutorial-body">
 
         <div class="tut-card">
-          <svg class="tut-icon" viewBox="0 0 120 90">
-            <rect x="10" y="60" width="100" height="6" fill="#4a5568"/>
-            <rect x="0" y="0" width="120" height="90" fill="none"/>
-            <g transform="translate(60,60)">
-              <rect x="-22" y="-16" width="44" height="20" rx="4" fill="#005BAC"/>
-              <circle cx="-12" cy="6" r="6" fill="#1a2440" stroke="#00B2E3" stroke-width="2"/>
-              <circle cx="12" cy="6" r="6" fill="#1a2440" stroke="#00B2E3" stroke-width="2"/>
-            </g>
-            <g transform="translate(20,30)"><rect x="-13" y="-13" width="26" height="26" rx="6" fill="#2a3350" stroke="#4DD4EF"/><path d="M2,-6 L-5,0 L2,6" fill="none" stroke="#4DD4EF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-            <g transform="translate(100,30)"><rect x="-13" y="-13" width="26" height="26" rx="6" fill="#2a3350" stroke="#4DD4EF"/><path d="M-2,-6 L5,0 L-2,6" fill="none" stroke="#4DD4EF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-          </svg>
+          <div class="tut-icon tut-icon-row">
+            <img src="assets/loco.png" alt="" class="tut-pic tut-pic-wide">
+            <img src="assets/icons/btn-stop.png" alt="" class="tut-pic tut-pic-btn">
+          </div>
           <div class="tut-text">
             <div class="tut-title">① 이동 방법</div>
-            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile"><b>◀ ▶</b> 버튼으로 움직입니다. 관성이 있으니 <b>정지</b>를 미리 눌러 제동하세요.<br>지도는 <b>끌어서</b> 이동, <b>두 손가락을 모으면</b> 축소됩니다.</span></div>
+            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile"><b>◀ ▶</b> 버튼으로 움직입니다. 관성이 있으니 <b>정지</b>를 미리 눌러 제동하세요.<br>지도는 <b>끌어서</b> 이동, <b>두 손가락을 모으면</b> 축소됩니다. <b>🎯</b> 버튼을 누르면 기관차로 돌아옵니다.</span></div>
           </div>
         </div>
 
@@ -1299,16 +1302,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
         </div>
 
         <div class="tut-card">
-          <svg class="tut-icon" viewBox="0 0 120 90">
-            <rect x="6" y="34" width="28" height="24" rx="4" fill="#5b6b8c"/>
-            <rect x="40" y="34" width="28" height="24" rx="4" fill="#5b6b8c"/>
-            <rect x="76" y="30" width="36" height="30" rx="6" fill="#005BAC"/>
-            <circle cx="16" cy="62" r="5" fill="#1a2440"/><circle cx="30" cy="62" r="5" fill="#1a2440"/>
-            <circle cx="50" cy="62" r="5" fill="#1a2440"/><circle cx="64" cy="62" r="5" fill="#1a2440"/>
-            <circle cx="88" cy="64" r="5" fill="#1a2440"/><circle cx="102" cy="64" r="5" fill="#1a2440"/>
-            <rect x="46" y="10" width="30" height="16" rx="4" fill="#2a3350" stroke="#4DD4EF"/>
-            <text x="61" y="22" font-size="9" fill="#4DD4EF" text-anchor="middle" font-weight="800">Ctrl</text>
-          </svg>
+          <div class="tut-icon tut-icon-row">
+            <img src="assets/icons/btn-couple.png" alt="" class="tut-pic tut-pic-btn">
+          </div>
           <div class="tut-text">
             <div class="tut-title">③ 연결·분리 방법</div>
             <div class="tut-desc">화차 가까이 다가가면 화차 선택창이 뜹니다. 원하는 화차를 고르고 <span class="only-desktop"><span class="key-badge wide">Ctrl</span>을 누르면</span><span class="only-mobile">우측 아래 <b>연결</b> 버튼을 누르면</span> 연결하거나 분리합니다. 실제로 화차 끝까지 붙어야 연결됩니다.</div>
@@ -1316,18 +1312,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
         </div>
 
         <div class="tut-card">
-          <svg class="tut-icon" viewBox="0 0 120 90">
-            <line x1="10" y1="75" x2="110" y2="75" stroke="#3f5079" stroke-width="4"/>
-            <g transform="translate(55,45)">
-              <circle cx="0" cy="-19" r="6" fill="#f2c299"/>
-              <path d="M -8,-8 Q 0,-15 8,-8 L 7,17 Q 0,20 -7,17 Z" fill="#ffb300"/>
-              <line x1="-8" y1="-4" x2="-14" y2="6" stroke="#ffb300" stroke-width="3.5" stroke-linecap="round"/>
-              <line x1="8" y1="-4" x2="14" y2="6" stroke="#ffb300" stroke-width="3.5" stroke-linecap="round"/>
-              <rect x="10" y="-40" width="22" height="16" rx="4" fill="#fff"/>
-              <path d="M12,-24 L9,-19 L15,-24 Z" fill="#fff"/>
-              <text x="21" y="-28" font-size="10" fill="#222" text-anchor="middle" font-weight="800">??</text>
-            </g>
-          </svg>
+          <div class="tut-icon tut-icon-row">
+            <img src="assets/worker-yard.png" alt="" class="tut-pic tut-pic-tall">
+          </div>
           <div class="tut-text">
             <div class="tut-title">④ 양회수송원</div>
             <div class="tut-desc">301~310호 전환기 주변을 돌아다니며 가끔 전환기를 무작위로 바꿉니다. 출발 전 진로를 반드시 다시 확인하세요.</div>
@@ -1335,17 +1322,10 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
         </div>
 
         <div class="tut-card">
-          <svg class="tut-icon" viewBox="0 0 120 90">
-            <line x1="10" y1="75" x2="110" y2="75" stroke="#3f5079" stroke-width="4"/>
-            <g transform="translate(40,45)">
-              <circle cx="0" cy="-19" r="6" fill="#f2c299"/>
-              <path d="M -8,-8 Q 0,-15 8,-8 L 7,17 Q 0,20 -7,17 Z" fill="#2563eb"/>
-              <line x1="-8" y1="-4" x2="-14" y2="6" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
-              <line x1="8" y1="-4" x2="14" y2="6" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round"/>
-            </g>
-            <rect x="76" y="20" width="34" height="18" rx="4" fill="#2a3350" stroke="#ff8a8a"/>
-            <text x="93" y="33" font-size="9" fill="#ff8a8a" text-anchor="middle" font-weight="800">Shift</text>
-          </svg>
+          <div class="tut-icon tut-icon-row">
+            <img src="assets/worker-main.png" alt="" class="tut-pic tut-pic-tall">
+            <img src="assets/icons/btn-horn.png" alt="" class="tut-pic tut-pic-btn">
+          </div>
           <div class="tut-text">
             <div class="tut-title">⑤ 본선 직원</div>
             <div class="tut-desc">본선 선로에 있는 직원으로, 열차운행여부를 모를 수 있어 위험합니다. 접촉하면 사상사고로 게임이 종료됩니다. 가까이 있으면 <span class="only-desktop"><span class="key-badge wide">Shift</span>로</span><span class="only-mobile">우측 아래 <b>기적</b> 버튼으로</span> 주의기적을 울려 대피시키세요.</div>
@@ -3163,6 +3143,7 @@ workerBubble.innerHTML = `
 `;
 workerG.appendChild(workerBubble);
 
+let workerFacing = 1;   // 1=오른쪽 보기, -1=왼쪽 보기
 let workerPos = null, workerTarget = null;
 let WORKER_SPEED = 14; // px/s, 기관차보다 훨씬 느리게 천천히 이동 (관리자기능에서 조정 가능)
 const WORKER_SWITCH_RANGE = Object.keys(tree).map(Number); // 301~310만 배회·취급 대상
@@ -3212,12 +3193,15 @@ function updateWorker(dt){
     if(dist < 3){
       workerPickNewTarget();
     } else {
+      // 그림은 오른쪽을 보고 있으므로 왼쪽으로 갈 때만 좌우를 뒤집는다.
+      // 값이 아주 작을 때 바꾸면 제자리에서 깜빡이므로 문턱을 둔다.
+      if(Math.abs(dx) > 0.5) workerFacing = dx < 0 ? -1 : 1;
       const step = Math.min(dist, WORKER_SPEED*dt);
       workerPos.x += dx/dist*step;
       workerPos.y += dy/dist*step;
     }
   }
-  workerG.setAttribute('transform', `translate(${workerPos.x},${workerPos.y})`);
+  workerG.setAttribute('transform', `translate(${workerPos.x},${workerPos.y}) scale(${workerFacing},1)`);
 
   const now = performance.now();
   if(workerNextFlipAt === 0) workerScheduleNextFlip();
@@ -3283,6 +3267,7 @@ function getMainWorkerPoints(){
   return pts;
 }
 
+let mainWorkerFacing = 1;
 let mainWorkerPos = null, mainWorkerTarget = null;
 const MAIN_WORKER_COLLISION_DIST = 16;
 function vehiclePositions(){
@@ -3359,12 +3344,13 @@ function updateMainWorker(dt){
     if(evacuating) mainWorkerEvacuateUntil = 0;
     mainWorkerPickNewTarget();
   } else {
+    if(Math.abs(dx) > 0.5) mainWorkerFacing = dx < 0 ? -1 : 1;
     const speed = MAIN_WORKER_SPEED * (evacuating ? MAIN_WORKER_EVACUATE_MULT : 1);
     const step = Math.min(dist, speed*dt);
     mainWorkerPos.x += dx/dist*step;
     mainWorkerPos.y += dy/dist*step;
   }
-  mainWorkerG.setAttribute('transform', `translate(${mainWorkerPos.x},${mainWorkerPos.y})`);
+  mainWorkerG.setAttribute('transform', `translate(${mainWorkerPos.x},${mainWorkerPos.y}) scale(${mainWorkerFacing},1)`);
 
   if(!gameOver && isNearMovingVehicle(mainWorkerPos, MAIN_WORKER_COLLISION_DIST)){
     triggerCrash('🚑 사상사고 발생', '본선 직원과 접촉했습니다. 서행과 주의기적으로 예방하세요.');
@@ -3858,12 +3844,16 @@ function edgeScreenDir(edge){
   if(edge.screenDir===undefined) edge.screenDir = Math.sign(edge.points[edge.points.length-1][0]-edge.points[0][0]) || 1;
   return edge.screenDir;
 }
+// 연결된 편성이 기관차의 어느 쪽으로 늘어서는지. -1=화면 왼쪽, +1=화면 오른쪽.
+// 예전에는 항상 왼쪽으로만 배치해서, 오른쪽에 있는 화차를 연결하면
+// 편성이 기관차 왼쪽으로 순간이동하는 문제가 있었다. 연결할 때 실제 방향을 기억한다.
+let consistSide = -1;
 function posFarther(startEdge, startPos, screenDist){
   let edge = startEdge, pos = startPos, remaining = screenDist, guard = 0;
   while(remaining > 0.0001 && guard < 12){
     guard++;
     const dir = edgeScreenDir(edge);
-    const targetPos = pos - remaining*dir;
+    const targetPos = pos + remaining*dir*consistSide;
     if(targetPos >= 0 && targetPos <= edge.len){
       pos = targetPos; remaining = 0;
     } else {
@@ -4045,9 +4035,18 @@ function performCarAction(){
     carActionBusy = true;
     showToast('🔗 연결 중입니다...', COUPLE_TIME_MS);
     setTimeout(()=>{
+      // 기관차에 처음 붙일 때, 화차가 기관차의 어느 쪽에 있는지 기억해 둔다.
+      // (이미 편성이 있으면 새 화차는 같은 방향 바깥쪽이므로 방향을 바꾸지 않는다)
+      if(attachedCars.length === 0){
+        const nearCar = (dFrom <= dTo) ? arr[from] : arr[to];
+        if(nearCar && nearCar._pos) consistSide = (nearCar._pos.x >= front.x) ? 1 : -1;
+      }
       const picked = arr.splice(from, to-from+1);
-      // picked는 항상 "막다른끝→전환기" 순서이므로, 기관차와 가장 가까운 것부터 연결되도록 뒤집어 넣는다
-      picked.reverse().forEach(car=>{ car.state='attached'; attachedCars.push(car); });
+      // attachedCars는 index0이 기관차와 가장 가까워야 한다.
+      // picked는 배열 순서(from→to)이므로, 기관차와 가까운 쪽이 to이면 뒤집는다.
+      // 예전에는 무조건 뒤집어서, 반대쪽에서 연결하면 순서가 거꾸로 붙었다.
+      const ordered = (dFrom <= dTo) ? picked : picked.slice().reverse();
+      ordered.forEach(car=>{ car.state='attached'; attachedCars.push(car); });
       clearCarSelection();
       carActionBusy = false;
       SoundFX.couple();
