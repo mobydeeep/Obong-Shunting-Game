@@ -1,0 +1,147 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Accept Android licenses
+        run: yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses || true
+
+      - name: Check if keystore exists in Secrets
+        id: keystore_check
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "needs_keygen=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_keygen=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate signing key (first run only)
+        if: steps.keystore_check.outputs.needs_keygen == 'true'
+        run: |
+          keytool -genkey -v -keystore keystore.jks \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias obong_key \
+            -storepass "$(echo ${{ github.run_id }} | md5sum | cut -d' ' -f1)" \
+            -keypass "$(echo ${{ github.run_id }} | md5sum | cut -d' ' -f1)" \
+            -dname "CN=Obong Shunting Game,O=Obong,L=Incheon,ST=Incheon,C=KR"
+
+          # Base64 encode keystore
+          cat keystore.jks | base64 -w 0 > keystore.base64
+          echo "KEYSTORE_BASE64=$(cat keystore.base64)" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=$(echo ${{ github.run_id }} | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
+          echo "KEY_ALIAS=obong_key" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=$(echo ${{ github.run_id }} | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
+
+      - name: Use existing keystore from Secrets
+        if: steps.keystore_check.outputs.needs_keygen == 'false'
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+          echo "KEYSTORE_BASE64=${{ secrets.ANDROID_KEYSTORE_BASE64 }}" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Display keystore fingerprint (for assetlinks.json)
+        run: |
+          keytool -list -v -keystore keystore.jks \
+            -storepass "${{ env.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ env.KEY_PASSWORD }}" | grep "SHA256:" || true
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Create Bubblewrap project
+        run: |
+          mkdir -p bubblewrap-app
+          cd bubblewrap-app
+          bubblewrap init --manifest https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest \
+            --package-id com.obong.shuntinggame \
+            --app-name "오봉 입환게임" \
+            --launcher-icon ../assets/icons/icon-192.png \
+            --maskable-icon ../assets/icons/icon-192.png \
+            --display standalone \
+            --orientation landscape \
+            --theme-color "#0a0d16" \
+            --background-color "#0a0d16" || true
+
+      - name: Build APK with Bubblewrap
+        run: |
+          cd bubblewrap-app
+          bubblewrap build \
+            --keystore ../keystore.jks \
+            --keystore-password "${{ env.KEYSTORE_PASSWORD }}" \
+            --key-alias "${{ env.KEY_ALIAS }}" \
+            --key-password "${{ env.KEY_PASSWORD }}"
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: apk
+          path: bubblewrap-app/dist/*.apk
+
+      - name: Upload keystore as artifact (for first run)
+        if: steps.keystore_check.outputs.needs_keygen == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: keystore
+          path: keystore.jks
+          retention-days: 1
+
+      - name: Print keystore info for Secrets registration
+        if: steps.keystore_check.outputs.needs_keygen == 'true'
+        run: |
+          echo "=== KEYSTORE INFORMATION (Save to GitHub Secrets) ==="
+          echo "ANDROID_KEYSTORE_BASE64: (Download keystore artifact and convert to base64)"
+          echo "ANDROID_KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD }}"
+          echo "ANDROID_KEY_ALIAS: ${{ env.KEY_ALIAS }}"
+          echo "ANDROID_KEY_PASSWORD: ${{ env.KEY_PASSWORD }}"
+          echo "SHA256 Fingerprint (for assetlinks.json):"
+          keytool -list -v -keystore keystore.jks \
+            -storepass "${{ env.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ env.KEY_PASSWORD }}" | grep "SHA256:" || true
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload APK to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bubblewrap-app/dist/app-release.apk
+          asset_name: obong-shunting-game.apk
+          asset_content_type: application/vnd.android.package-archive
