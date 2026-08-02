@@ -1427,11 +1427,18 @@ const CAMERA = {
   x: 0, y: 0,
   targetX: 0, targetY: 0,
   w: 550, h: 330,
+  wMin: 550,   // 가장 확대된 상태(= 기본 배율). 이보다 더 확대하지 않는다
+  wMax: 1550,  // 가장 축소된 상태(야드 전체가 들어오는 배율)
+  zoom: 1,     // 현재 배율 = w / wMin. 화면 크기가 바뀌어도 유지된다
 };
 const CAMERA_W_PORTRAIT = 420;
 const CAMERA_W_LANDSCAPE = 700;
 const CAMERA_LERP = 0.14;
-const YARD_BOUNDS = { minX: 60, maxX: 1500, minY: -20, maxY: 660 };
+// 데스크톱 기본 viewBox("0 -140 1550 900")와 동일한 영역.
+// 좁게 잡으면 좌측 선로명(x=20)·우측 터널선·상단 한일선이 화면 밖으로 잘려 도달할 수 없다.
+const YARD_BOUNDS = { minX: 0, maxX: 1550, minY: -140, maxY: 760 };
+const YARD_W = YARD_BOUNDS.maxX - YARD_BOUNDS.minX;
+const YARD_H = YARD_BOUNDS.maxY - YARD_BOUNDS.minY;
 
 // 모바일 맵 손가락 이동(팬) 상태. 반드시 updateCamera보다 먼저 선언해야 한다
 // (아래 드래그 핸들러는 별도 스크립트 블록에 있지만 이 객체를 공유한다).
@@ -1446,10 +1453,23 @@ const MAP_PAN = {
 const MAP_PAN_THRESHOLD = 4;    // 이 픽셀 이상 움직여야 드래그로 인정(전환기 탭과 구분)
 const MAP_PAN_RESUME_MS = 2000; // 터치가 없으면 2초 뒤 기관차로 복귀
 
+// 축소해서 뷰포트가 야드보다 커지면 lo > hi가 되어 Math.max/min이 뒤집힌다.
+// 그 경우엔 야드를 화면 가운데에 둔다.
+function clampAxis(v, lo, hi){
+  if(lo > hi) return (lo + hi) / 2;
+  return Math.max(lo, Math.min(hi, v));
+}
+function clampCameraX(x){
+  const halfW = CAMERA.w/2;
+  return clampAxis(x, YARD_BOUNDS.minX+halfW, YARD_BOUNDS.maxX-halfW);
+}
+function clampCameraY(y){
+  const halfH = CAMERA.h/2;
+  return clampAxis(y, YARD_BOUNDS.minY+halfH, YARD_BOUNDS.maxY-halfH);
+}
 function clampCameraToYard(){
-  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
-  CAMERA.x = Math.max(YARD_BOUNDS.minX+halfW, Math.min(YARD_BOUNDS.maxX-halfW, CAMERA.x));
-  CAMERA.y = Math.max(YARD_BOUNDS.minY+halfH, Math.min(YARD_BOUNDS.maxY-halfH, CAMERA.y));
+  CAMERA.x = clampCameraX(CAMERA.x);
+  CAMERA.y = clampCameraY(CAMERA.y);
 }
 
 function applyCameraViewBox(){
@@ -1461,13 +1481,23 @@ function applyCameraViewBox(){
 
 function updateCamera(dt){
   if(!CAMERA.active || CAMERA.overviewMode || MAP_PAN.manual){ return; }
-  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
-  CAMERA.targetX = Math.max(YARD_BOUNDS.minX+halfW, Math.min(YARD_BOUNDS.maxX-halfW, engineXY.x));
-  CAMERA.targetY = Math.max(YARD_BOUNDS.minY+halfH, Math.min(YARD_BOUNDS.maxY-halfH, engineXY.y));
+  CAMERA.targetX = clampCameraX(engineXY.x);
+  CAMERA.targetY = clampCameraY(engineXY.y);
   const k = 1 - Math.pow(1-CAMERA_LERP, dt*60);
   CAMERA.x += (CAMERA.targetX - CAMERA.x) * k;
   CAMERA.y += (CAMERA.targetY - CAMERA.y) * k;
   applyCameraViewBox();
+}
+
+// 기본 배율(baseW)과 화면 비율(aspect = 지도 높이/너비)로부터 확대·축소 한계를 정한다.
+// 기본 배율이 곧 최대 확대이며(더 확대 불가), 최대 축소는 야드 전체가 들어오는 배율이다.
+function applyCameraZoomLimits(baseW, aspect){
+  CAMERA.wMin = baseW;
+  CAMERA.wMax = Math.max(YARD_W, YARD_H / aspect);
+  const zoom = Math.max(1, Math.min(CAMERA.wMax / CAMERA.wMin, CAMERA.zoom || 1));
+  CAMERA.zoom = zoom;
+  CAMERA.w = baseW * zoom;
+  CAMERA.h = CAMERA.w * aspect;
 }
 
 // ---- 화면(가로+세로) 크기에 맞춰 시뮬레이터 크기를 계산 (PC: 가로/세로 모두 화면 안에, 모바일: 가로폭에 정확히 맞춤) ----
@@ -1492,16 +1522,14 @@ function fitMapToViewport(){
     mapWrap.style.width = w+'px';
     mapWrap.style.height = h+'px';
     CAMERA.active = true;
-    CAMERA.w = CAMERA_W_LANDSCAPE;
-    CAMERA.h = CAMERA.w * (h / w);
+    applyCameraZoomLimits(CAMERA_W_LANDSCAPE, h / w);
   } else if(isPortraitMobile){
     const w = window.innerWidth - 16;
     const h = w/ratio;
     mapWrap.style.width = w+'px';
     mapWrap.style.height = h+'px';
     CAMERA.active = true;
-    CAMERA.w = CAMERA_W_PORTRAIT;
-    CAMERA.h = CAMERA.w * (h / w);
+    applyCameraZoomLimits(CAMERA_W_PORTRAIT, h / w);
   } else {
     const titleEl = document.querySelector('h1');
     const topOffset = titleEl ? titleEl.getBoundingClientRect().top : 40;
@@ -5183,6 +5211,11 @@ if ('serviceWorker' in navigator) {
   const svg = document.getElementById('trackSvg');
   if(!svg) return;
 
+  const pointers = new Map();   // 화면에 닿아있는 손가락들: pointerId -> {x, y}
+  let pinchStartDist = 0;       // 핀치 시작 시 두 손가락 간 거리
+  let pinchStartW = 0;          // 핀치 시작 시 CAMERA.w
+  let didInteract = false;      // 팬이든 핀치든 실제 조작이 있었는지
+
   function cancelResume(){
     if(MAP_PAN.resumeTimer){ clearTimeout(MAP_PAN.resumeTimer); MAP_PAN.resumeTimer = null; }
   }
@@ -5194,19 +5227,78 @@ if ('serviceWorker' in navigator) {
     }, MAP_PAN_RESUME_MS);
   }
 
+  function twoPointers(){
+    const it = pointers.values();
+    return [it.next().value, it.next().value];
+  }
+  function distanceOf(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+
+  // 화면상의 (screenX, screenY) 지점이 가리키는 야드 좌표가 그대로 유지되도록 배율만 바꾼다.
+  function zoomAround(newW, screenX, screenY){
+    const rect = svg.getBoundingClientRect();
+    if(!rect.width || !rect.height) return;
+    newW = Math.max(CAMERA.wMin, Math.min(CAMERA.wMax, newW));
+    if(newW === CAMERA.w) return;
+
+    const aspect = CAMERA.h / CAMERA.w;
+    const newH = newW * aspect;
+    const offX = screenX - rect.left, offY = screenY - rect.top;
+    // 배율 변경 전, 그 화면 지점의 야드 좌표
+    const anchorX = (CAMERA.x - CAMERA.w/2) + offX * (CAMERA.w / rect.width);
+    const anchorY = (CAMERA.y - CAMERA.h/2) + offY * (CAMERA.h / rect.height);
+
+    CAMERA.w = newW;
+    CAMERA.h = newH;
+    CAMERA.zoom = newW / CAMERA.wMin;
+    CAMERA.x = anchorX - offX * (newW / rect.width) + newW/2;
+    CAMERA.y = anchorY - offY * (newH / rect.height) + newH/2;
+    clampCameraToYard();
+    applyCameraViewBox();
+  }
+
   // CAMERA.active는 모바일(가로/세로)에서만 true이므로 이 조건이 곧 모바일 판정이다.
   svg.addEventListener('pointerdown', (e)=>{
     if(!CAMERA.active) return;
-    MAP_PAN.active = true;
-    MAP_PAN.moved = false;
-    MAP_PAN.pointerId = e.pointerId;
-    MAP_PAN.lastX = e.clientX;
-    MAP_PAN.lastY = e.clientY;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     cancelResume();
+
+    if(pointers.size === 2){
+      // 두 번째 손가락이 닿으면 한손가락 팬을 멈추고 핀치로 전환
+      const [a, b] = twoPointers();
+      pinchStartDist = distanceOf(a, b);
+      pinchStartW = CAMERA.w;
+      MAP_PAN.active = false;
+      MAP_PAN.moved = false;
+      MAP_PAN.manual = true;   // 핀치 중에는 자동추적 정지
+      didInteract = true;
+    } else if(pointers.size === 1){
+      MAP_PAN.active = true;
+      MAP_PAN.moved = false;
+      MAP_PAN.pointerId = e.pointerId;
+      MAP_PAN.lastX = e.clientX;
+      MAP_PAN.lastY = e.clientY;
+    }
     // 여기서 preventDefault를 하면 전환기 탭(click)이 죽으므로 하지 않는다.
   });
 
   svg.addEventListener('pointermove', (e)=>{
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // --- 두 손가락: 핀치 확대/축소 ---
+    if(pointers.size >= 2){
+      const [a, b] = twoPointers();
+      const dist = distanceOf(a, b);
+      if(pinchStartDist > 0 && dist > 0){
+        // 손가락을 모으면 dist가 줄어 newW가 커진다 → 축소.
+        // 벌리면 newW가 작아진다 → 확대(단 wMin까지만).
+        zoomAround(pinchStartW * (pinchStartDist / dist), (a.x + b.x)/2, (a.y + b.y)/2);
+      }
+      e.preventDefault();
+      return;
+    }
+
+    // --- 한 손가락: 맵 끌기 ---
     if(!MAP_PAN.active || e.pointerId !== MAP_PAN.pointerId) return;
     const dx = e.clientX - MAP_PAN.lastX;
     const dy = e.clientY - MAP_PAN.lastY;
@@ -5216,6 +5308,7 @@ if ('serviceWorker' in navigator) {
       if(Math.abs(dx) < MAP_PAN_THRESHOLD && Math.abs(dy) < MAP_PAN_THRESHOLD) return;
       MAP_PAN.moved = true;
       MAP_PAN.manual = true;  // 이 순간부터 자동추적 정지
+      didInteract = true;
       // 손가락이 SVG 밖으로 나가도 이벤트를 계속 받기 위해 포인터를 붙잡는다.
       try{ svg.setPointerCapture(e.pointerId); }catch(err){}
     }
@@ -5233,15 +5326,30 @@ if ('serviceWorker' in navigator) {
     e.preventDefault();
   });
 
-  function endPan(e){
-    if(!MAP_PAN.active || (e.pointerId != null && e.pointerId !== MAP_PAN.pointerId)) return;
-    MAP_PAN.active = false;
-    MAP_PAN.pointerId = null;
-    if(MAP_PAN.moved) scheduleResume();  // 실제로 끌었을 때만 복귀 타이머 시작
-    MAP_PAN.moved = false;
+  function endPointer(e){
+    if(!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+
+    if(pointers.size < 2) pinchStartDist = 0;
+
+    if(pointers.size === 1){
+      // 한 손가락만 남으면 그 손가락으로 팬을 이어간다(튀지 않도록 기준점 갱신)
+      const [id, p] = pointers.entries().next().value;
+      MAP_PAN.active = true;
+      MAP_PAN.moved = true;
+      MAP_PAN.pointerId = id;
+      MAP_PAN.lastX = p.x;
+      MAP_PAN.lastY = p.y;
+    } else if(pointers.size === 0){
+      MAP_PAN.active = false;
+      MAP_PAN.moved = false;
+      MAP_PAN.pointerId = null;
+      if(didInteract) scheduleResume();  // 실제로 조작했을 때만 복귀 타이머 시작
+      didInteract = false;
+    }
   }
-  svg.addEventListener('pointerup', endPan);
-  svg.addEventListener('pointercancel', endPan);
+  svg.addEventListener('pointerup', endPointer);
+  svg.addEventListener('pointercancel', endPointer);
 })();
 </script>
 </body>
