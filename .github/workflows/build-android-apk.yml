@@ -133,7 +133,7 @@ jobs:
         if: steps.keystore_check.outputs.has_keystore == 'true'
         run: |
           cd twa
-          npx @bubblewrap/cli build \
+          echo "no" | npx @bubblewrap/cli build \
             --keystore "../release.keystore" \
             --keystore-password "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             --key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
