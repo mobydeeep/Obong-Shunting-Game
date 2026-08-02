@@ -90,12 +90,19 @@ jobs:
         run: |
           mkdir -p twa
           cd twa
-          npx @bubblewrap/cli init \
-            --manifest "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest" \
-            --package-id "com.obong.shuntinggame" \
-            --app-name "오봉 입환게임" \
-            --launcher-icon "../assets/icons/icon-192.png" \
-            --maskable-icon "../assets/icons/icon-192.png" 2>&1 || echo "Init completed with warnings"
+          yes '' | npx @bubblewrap/cli init \
+            --manifest "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest" || true
+
+          if [ ! -f twa-manifest.json ]; then
+            echo "ERROR: twa-manifest.json was not created"
+            exit 1
+          fi
+
+          # assetlinks.json은 com.obong.shuntinggame으로 고정되어 있으므로 packageId를 맞춤
+          jq '.packageId = "com.obong.shuntinggame"' twa-manifest.json > twa-manifest.tmp.json
+          mv twa-manifest.tmp.json twa-manifest.json
+          echo "=== Final twa-manifest.json ==="
+          cat twa-manifest.json
 
       - name: Build APK
         if: steps.keystore_check.outputs.has_keystore == 'true'
