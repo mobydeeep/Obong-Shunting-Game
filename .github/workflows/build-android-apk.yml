@@ -33,8 +33,17 @@ jobs:
       - name: Install Bubblewrap globally
         run: npm install -g @bubblewrap/cli
 
+      - name: Check if keystore Secrets exist
+        id: keystore_check
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "has_keystore=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_keystore=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate keystore (first time)
-        if: secrets.ANDROID_KEYSTORE_BASE64 == ''
+        if: steps.keystore_check.outputs.has_keystore == 'false'
         run: |
           keytool -genkey -v -keystore release.keystore \
             -keyalg RSA -keysize 2048 -validity 10000 \
@@ -50,7 +59,7 @@ jobs:
           echo "ANDROID_KEY_PASSWORD: releasepass123"
 
       - name: Upload keystore for first run
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 == '' }}
+        if: steps.keystore_check.outputs.has_keystore == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: keystore
@@ -58,7 +67,7 @@ jobs:
           retention-days: 7
 
       - name: Restore keystore from Secrets
-        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
+        if: steps.keystore_check.outputs.has_keystore == 'true'
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
           echo "KEYSTORE_PATH=$(pwd)/release.keystore" >> $GITHUB_ENV
@@ -78,7 +87,7 @@ jobs:
             --maskable-icon "../assets/icons/icon-192.png" 2>&1 || echo "Init completed with warnings"
 
       - name: Build APK
-        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
+        if: steps.keystore_check.outputs.has_keystore == 'true'
         run: |
           cd twa
           npx @bubblewrap/cli build \
@@ -88,7 +97,7 @@ jobs:
             --key-password "${{ secrets.ANDROID_KEY_PASSWORD }}"
 
       - name: Upload APK
-        if: secrets.ANDROID_KEYSTORE_BASE64 != ''
+        if: steps.keystore_check.outputs.has_keystore == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
