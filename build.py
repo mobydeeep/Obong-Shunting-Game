@@ -35,6 +35,22 @@ def main():
         lambda b64: f'<audio id="bgMusic" loop preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
     )
 
+    # 효과음 인라인 (주행음 / 기적)
+    html = inline_asset(
+        html,
+        r'<audio id="engineSfx" loop preload="auto"><source src="assets/engine-move\.mp3" type="audio/mpeg"></audio>',
+        'assets/engine-move.mp3',
+        'audio/mpeg',
+        lambda b64: f'<audio id="engineSfx" loop preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
+    )
+    html = inline_asset(
+        html,
+        r'<audio id="hornSfx" preload="auto"><source src="assets/horn\.mp3" type="audio/mpeg"></audio>',
+        'assets/horn.mp3',
+        'audio/mpeg',
+        lambda b64: f'<audio id="hornSfx" preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
+    )
+
     # 시작화면 캐릭터 이미지 인라인
     html = inline_asset(
         html,

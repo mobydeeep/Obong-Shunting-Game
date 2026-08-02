@@ -2,6 +2,8 @@ const CACHE_ASSETS = [
   './',
   './index.html',
   './assets/bgm.mp3',
+  './assets/engine-move.mp3',
+  './assets/horn.mp3',
   './assets/start-character.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-256.png'

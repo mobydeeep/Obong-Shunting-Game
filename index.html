@@ -1301,6 +1301,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   </div>
 
   <audio id="bgMusic" loop preload="auto"><source src="assets/bgm.mp3" type="audio/mpeg"></audio>
+  <!-- 효과음(녹음 파일). 주행음은 반복 재생하며 속도에 따라 음량·재생속도를 조절한다 -->
+  <audio id="engineSfx" loop preload="auto"><source src="assets/engine-move.mp3" type="audio/mpeg"></audio>
+  <audio id="hornSfx" preload="auto"><source src="assets/horn.mp3" type="audio/mpeg"></audio>
 
   <div class="start-overlay" id="startOverlay">
     <img class="start-char-img" src="assets/start-character.png" alt="">
@@ -3261,8 +3264,17 @@ const SoundFX = (()=>{
         tone(90, 0.03, 0.12, 'triangle', 0.18);
       }catch(e){}
     },
-    // 기적: 디젤기관차 특유의 두 음이 겹치는 낮은 경적
+    // 기적: 녹음 파일(assets/horn.mp3)을 재생. 파일을 못 쓰면 기존 합성음으로 대체한다.
     horn(){
+      try{
+        const el = document.getElementById('hornSfx');
+        if(el && el.readyState > 0){
+          el.currentTime = 0;
+          el.volume = 0.9;
+          el.play().catch(()=>{});
+          return;
+        }
+      }catch(e){}
       try{
         tone(233, 0, 0.85, 'sawtooth', 0.16);
         tone(196, 0, 0.85, 'sawtooth', 0.13);
@@ -3291,6 +3303,10 @@ document.getElementById('restartBtn').addEventListener('click', handleCrashResta
 document.getElementById('homeBtn').addEventListener('click', ()=>{
   location.reload();
 });
+// 사용자가 음소거 버튼을 눌렀는지를 따로 기억한다.
+// bgMusic.paused만 보면 자동재생이 막혔을 때도 "음소거"로 오인하게 된다.
+let soundMuted = false;
+
 document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   const bgMusic = document.getElementById('bgMusic');
   const btn = document.getElementById('musicToggleBtn');
@@ -3298,12 +3314,34 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
     bgMusic.play().catch(()=>{});
     btn.textContent = '🔊';
     btn.classList.remove('muted');
+    soundMuted = false;
   } else {
     bgMusic.pause();
     btn.textContent = '🔇';
     btn.classList.add('muted');
+    soundMuted = true;
+    const eng = document.getElementById('engineSfx');
+    if(eng && !eng.paused) eng.pause();
   }
 });
+
+// ---- 기관차 주행음(assets/engine-move.mp3) ----
+// 움직이는 동안 반복 재생하고, 속도가 빠를수록 조금 더 크고 빠르게 들리도록 한다.
+// 배경음악처럼 계속 이어지는 소리이므로 음소거 버튼의 영향을 함께 받는다.
+const ENGINE_SFX_MIN_V = 2;   // 이 속도 미만은 정차로 보고 소리를 끈다
+function updateEngineSound(){
+  const el = document.getElementById('engineSfx');
+  if(!el) return;
+  const moving = !gameOver && !soundMuted && Math.abs(vScreen) > ENGINE_SFX_MIN_V;
+  if(moving){
+    const ratio = Math.min(1, Math.abs(vScreen) / MAX_V);
+    el.volume = Math.min(1, 0.20 + ratio * 0.55);
+    el.playbackRate = 0.88 + ratio * 0.28;
+    if(el.paused) el.play().catch(()=>{});
+  } else if(!el.paused){
+    el.pause();
+  }
+}
 
 // ---- 키보드 입력 ----
 window.addEventListener('keydown', e=>{
@@ -4383,6 +4421,7 @@ function loop(ts){
     stepEngine(dt);
   }
 
+  updateEngineSound();
   updateCamera(dt);
   renderEngine();
   renderCars();
