@@ -165,6 +165,10 @@
   .ov-head{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
     padding:7px 10px; font-size:11.5px; font-weight:800; color:#8FE6F5; cursor:pointer; user-select:none;
+    touch-action:none; -webkit-user-select:none;
+  }
+  @media (max-width: 760px){
+    .ov-head{ padding:10px 12px; min-height:44px; }
   }
   .ov-caret{ font-size:10px; color:#6b7690; transition:transform .15s ease; }
   .overlay-panel.collapsed .ov-caret{ transform:rotate(-90deg); }
@@ -702,7 +706,10 @@
   body.mobile-landscape .tutorial-toggle-btn{ right:152px !important; }
   body.mobile-landscape .music-toggle-btn{ top:4px !important; right:224px !important; width:24px !important; height:24px !important; font-size:11px !important; }
   body.mobile-landscape .admin-toggle-btn{ left:4px !important; }
-  body.mobile-landscape .credit-tag{ display:none !important; }
+  body.mobile-landscape .credit-tag{
+    display:block !important; position:fixed; bottom:20px; right:16px;
+    left:auto; top:auto; transform:none; font-size:8px; opacity:0.6;
+  }
   body.mobile-landscape .game-toggle-btn{
     top:4px !important; left:50% !important; transform:translateX(-50%);
     padding:4px 10px !important; font-size:9.5px !important;
@@ -5143,6 +5150,41 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// 모바일 맵 드래그 기능
+let mapDragState = { active: false, startX: 0, startY: 0, startTime: 0, touchCount: 0 };
+const trackSvg = document.getElementById('trackSvg');
+trackSvg.addEventListener('pointerdown', (e) => {
+  if (!document.body.classList.contains('mobile-landscape')) return;
+  mapDragState = { active: true, startX: e.clientX, startY: e.clientY, startTime: Date.now(), touchCount: 0 };
+  trackSvg.setPointerCapture(e.pointerId);
+}, { passive: false });
+
+trackSvg.addEventListener('pointermove', (e) => {
+  if (!mapDragState.active) return;
+  const deltaX = e.clientX - mapDragState.startX;
+  const deltaY = e.clientY - mapDragState.startY;
+  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) mapDragState.touchCount++;
+  if (mapDragState.touchCount < 2) return;
+
+  const mapRect = trackSvg.getBoundingClientRect();
+  const vbox = trackSvg.getAttribute('viewBox').split(' ').map(Number);
+  const scale = vbox[2] / mapRect.width;
+  const newX = vbox[0] - deltaX * scale;
+  const newY = vbox[1] - deltaY * scale;
+  trackSvg.setAttribute('viewBox', `${newX} ${newY} ${vbox[2]} ${vbox[3]}`);
+  mapDragState.startX = e.clientX;
+  mapDragState.startY = e.clientY;
+}, { passive: false });
+
+trackSvg.addEventListener('pointerup', () => {
+  if (!mapDragState.active) return;
+  const holdTime = Date.now() - mapDragState.startTime;
+  mapDragState.active = false;
+  if (holdTime > 2000 && CAMERA.active) {
+    CAMERA.overviewMode = false;
+  }
+}, { passive: false });
 </script>
 </body>
 </html>
