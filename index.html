@@ -5152,39 +5152,44 @@ if ('serviceWorker' in navigator) {
 }
 
 // 모바일 맵 드래그 기능
-let mapDragState = { active: false, startX: 0, startY: 0, startTime: 0, touchCount: 0 };
-const trackSvg = document.getElementById('trackSvg');
-trackSvg.addEventListener('pointerdown', (e) => {
-  if (!document.body.classList.contains('mobile-landscape')) return;
-  mapDragState = { active: true, startX: e.clientX, startY: e.clientY, startTime: Date.now(), touchCount: 0 };
-  trackSvg.setPointerCapture(e.pointerId);
-}, { passive: false });
+let mapDragState = { active: false, startX: 0, startY: 0, startTime: 0, touchCount: 0, pointerId: null };
+window.addEventListener('load', () => {
+  const trackSvg = document.getElementById('trackSvg');
+  if (!trackSvg) return;
 
-trackSvg.addEventListener('pointermove', (e) => {
-  if (!mapDragState.active) return;
-  const deltaX = e.clientX - mapDragState.startX;
-  const deltaY = e.clientY - mapDragState.startY;
-  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) mapDragState.touchCount++;
-  if (mapDragState.touchCount < 2) return;
+  trackSvg.addEventListener('pointerdown', (e) => {
+    if (!document.body.classList.contains('mobile-landscape')) return;
+    mapDragState = { active: true, startX: e.clientX, startY: e.clientY, startTime: Date.now(), touchCount: 0, pointerId: e.pointerId };
+    trackSvg.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
 
-  const mapRect = trackSvg.getBoundingClientRect();
-  const vbox = trackSvg.getAttribute('viewBox').split(' ').map(Number);
-  const scale = vbox[2] / mapRect.width;
-  const newX = vbox[0] - deltaX * scale;
-  const newY = vbox[1] - deltaY * scale;
-  trackSvg.setAttribute('viewBox', `${newX} ${newY} ${vbox[2]} ${vbox[3]}`);
-  mapDragState.startX = e.clientX;
-  mapDragState.startY = e.clientY;
-}, { passive: false });
+  document.addEventListener('pointermove', (e) => {
+    if (!mapDragState.active || e.pointerId !== mapDragState.pointerId) return;
+    const deltaX = e.clientX - mapDragState.startX;
+    const deltaY = e.clientY - mapDragState.startY;
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) mapDragState.touchCount++;
+    if (mapDragState.touchCount < 2) return;
 
-trackSvg.addEventListener('pointerup', () => {
-  if (!mapDragState.active) return;
-  const holdTime = Date.now() - mapDragState.startTime;
-  mapDragState.active = false;
-  if (holdTime > 2000 && CAMERA.active) {
-    CAMERA.overviewMode = false;
-  }
-}, { passive: false });
+    const mapRect = trackSvg.getBoundingClientRect();
+    const vbox = trackSvg.getAttribute('viewBox').split(' ').map(Number);
+    const scale = vbox[2] / mapRect.width;
+    const newX = vbox[0] - deltaX * scale;
+    const newY = vbox[1] - deltaY * scale;
+    trackSvg.setAttribute('viewBox', `${newX} ${newY} ${vbox[2]} ${vbox[3]}`);
+    mapDragState.startX = e.clientX;
+    mapDragState.startY = e.clientY;
+  });
+
+  document.addEventListener('pointerup', (e) => {
+    if (!mapDragState.active || e.pointerId !== mapDragState.pointerId) return;
+    const holdTime = Date.now() - mapDragState.startTime;
+    mapDragState.active = false;
+    if (holdTime > 2000 && CAMERA && CAMERA.active) {
+      CAMERA.overviewMode = false;
+    }
+  });
+});
 </script>
 </body>
 </html>
