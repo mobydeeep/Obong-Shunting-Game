@@ -3199,7 +3199,7 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   highlightSelection();
   document.getElementById('gameStartBtn').style.display = '';
   const bgMusic = document.getElementById('bgMusic');
-  bgMusic.volume = 0.5;
+  bgMusic.volume = 0.22;  // 효과음(주행음·기적 등)이 묻히지 않도록 배경음악은 낮게
   bgMusic.play().catch(()=>{}); // 자동재생이 막힐 경우 조용히 무시(음소거 버튼으로 수동 재생 가능)
   openTutorial(); // 최초 입장 시 튜토리얼을 바로 보여준다(모바일이면 1단계부터)
 });
@@ -3303,10 +3303,7 @@ document.getElementById('restartBtn').addEventListener('click', handleCrashResta
 document.getElementById('homeBtn').addEventListener('click', ()=>{
   location.reload();
 });
-// 사용자가 음소거 버튼을 눌렀는지를 따로 기억한다.
-// bgMusic.paused만 보면 자동재생이 막혔을 때도 "음소거"로 오인하게 된다.
-let soundMuted = false;
-
+// 음소거 버튼은 배경음악만 끈다. 효과음(연결·분리, 주행음, 기적 등)은 계속 들린다.
 document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   const bgMusic = document.getElementById('bgMusic');
   const btn = document.getElementById('musicToggleBtn');
@@ -3314,25 +3311,21 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
     bgMusic.play().catch(()=>{});
     btn.textContent = '🔊';
     btn.classList.remove('muted');
-    soundMuted = false;
   } else {
     bgMusic.pause();
     btn.textContent = '🔇';
     btn.classList.add('muted');
-    soundMuted = true;
-    const eng = document.getElementById('engineSfx');
-    if(eng && !eng.paused) eng.pause();
   }
 });
 
 // ---- 기관차 주행음(assets/engine-move.mp3) ----
 // 움직이는 동안 반복 재생하고, 속도가 빠를수록 조금 더 크고 빠르게 들리도록 한다.
-// 배경음악처럼 계속 이어지는 소리이므로 음소거 버튼의 영향을 함께 받는다.
+// 효과음이므로 음소거 버튼(배경음악 전용)의 영향을 받지 않는다.
 const ENGINE_SFX_MIN_V = 2;   // 이 속도 미만은 정차로 보고 소리를 끈다
 function updateEngineSound(){
   const el = document.getElementById('engineSfx');
   if(!el) return;
-  const moving = !gameOver && !soundMuted && Math.abs(vScreen) > ENGINE_SFX_MIN_V;
+  const moving = !gameOver && Math.abs(vScreen) > ENGINE_SFX_MIN_V;
   if(moving){
     const ratio = Math.min(1, Math.abs(vScreen) / MAX_V);
     el.volume = Math.min(1, 0.20 + ratio * 0.55);
