@@ -2991,6 +2991,13 @@ function initMainWorkerPosition(){
 }
 let mainWorkerVisible = false;
 let mainWorkerNextToggleAt = 0;
+// 주의기적을 들은 직후에는 평소보다 빠르게 선로에서 물러난다
+let mainWorkerEvacuateUntil = 0;
+const MAIN_WORKER_EVACUATE_MULT = 2.6;  // 대피 중 이동속도 배수
+// 대피 지점에 닿으면 곧바로 해제되므로 이 값은 "혹시 도착하지 못할 때"를 위한 상한이다.
+// 거리(120)를 보통 속도(14)×2.6 으로 가면 약 3.3초 걸리므로 그보다 여유 있게 잡는다.
+const MAIN_WORKER_EVACUATE_MS = 5000;
+const MAIN_WORKER_EVACUATE_DIST = 120;  // 기적을 들었을 때 물러나는 거리
 function mainWorkerScheduleNextToggle(){
   const sec = 20 + Math.random()*30; // 20~50초
   mainWorkerNextToggleAt = performance.now() + sec*1000;
@@ -3015,10 +3022,14 @@ function updateMainWorker(dt){
   if(!mainWorkerPos) initMainWorkerPosition();
   const dx = mainWorkerTarget.x - mainWorkerPos.x, dy = mainWorkerTarget.y - mainWorkerPos.y;
   const dist = Math.hypot(dx,dy);
+  const evacuating = now < mainWorkerEvacuateUntil;
   if(dist < 3){
+    // 대피를 마쳤으면 그 자리에서 다시 평소처럼 배회한다
+    if(evacuating) mainWorkerEvacuateUntil = 0;
     mainWorkerPickNewTarget();
   } else {
-    const step = Math.min(dist, MAIN_WORKER_SPEED*dt);
+    const speed = MAIN_WORKER_SPEED * (evacuating ? MAIN_WORKER_EVACUATE_MULT : 1);
+    const step = Math.min(dist, speed*dt);
     mainWorkerPos.x += dx/dist*step;
     mainWorkerPos.y += dy/dist*step;
   }
@@ -3037,7 +3048,7 @@ document.getElementById('adminMainWorkerSpeedInput').addEventListener('input', (
   document.getElementById('mainWorkerSpeedReadout').textContent = MAIN_WORKER_SPEED;
 });
 
-// ---- 주의기적(Shift): 기관차 근처에 본선 직원이 있으면 천천히 대피시킨다 ----
+// ---- 주의기적(Shift): 기관차 근처에 본선 직원이 있으면 서둘러 대피시킨다 ----
 const WARNING_HORN_RANGE = 70; // 선로(선) 자체로부터 이 거리 안이면 "그 선로 근처"로 간주
 function pointToSegmentDist(p, a, b){
   const dx=b[0]-a[0], dy=b[1]-a[1];
@@ -3067,10 +3078,14 @@ function triggerWarningHorn(){
     // (같은 선로 위라면 기관차와 거리가 좀 있어도 대피해야 하므로)
     const dist = distToCurrentTrack(mainWorkerPos);
     if(dist < WARNING_HORN_RANGE){
-      // 그 선로에서 수직으로 멀어지는 방향으로 목표 지점을 새로 잡는다 (이동 자체는 기존 속도로 서서히)
+      // 기관차에서 멀어지는 방향으로 목표를 새로 잡고, 잠시 동안 평소보다 빠르게 걷게 한다
       const dx = mainWorkerPos.x - engineXY.x, dy = mainWorkerPos.y - engineXY.y;
       const mag = Math.hypot(dx,dy) || 1;
-      mainWorkerTarget = { x: mainWorkerPos.x + (dx/mag)*100, y: mainWorkerPos.y + (dy/mag)*100 };
+      mainWorkerTarget = {
+        x: mainWorkerPos.x + (dx/mag)*MAIN_WORKER_EVACUATE_DIST,
+        y: mainWorkerPos.y + (dy/mag)*MAIN_WORKER_EVACUATE_DIST
+      };
+      mainWorkerEvacuateUntil = performance.now() + MAIN_WORKER_EVACUATE_MS;
       showToast('🚶 본선 직원이 선로에서 대피합니다', 1500);
     }
   }
