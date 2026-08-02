@@ -135,25 +135,35 @@ jobs:
 
       - name: Build APK
         if: steps.keystore_check.outputs.has_keystore == 'true'
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           cd twa
-          printf 'no\n%s\n%s\n' "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" "${{ secrets.ANDROID_KEY_PASSWORD }}" | npx @bubblewrap/cli build \
-            --keystore "../release.keystore" \
-            --keystore-password "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
-            --key-alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
-            --key-password "${{ secrets.ANDROID_KEY_PASSWORD }}"
+          # 비밀번호는 환경변수로 전달(프롬프트 안 뜸).
+          # 체크섬 프롬프트에는 y로 답해 안드로이드 프로젝트를 twa-manifest.json에서 생성한다.
+          echo "y" | npx @bubblewrap/cli build --skipPwaValidation
+
+          echo "=== 생성된 APK/AAB 파일 목록 ==="
+          find . -name "*.apk" -o -name "*.aab" | head -20
 
       - name: Upload APK
         if: steps.keystore_check.outputs.has_keystore == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
-          path: twa/dist/*.apk
+          path: |
+            twa/*.apk
+            twa/*.aab
+            twa/dist/*.apk
+          if-no-files-found: error
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: twa/dist/*.apk
+          files: |
+            twa/*.apk
+            twa/dist/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
