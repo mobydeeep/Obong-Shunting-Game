@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -86,23 +87,47 @@ jobs:
           echo "KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
           echo "KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
 
-      - name: Create TWA with Bubblewrap
+      - name: Create TWA manifest (non-interactive, no bubblewrap wizard)
         run: |
           mkdir -p twa
-          cd twa
-          yes '' | npx @bubblewrap/cli init \
-            --manifest "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest" || true
-
-          if [ ! -f twa-manifest.json ]; then
-            echo "ERROR: twa-manifest.json was not created"
-            exit 1
-          fi
-
-          # assetlinks.json은 com.obong.shuntinggame으로 고정되어 있으므로 packageId를 맞춤
-          jq '.packageId = "com.obong.shuntinggame"' twa-manifest.json > twa-manifest.tmp.json
-          mv twa-manifest.tmp.json twa-manifest.json
-          echo "=== Final twa-manifest.json ==="
-          cat twa-manifest.json
+          cat > twa/twa-manifest.json <<'EOF'
+          {
+            "packageId": "com.obong.shuntinggame",
+            "host": "mobydeeep.github.io",
+            "name": "오봉 입환게임",
+            "launcherName": "오봉 입환게임",
+            "display": "standalone",
+            "orientation": "landscape",
+            "themeColor": "#0a0d16",
+            "navigationColor": "#0a0d16",
+            "navigationColorDark": "#0a0d16",
+            "navigationDividerColor": "#0a0d16",
+            "navigationDividerColorDark": "#0a0d16",
+            "backgroundColor": "#0a0d16",
+            "enableNotifications": false,
+            "startUrl": "/Obong-Shunting-Game/index.html",
+            "iconUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/assets/icons/icon-512.png",
+            "maskableIconUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/assets/icons/icon-512.png",
+            "splashScreenFadeOutDuration": 300,
+            "appVersionName": "1.0.0",
+            "appVersionCode": 1,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/",
+            "minSdkVersion": 21
+          }
+          EOF
+          echo "=== twa-manifest.json ==="
+          cat twa/twa-manifest.json
 
       - name: Build APK
         if: steps.keystore_check.outputs.has_keystore == 'true'
