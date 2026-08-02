@@ -133,6 +133,18 @@ jobs:
           echo "=== twa-manifest.json ==="
           cat twa/twa-manifest.json
 
+      - name: Show SHA256 fingerprint (for assetlinks.json)
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        run: |
+          echo "=============================================="
+          echo "아래 SHA256 값을 assetlinks.json에 넣어야 합니다"
+          echo "=============================================="
+          keytool -list -v \
+            -keystore release.keystore \
+            -alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+            -storepass "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            | grep "SHA256:"
+
       - name: Generate Android project from manifest
         if: steps.keystore_check.outputs.has_keystore == 'true'
         env:
