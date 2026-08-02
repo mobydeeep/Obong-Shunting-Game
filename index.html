@@ -744,15 +744,23 @@
     padding:4px 10px !important; font-size:9.5px !important;
   }
 
-  /* 튜토리얼 패널: 가로 모바일은 세로 공간이 좁으므로 전체적으로 축소 */
-  body.mobile-landscape .tutorial-overlay{ padding:8px; }
-  body.mobile-landscape .tutorial-panel{ width:96vw; max-height:94vh; padding:10px 12px; border-radius:12px; }
+  /* 튜토리얼 패널: 가로 모바일은 세로 공간이 좁으므로 전체적으로 축소.
+     한 번에 한 장만 보이므로 폭을 좁혀 가로로 길쭉하지 않게 하고, 배경은 반투명 처리 */
+  body.mobile-landscape .tutorial-overlay{ padding:8px; background:rgba(6,9,16,.55); }
+  body.mobile-landscape .tutorial-panel{
+    width:min(430px, 88vw); max-height:94vh; padding:12px 14px; border-radius:16px;
+    background:rgba(20,27,44,.80); border-color:rgba(77,212,239,.22);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
   body.mobile-landscape .tutorial-head{ font-size:13px; margin-bottom:8px; }
-  body.mobile-landscape .tut-card{ padding:10px; gap:10px; }
+  body.mobile-landscape .tut-card{
+    padding:14px; gap:12px; border-radius:14px;
+    background:rgba(26,35,56,.45); border-color:rgba(255,255,255,.10);
+  }
   body.mobile-landscape .tut-icon{ width:58px; height:44px; }
   body.mobile-landscape .tut-title{ font-size:12px; }
   body.mobile-landscape .tut-desc{ font-size:10.5px; line-height:1.5; }
-  body.mobile-landscape .tut-nav{ margin-top:8px; }
+  body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
   body.mobile-landscape .map-wrap{ position:fixed !important; inset:0; width:100vw !important; height:100vh !important; margin:0 !important; border:none !important; overflow:visible !important; }
 
