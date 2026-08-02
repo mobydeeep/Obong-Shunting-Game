@@ -1433,23 +1433,47 @@ const CAMERA_W_LANDSCAPE = 700;
 const CAMERA_LERP = 0.14;
 const YARD_BOUNDS = { minX: 60, maxX: 1500, minY: -20, maxY: 660 };
 
+// 모바일 맵 손가락 이동(팬) 상태. 반드시 updateCamera보다 먼저 선언해야 한다
+// (아래 드래그 핸들러는 별도 스크립트 블록에 있지만 이 객체를 공유한다).
+const MAP_PAN = {
+  active: false,      // 손가락이 화면에 닿아있는 중
+  manual: false,      // 사용자가 직접 옮긴 상태 → 카메라 자동추적 정지
+  moved: false,       // 임계값을 넘겨 실제로 드래그가 시작됐는지
+  pointerId: null,
+  lastX: 0, lastY: 0,
+  resumeTimer: null,  // 손 뗀 뒤 자동추적 복귀 타이머
+};
+const MAP_PAN_THRESHOLD = 4;    // 이 픽셀 이상 움직여야 드래그로 인정(전환기 탭과 구분)
+const MAP_PAN_RESUME_MS = 2000; // 터치가 없으면 2초 뒤 기관차로 복귀
+
+function clampCameraToYard(){
+  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
+  CAMERA.x = Math.max(YARD_BOUNDS.minX+halfW, Math.min(YARD_BOUNDS.maxX-halfW, CAMERA.x));
+  CAMERA.y = Math.max(YARD_BOUNDS.minY+halfH, Math.min(YARD_BOUNDS.maxY-halfH, CAMERA.y));
+}
+
+function applyCameraViewBox(){
+  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
+  const svg = document.getElementById('trackSvg');
+  if(!svg) return;
+  svg.setAttribute('viewBox', `${(CAMERA.x-halfW).toFixed(1)} ${(CAMERA.y-halfH).toFixed(1)} ${CAMERA.w} ${CAMERA.h}`);
+}
+
 function updateCamera(dt){
-  if(!CAMERA.active || CAMERA.overviewMode || mapDragState.active){ return; }
+  if(!CAMERA.active || CAMERA.overviewMode || MAP_PAN.manual){ return; }
   const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
   CAMERA.targetX = Math.max(YARD_BOUNDS.minX+halfW, Math.min(YARD_BOUNDS.maxX-halfW, engineXY.x));
   CAMERA.targetY = Math.max(YARD_BOUNDS.minY+halfH, Math.min(YARD_BOUNDS.maxY-halfH, engineXY.y));
   const k = 1 - Math.pow(1-CAMERA_LERP, dt*60);
   CAMERA.x += (CAMERA.targetX - CAMERA.x) * k;
   CAMERA.y += (CAMERA.targetY - CAMERA.y) * k;
-  const viewBoxStr = `${(CAMERA.x-halfW).toFixed(1)} ${(CAMERA.y-halfH).toFixed(1)} ${CAMERA.w} ${CAMERA.h}`;
-  document.getElementById('trackSvg').setAttribute('viewBox', viewBoxStr);
+  applyCameraViewBox();
 }
 
 // ---- 화면(가로+세로) 크기에 맞춰 시뮬레이터 크기를 계산 (PC: 가로/세로 모두 화면 안에, 모바일: 가로폭에 정확히 맞춤) ----
 function fitMapToViewport(){
   const mapWrap = document.querySelector('.map-wrap');
   if(!mapWrap) return;
-  if(mapDragState && mapDragState.active) return;
   const ratio = 1550/900;
   // 모바일 기기 판정 (사용자 에이전트 기반, 창 크기 이중 확인)
   const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -5152,54 +5176,73 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 모바일 맵 드래그 기능
-let mapDragState = { active: false, startX: 0, startY: 0, startTime: 0, pointerId: null, cameraWasActive: false };
-window.addEventListener('load', () => {
-  const trackSvg = document.getElementById('trackSvg');
-  if (!trackSvg) return;
+// ---- 모바일: 맵을 손가락으로 끌어 다른 구역 보기 ----
+// CAMERA.x/y를 직접 옮기므로, 자동추적이 복귀할 때 현재 위치에서 기관차로 부드럽게 이어진다.
+// 손을 뗀 뒤 MAP_PAN_RESUME_MS 동안 터치가 없으면 다시 기관차를 따라간다.
+(function setupMapPan(){
+  const svg = document.getElementById('trackSvg');
+  if(!svg) return;
 
-  // Capture phase에서 SVG 포인터 이벤트 감지 (모든 자식 요소의 이벤트 차단)
-  trackSvg.addEventListener('pointerdown', (e) => {
-    if (!document.body.classList.contains('mobile-landscape')) return;
+  function cancelResume(){
+    if(MAP_PAN.resumeTimer){ clearTimeout(MAP_PAN.resumeTimer); MAP_PAN.resumeTimer = null; }
+  }
+  function scheduleResume(){
+    cancelResume();
+    MAP_PAN.resumeTimer = setTimeout(()=>{
+      MAP_PAN.manual = false;
+      MAP_PAN.resumeTimer = null;
+    }, MAP_PAN_RESUME_MS);
+  }
 
-    mapDragState = { active: true, startX: e.clientX, startY: e.clientY, startTime: Date.now(), pointerId: e.pointerId, cameraWasActive: CAMERA.active };
-    CAMERA.active = false;
-    trackSvg.setPointerCapture(e.pointerId);
-    e.preventDefault();
-    e.stopPropagation();
-  }, true);
+  // CAMERA.active는 모바일(가로/세로)에서만 true이므로 이 조건이 곧 모바일 판정이다.
+  svg.addEventListener('pointerdown', (e)=>{
+    if(!CAMERA.active) return;
+    MAP_PAN.active = true;
+    MAP_PAN.moved = false;
+    MAP_PAN.pointerId = e.pointerId;
+    MAP_PAN.lastX = e.clientX;
+    MAP_PAN.lastY = e.clientY;
+    cancelResume();
+    // 여기서 preventDefault를 하면 전환기 탭(click)이 죽으므로 하지 않는다.
+  });
 
-  trackSvg.addEventListener('pointermove', (e) => {
-    if (!mapDragState.active || e.pointerId !== mapDragState.pointerId) return;
-    const deltaX = e.clientX - mapDragState.startX;
-    const deltaY = e.clientY - mapDragState.startY;
-    if (Math.abs(deltaX) < 3 && Math.abs(deltaY) < 3) return;
+  svg.addEventListener('pointermove', (e)=>{
+    if(!MAP_PAN.active || e.pointerId !== MAP_PAN.pointerId) return;
+    const dx = e.clientX - MAP_PAN.lastX;
+    const dy = e.clientY - MAP_PAN.lastY;
 
-    const mapRect = trackSvg.getBoundingClientRect();
-    const vbox = trackSvg.getAttribute('viewBox').split(' ').map(Number);
-    const scale = vbox[2] / mapRect.width;
-    const newX = vbox[0] - deltaX * scale;
-    const newY = vbox[1] - deltaY * scale;
-    trackSvg.setAttribute('viewBox', `${newX} ${newY} ${vbox[2]} ${vbox[3]}`);
-    mapDragState.startX = e.clientX;
-    mapDragState.startY = e.clientY;
-    e.preventDefault();
-    e.stopPropagation();
-  }, true);
-
-  trackSvg.addEventListener('pointerup', (e) => {
-    if (!mapDragState.active || e.pointerId !== mapDragState.pointerId) return;
-    const holdTime = Date.now() - mapDragState.startTime;
-    const wasCameraActive = mapDragState.cameraWasActive;
-    mapDragState.active = false;
-    CAMERA.active = wasCameraActive;
-    if (holdTime > 2000 && CAMERA && wasCameraActive) {
-      CAMERA.overviewMode = false;
+    if(!MAP_PAN.moved){
+      // 임계값을 넘기 전까지는 탭일 수도 있으므로 아무것도 하지 않는다.
+      if(Math.abs(dx) < MAP_PAN_THRESHOLD && Math.abs(dy) < MAP_PAN_THRESHOLD) return;
+      MAP_PAN.moved = true;
+      MAP_PAN.manual = true;  // 이 순간부터 자동추적 정지
+      // 손가락이 SVG 밖으로 나가도 이벤트를 계속 받기 위해 포인터를 붙잡는다.
+      try{ svg.setPointerCapture(e.pointerId); }catch(err){}
     }
+
+    const rect = svg.getBoundingClientRect();
+    if(!rect.width || !rect.height) return;
+    // 화면 픽셀 → SVG 좌표 환산. 손가락을 따라 맵이 끌려오도록 부호는 반대.
+    CAMERA.x -= dx * (CAMERA.w / rect.width);
+    CAMERA.y -= dy * (CAMERA.h / rect.height);
+    clampCameraToYard();
+    applyCameraViewBox();
+
+    MAP_PAN.lastX = e.clientX;
+    MAP_PAN.lastY = e.clientY;
     e.preventDefault();
-    e.stopPropagation();
-  }, true);
-});
+  });
+
+  function endPan(e){
+    if(!MAP_PAN.active || (e.pointerId != null && e.pointerId !== MAP_PAN.pointerId)) return;
+    MAP_PAN.active = false;
+    MAP_PAN.pointerId = null;
+    if(MAP_PAN.moved) scheduleResume();  // 실제로 끌었을 때만 복귀 타이머 시작
+    MAP_PAN.moved = false;
+  }
+  svg.addEventListener('pointerup', endPan);
+  svg.addEventListener('pointercancel', endPan);
+})();
 </script>
 </body>
 </html>
