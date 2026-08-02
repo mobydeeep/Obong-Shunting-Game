@@ -10,6 +10,10 @@ const CACHE_ASSETS = [
   './assets/icons/btn-stop.png',
   './assets/icons/btn-horn.png',
   './assets/icons/btn-couple.png',
+  './assets/loco.png',
+  './assets/hud-char.png',
+  './assets/worker-yard.png',
+  './assets/worker-main.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-256.png'
 ];

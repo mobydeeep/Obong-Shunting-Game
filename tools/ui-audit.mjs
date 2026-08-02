@@ -414,11 +414,19 @@ async function main(){
         ctxOpts.hasTouch = true;
       }
       const ctx = await browser.newContext(ctxOpts);
+      await ctx.route(/(gstatic\.com\/firebasejs|firebaseio\.com|firebasedatabase\.app)/,
+                      route => route.abort());
       const dir = path.join(SHOT_DIR, args.label, prof.name);
       mkdirSync(dir, { recursive: true });
 
       for(const st of states){
         const page = await ctx.newPage();
+        // 이 하네스는 실서비스 Firebase 랭킹에 절대 쓰면 안 된다.
+        // S10(사고)이나 미션 완료가 updateRankRecord -> saveRankRecords -> firebaseDb.set 을 타고
+        // 공용 기록을 덮어쓴 적이 있다. SDK를 window.firebase 수준에서 감싸는 방식은
+        // 게임이 먼저 firebase.database()를 잡아가면 늦어서 막지 못했다.
+        // 확실한 방법은 SDK와 DB 통신 자체를 네트워크에서 끊는 것이다.
+        // firebaseDb가 없으면 게임은 경고만 남기고 정상 동작한다(랭킹은 비어 보인다).
         page.on('pageerror', e => {
           results.push({ profile: prof.name, state: st.id, jsError: String(e).slice(0, 200) });
         });

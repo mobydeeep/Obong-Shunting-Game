@@ -64,6 +64,16 @@ def main():
             b64 = base64.b64encode(f.read()).decode()
         html = html.replace(f'src="{path}"', f'src="data:image/png;base64,{b64}"')
 
+    # 캐릭터·기관차 그림 인라인 (img src / SVG image href 참조)
+    for path in ['assets/loco.png', 'assets/hud-char.png',
+                 'assets/worker-yard.png', 'assets/worker-main.png']:
+        with open(path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        data = f'data:image/png;base64,{b64}'
+        html = html.replace(f'src="{path}"', f'src="{data}"')
+        html = html.replace(f"'{path}'", f"'{data}'")
+        html = html.replace(f'href="{path}"', f'href="{data}"')
+
     # 시작화면 캐릭터 이미지 인라인
     html = inline_asset(
         html,
