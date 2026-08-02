@@ -390,8 +390,11 @@ async function main(){
   const server = spawn('python3', ['-m', 'http.server', String(PORT)], { cwd: ROOT, stdio: 'ignore' });
   await new Promise(r => setTimeout(r, 900));
 
-  const profiles = args.profile ? PROFILES.filter(p => p.name === args.profile) : PROFILES;
-  const states = args.state ? STATES.filter(s => s.id === args.state) : STATES;
+  // --profile / --state 는 쉼표로 여러 개 지정할 수 있다
+  const pick = (v) => v ? v.split(',').map(x=>x.trim()) : null;
+  const wantP = pick(args.profile), wantS = pick(args.state);
+  const profiles = wantP ? PROFILES.filter(p => wantP.includes(p.name)) : PROFILES;
+  const states = wantS ? STATES.filter(s => wantS.includes(s.id)) : STATES;
   if(!profiles.length){ console.error('알 수 없는 프로필:', args.profile); process.exit(2); }
   if(!states.length){ console.error('알 수 없는 상태:', args.state); process.exit(2); }
 
@@ -420,9 +423,9 @@ async function main(){
           results.push({ profile: prof.name, state: st.id, jsError: String(e).slice(0, 200) });
         });
         await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'load' });
-        await page.waitForTimeout(600);
+        await page.waitForTimeout(400);
         try{ await st.setup(page); }catch(e){ /* 상태 구성 실패는 아래 audit에서 드러난다 */ }
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(200);
 
         const audit = await page.evaluate(AUDIT_FN, {
           fontMin: FONT_MIN, touchMin: TOUCH_MIN, overlapMax: OVERLAP_MAX,

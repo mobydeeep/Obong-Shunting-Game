@@ -735,6 +735,7 @@
     /* 이동 버튼 한 변. 세로가 짧은 기기에서 화면을 다 먹지 않도록 vh로 상한을 둔다.
        제작자 표기 위치도 이 값을 기준으로 계산한다. */
     --mpad: min(64px, 17vh);
+    --mbtn: min(56px, 15vh);   /* 정지·기적·연결 아이콘 버튼 크기 */
   }
   body.mobile-landscape .desktop-pad{ display:none !important; }
   body.mobile-landscape h1,
@@ -764,18 +765,39 @@
   body.mobile-landscape .music-toggle-btn{ right:132px !important; }
 
   /* 제작자 표시: 좌하단 ◀ 버튼 위. bottom은 버튼 크기(--mpad)와 연동해 계산한다 */
+  /* 하단 중앙은 HUD 자리다. 상단 중앙(시작 버튼과 우측 아이콘 사이)이 비어 있으므로 그쪽으로. */
   body.mobile-landscape .credit-tag{
-    display:block !important; position:fixed;
-    bottom:calc(16px + var(--mpad) + 10px); left:16px;
-    right:auto; top:auto; transform:none; font-size:10px; opacity:0.45;
+    display:flex !important; position:fixed;
+    top:12px; left:50%; transform:translateX(-50%);
+    right:auto; bottom:auto; font-size:10px; opacity:0.85;
+    background:rgba(8,14,26,.45); padding:3px 10px; border-radius:10px;
+    backdrop-filter:blur(3px);
   }
   /* 관리자 버튼이 사라진 좌측 상단으로. 가운데 두면 좁은 화면에서 우측 버튼들과 겹친다 */
+  /* 하늘 배경 위에서는 파란 버튼이 묻힌다. 참고 이미지처럼 어두운 알약 + 금색 테두리로. */
   body.mobile-landscape .game-toggle-btn{
-    top:6px !important; left:6px !important; transform:none !important;
-    height:36px; padding:0 16px !important; font-size:12px !important;
+    top:8px !important; left:8px !important; transform:none !important;
+    height:40px; padding:0 18px !important; font-size:14px !important; font-weight:900;
     /* display에 !important를 주면 안 된다 — 인라인 display:none으로 숨기는 로직을
        덮어써서 시작·종료 버튼이 동시에 보이게 된다 */
-    align-items:center; justify-content:center; border-radius:18px; line-height:36px;
+    align-items:center; justify-content:center; border-radius:20px; line-height:40px;
+    background:linear-gradient(180deg,#1b3564,#0d1c38) !important;
+    border:2px solid #f0b429 !important;
+    box-shadow:0 4px 0 rgba(0,0,0,.35), 0 6px 14px rgba(0,0,0,.35) !important;
+    color:#ffdf7e;
+  }
+  body.mobile-landscape .game-toggle-btn.danger{
+    background:linear-gradient(180deg,#a41f1f,#6d1010) !important;
+    border-color:#ff9c9c !important; color:#ffe4e4;
+  }
+  /* 상단 아이콘 버튼도 밝은 배경에서 또렷하게 */
+  body.mobile-landscape .rank-toggle-btn,
+  body.mobile-landscape .home-toggle-btn,
+  body.mobile-landscape .tutorial-toggle-btn,
+  body.mobile-landscape .music-toggle-btn{
+    background:linear-gradient(180deg,#1b3564,#0d1c38) !important;
+    border:2px solid #4b7fc4 !important;
+    box-shadow:0 3px 0 rgba(0,0,0,.3), 0 5px 12px rgba(0,0,0,.3) !important;
   }
   body.mobile-landscape .game-toggle-btn .btn-label{ display:none; }
   .game-toggle-btn .btn-short{ display:none; }
@@ -800,7 +822,22 @@
   body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
   /* 지도를 화면 전체로. z-index는 절대 주지 말 것(위 62행 주석 참고) */
+  /* 배경 일러스트 위에서는 SVG의 어두운 배경판을 걷어내고,
+     밝은 하늘·잔디 위에서도 글자가 읽히도록 외곽선을 준다. */
+  body.mobile-landscape .map-bg{ display:none; }
+  body.mobile-landscape #trackSvg text{
+    paint-order:stroke fill;
+    stroke:rgba(8,14,26,.85); stroke-width:3px; stroke-linejoin:round;
+  }
+  body.mobile-landscape .track-label,
+  body.mobile-landscape .main-label,
+  body.mobile-landscape .zone-label{ fill:#fff; }
+  /* 배경 일러스트. 지도(SVG)는 이 위에 투명하게 얹힌다. */
+  body.mobile-landscape{
+    background:#7ec8f0 url('assets/bg-game.jpg') center/cover no-repeat fixed !important;
+  }
   body.mobile-landscape .map-wrap{
+    background:transparent !important;
     position:fixed !important; inset:0;
     width:100vw !important; height:100vh !important; margin:0 !important;
     border:none !important; border-radius:0 !important; box-shadow:none !important;
@@ -835,13 +872,54 @@
     order:1; margin-bottom:4px;
   }
   /* 정지·기적·연결: 손가락으로 확실히 눌리도록 44px */
-  body.mobile-landscape .mpad-btn-small {
-    width:auto; height:44px; min-width:56px; padding:0 14px; font-size:13px; border-radius:10px;
-    white-space:nowrap;   /* 없으면 "정지"가 "정/지"로 쪼개진다 */
+  /* 정지·기적·연결: 그림 자체가 버튼 모양(라벨 포함)이라 배경·테두리를 지우고 그림만 띄운다 */
+  .mpad-icon{ display:none; }
+  body.mobile-landscape .mpad-btn-small{
+    width:auto; height:auto; min-width:0; padding:0; border:none !important;
+    background:none !important; box-shadow:none !important;
   }
-  body.mobile-landscape .mpad-btn{
-    font-size:12px; padding:0;
+  body.mobile-landscape .mpad-btn-small .mpad-text{
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+  }
+  body.mobile-landscape .mpad-btn-small .mpad-icon{
+    display:block; width:var(--mbtn); height:auto;
+    filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
+  }
+  body.mobile-landscape .mpad-btn-small:active .mpad-icon{ transform:translateY(2px) scale(.96); }
+  /* 이동 버튼: 밝은 배경 위에서는 반투명 유리 스타일이 묻혀 안 보인다.
+     참고 이미지처럼 파란 입체 버튼으로 바꾼다. */
+  body.mobile-landscape .mpad-btn.move{
+    font-size:0; padding:0;
     min-width:var(--mpad); aspect-ratio:1;
+    border-radius:18px;
+    background:linear-gradient(180deg,#5cb3f5 0%,#2f7fd6 55%,#1c5fae 100%) !important;
+    border:3px solid #12406f !important;
+    box-shadow:0 5px 0 #12406f, 0 8px 14px rgba(0,0,0,.35),
+               inset 0 3px 0 rgba(255,255,255,.45) !important;
+    backdrop-filter:none !important;
+    color:#fff;
+    position:relative;
+  }
+  /* ◀ ▶ 글자 대신 또렷한 삼각형을 그려 넣는다 */
+  body.mobile-landscape .mpad-btn.move::before{
+    content:''; position:absolute; top:50%; left:50%;
+    width:0; height:0;
+    border-top:calc(var(--mpad)*0.20) solid transparent;
+    border-bottom:calc(var(--mpad)*0.20) solid transparent;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.35));
+  }
+  body.mobile-landscape #mBtnLeft::before{
+    transform:translate(-58%,-50%);
+    border-right:calc(var(--mpad)*0.26) solid #fff;
+  }
+  body.mobile-landscape #mBtnRight::before{
+    transform:translate(-42%,-50%);
+    border-left:calc(var(--mpad)*0.26) solid #fff;
+  }
+  body.mobile-landscape .mpad-btn.move:active{
+    transform:translateY(4px);
+    box-shadow:0 1px 0 #12406f, 0 3px 8px rgba(0,0,0,.3),
+               inset 0 3px 0 rgba(255,255,255,.35) !important;
   }
 
   /* HUD: 좌측 상단에 아주 작게, 트랙과 안 겹치도록 살짝 띄워서 */
@@ -878,8 +956,10 @@
   }
   /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
      화면 오른쪽 밖으로 밀려나거나 우측 버튼 위로 겹치지 않게 한다 */
+  /* 왼쪽 미션 패널(약 175px)과 오른쪽 조작 스트립(약 200px)을 뺀 폭까지만.
+     화차가 많으면 목록은 가로 스크롤된다(.car-btn-row가 overflow-x:auto). */
   body.mobile-landscape .car-select-panel.overlay-panel{
-    max-width:calc(100vw - 175px) !important;
+    max-width:calc(100vw - 380px) !important;
   }
   body.mobile-landscape .car-select-panel .car-btn{ font-size:12px; padding:9px 12px; border-radius:8px; }
   body.mobile-landscape .car-select-panel .cs-small-btn{ font-size:12px; padding:11px 6px; border-radius:8px; }
@@ -896,7 +976,35 @@
   /* 시작 화면: 모바일 가로 레이아웃 (캐릭터 좌측 + 콘텐츠 우측) */
   body.mobile-landscape .start-overlay{
     display:flex !important; align-items:center; justify-content:space-between; gap:16px;
-    background:linear-gradient(90deg, #16213f 0%, #0a0f1f 70%);
+    /* 일러스트 배경 위에 왼쪽만 살짝 어둡게 깔아 캐릭터가 묻히지 않게 한다 */
+    background:
+      linear-gradient(90deg, rgba(6,12,26,.72) 0%, rgba(6,12,26,.30) 42%, rgba(6,12,26,.42) 100%),
+      url('assets/bg-start.jpg') center/cover no-repeat !important;
+  }
+  /* 밝은 배경 위에서 읽히도록 글자에 그림자를 준다 */
+  body.mobile-landscape .start-overlay h2,
+  body.mobile-landscape .start-overlay p,
+  body.mobile-landscape .start-badge,
+  body.mobile-landscape .start-keys{
+    text-shadow:0 2px 6px rgba(0,0,0,.8), 0 0 2px rgba(0,0,0,.9);
+  }
+  body.mobile-landscape .start-overlay p{ color:#eaf2ff; }
+  /* 시작 버튼: 참고 이미지처럼 금색 입체 버튼 */
+  body.mobile-landscape .start-btn{
+    background:linear-gradient(180deg,#ffd257 0%,#f5a623 55%,#d97e06 100%) !important;
+    color:#3d2600 !important; border:3px solid #a75f04 !important;
+    box-shadow:0 6px 0 #a75f04, 0 10px 20px rgba(0,0,0,.4) !important;
+    font-size:18px; font-weight:900; padding:12px 44px; border-radius:26px;
+  }
+  body.mobile-landscape .start-btn:disabled{
+    filter:grayscale(.55) brightness(.8); box-shadow:0 4px 0 #6b4a1a !important;
+  }
+  body.mobile-landscape .start-btn:active:not(:disabled){
+    transform:translateY(4px); box-shadow:0 2px 0 #a75f04, 0 4px 10px rgba(0,0,0,.35) !important;
+  }
+  body.mobile-landscape .start-name-row input{
+    background:rgba(8,14,26,.72) !important; border:2px solid #7fc4ff !important;
+    color:#fff; border-radius:22px;
   }
   body.mobile-landscape .start-char-img{
     display:block !important; position:static; order:1;
@@ -1394,7 +1502,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <div class="map-wrap">
     <div class="action-toast" id="actionToast"></div>
     <svg id="trackSvg" viewBox="0 -140 1550 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="-140" width="1550" height="900" fill="#0f1626"/>
+      <rect class="map-bg" x="0" y="-140" width="1550" height="900" fill="#0f1626"/>
       <text x="20" y="650" class="zone-label">◀ 양회기지(의왕방향)</text>
       <text x="1290" y="650" class="zone-label">본선(터널방향) ▶</text>
       <g id="facilityGroup"></g>
@@ -1520,9 +1628,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     </div>
     <div class="pad-right">
       <div class="pad-actions">
-        <button class="mpad-btn-small brake" id="mBtnStop">정지</button>
-        <button class="mpad-btn-small horn" id="mBtnHorn">기적</button>
-        <button class="mpad-btn-small couple" id="mBtnSpace">연결</button>
+        <button class="mpad-btn-small brake" id="mBtnStop"><img src="assets/icons/btn-stop.png" alt="" class="mpad-icon"><span class="mpad-text">정지</span></button>
+        <button class="mpad-btn-small horn" id="mBtnHorn"><img src="assets/icons/btn-horn.png" alt="" class="mpad-icon"><span class="mpad-text">기적</span></button>
+        <button class="mpad-btn-small couple" id="mBtnSpace"><img src="assets/icons/btn-couple.png" alt="" class="mpad-icon"><span class="mpad-text">연결</span></button>
       </div>
       <button class="mpad-btn move" id="mBtnRight">▶</button>
     </div>

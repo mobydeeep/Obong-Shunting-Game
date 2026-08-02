@@ -5,6 +5,11 @@ const CACHE_ASSETS = [
   './assets/engine-move.mp3',
   './assets/horn.mp3',
   './assets/start-character.png',
+  './assets/bg-game.jpg',
+  './assets/bg-start.jpg',
+  './assets/icons/btn-stop.png',
+  './assets/icons/btn-horn.png',
+  './assets/icons/btn-couple.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-256.png'
 ];

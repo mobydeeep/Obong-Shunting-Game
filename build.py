@@ -51,6 +51,19 @@ def main():
         lambda b64: f'<audio id="hornSfx" preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
     )
 
+    # 배경 일러스트 인라인 (CSS url() 참조)
+    for path, mime in [('assets/bg-game.jpg','image/jpeg'), ('assets/bg-start.jpg','image/jpeg')]:
+        with open(path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        html = html.replace(f"url('{path}')", f"url('data:{mime};base64,{b64}')")
+
+    # 조작 버튼 아이콘 인라인 (img src 참조)
+    for name in ['stop', 'horn', 'couple']:
+        path = f'assets/icons/btn-{name}.png'
+        with open(path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        html = html.replace(f'src="{path}"', f'src="data:image/png;base64,{b64}"')
+
     # 시작화면 캐릭터 이미지 인라인
     html = inline_asset(
         html,
