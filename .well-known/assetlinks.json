@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.obong.shuntinggame",
-    "sha256_cert_fingerprints": ["PLACEHOLDER_SHA256_FINGERPRINT"]
+    "sha256_cert_fingerprints": ["A6:A6:DE:D0:70:81:FE:7E:56:B4:F9:19:7F:F0:00:AC:16:51:7C:72:47:5D:F0:64:04:4A:E2:C0:43:A3:59:9A"]
   }
 }]
