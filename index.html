@@ -4055,14 +4055,16 @@ const actionToastEl = document.getElementById('actionToast');
 
 const CAR_SPACING = 24, CAR_LEN = 20, CAR_W = 13;
 // 모바일 화차 그림 상자. 폭은 CAR_SPACING에 맞춰 서로 거의 맞닿게, 높이는 여유 있게 잡고
-// preserveAspectRatio="meet"이 실제 크기(26 x 10.04)를 정한다.
-const CAR_IMG_W = 24, CAR_IMG_H = 12;
+// preserveAspectRatio="meet"이 실제 크기(CAR_IMG_W x CAR_IMG_W/CAR_IMG_RATIO)를 정한다.
+const CAR_IMG_W = 24, CAR_IMG_H = 14;
+const CAR_IMG_RATIO = 2.09;                 // wagon.png 가로/세로
+const CAR_IMG_DRAWN_H = CAR_IMG_W / CAR_IMG_RATIO;
 // 모바일 화차 그림은 낮고 길어서 번호를 한가운데 얹으면 화차가 안 보인다 — 그림 위로 올린다.
 // (데스크톱은 예전처럼 네모 안 가운데)
 // 번호는 화차 간격(24)보다 길어서 옆 화차 번호와 붙는다 — 홀짝으로 두 줄에 나눠 얹는다.
 function carLabelY(idx){
   if(!document.body.classList.contains('mobile-landscape')) return 3;
-  const top = -(CAR_IMG_W/2.59)/2 - 1.5;
+  const top = -CAR_IMG_DRAWN_H/2 - 1.5;
   return (idx % 2 === 0) ? top : top - 5.5;
 }
 const ENGINE_CAR_GAP = 38; // 기관차와 첫 화차 사이 간격(겹침 방지: 기관차 반폭22.7 + 연결기2 + 화차 반폭10 + 여유3)
@@ -4488,10 +4490,10 @@ function getOrCreateCarEl(car){
     g.appendChild(line);
   });
   // 모바일 전용 양회화차 그림 (기관차와 같은 방식: 데스크톱은 도형 유지)
-  // 그림 비율이 2.59:1. meet으로 넣으면 CAR_IMG_W x (CAR_IMG_W/2.59)로 세로 가운데에 놓인다.
+  // meet으로 넣으면 CAR_IMG_W x CAR_IMG_DRAWN_H 크기로 세로 가운데에 놓인다.
   const img = document.createElementNS(svgNS,'image');
   img.setAttribute('class','car-img');
-  img.setAttribute('href','assets/wagon.png?v=11');
+  img.setAttribute('href','assets/wagon.png?v=12');
   img.setAttribute('x', -CAR_IMG_W/2); img.setAttribute('y', -CAR_IMG_H/2);
   img.setAttribute('width', CAR_IMG_W); img.setAttribute('height', CAR_IMG_H);
   img.setAttribute('preserveAspectRatio','xMidYMid meet');
@@ -4499,8 +4501,8 @@ function getOrCreateCarEl(car){
   // 연결·선택·불량 상태는 그림 위에 반투명 색을 덮어 표시한다
   const tint = document.createElementNS(svgNS,'rect');
   tint.setAttribute('class','car-tint');
-  tint.setAttribute('x', -CAR_IMG_W/2); tint.setAttribute('y', -CAR_IMG_W/2.59/2);
-  tint.setAttribute('width', CAR_IMG_W); tint.setAttribute('height', CAR_IMG_W/2.59);
+  tint.setAttribute('x', -CAR_IMG_W/2); tint.setAttribute('y', -CAR_IMG_DRAWN_H/2);
+  tint.setAttribute('width', CAR_IMG_W); tint.setAttribute('height', CAR_IMG_DRAWN_H);
   tint.setAttribute('rx', 2);
   g.appendChild(tint);
   const label = document.createElementNS(svgNS,'text');
@@ -4549,8 +4551,11 @@ function renderCars(){
       visibleIds.add(car.id);
       const entry = getOrCreateCarEl(car);
       entry.g.style.display = '';
-      entry.g.setAttribute('transform', `translate(${car._pos.x},${car._pos.y}) rotate(${car._pos.angle*180/Math.PI})`);
-      entry.label.setAttribute('transform', `rotate(${-car._pos.angle*180/Math.PI})`);
+      // 그림 화차는 위아래가 있으므로 기관차와 같은 방식으로 각도를 (-90,90]로 접는다.
+      // 안 그러면 오른쪽->왼쪽으로 향하는 선로(양회기지 쪽)에서 화차가 뒤집혀 보인다.
+      const carDeg = normalizeEngineTilt(car._pos.angle);
+      entry.g.setAttribute('transform', `translate(${car._pos.x},${car._pos.y}) rotate(${carDeg})`);
+      entry.label.setAttribute('transform', `rotate(${-carDeg})`);
       entry.label.setAttribute('y', carLabelY(idx));
       entry.label.textContent = car.number;
       entry.label.setAttribute('fill', '#1a1f29');
@@ -4572,8 +4577,9 @@ function renderCars(){
     car._pos = p;
     visibleIds.add(car.id);
     const entry = getOrCreateCarEl(car);
-    entry.g.setAttribute('transform', `translate(${p.x},${p.y}) rotate(${p.angle*180/Math.PI})`);
-    entry.label.setAttribute('transform', `rotate(${-p.angle*180/Math.PI})`);
+    const aDeg = normalizeEngineTilt(p.angle);
+    entry.g.setAttribute('transform', `translate(${p.x},${p.y}) rotate(${aDeg})`);
+    entry.label.setAttribute('transform', `rotate(${-aDeg})`);
     entry.label.setAttribute('y', carLabelY(i));
     entry.label.textContent = car.number;
     entry.label.setAttribute('fill', '#fff');
