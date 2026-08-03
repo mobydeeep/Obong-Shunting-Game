@@ -214,6 +214,20 @@
   body.mobile-landscape #workerFigure > .npc-img,
   body.mobile-landscape #mainWorkerFigure > .npc-img{ display:block; }
 
+  /* 양회화차: 모바일에서는 그림으로 교체 (기관차와 같은 방식) */
+  .car-img, .car-tint{ display:none; }
+  body.mobile-landscape .car-hopper .body,
+  body.mobile-landscape .car-hopper .car-seam{ display:none; }
+  body.mobile-landscape .car-img{ display:block; }
+  /* 상태 표시: 화차 그림을 가리지 않도록 옅은 색 + 테두리로만 표시
+     (연결=파랑, 선택=노랑, 불량=빨강) */
+  body.mobile-landscape .car-hopper.attached .car-tint,
+  body.mobile-landscape .car-hopper.selected .car-tint,
+  body.mobile-landscape .car-hopper.defect .car-tint{ display:block; stroke-width:1.2; }
+  body.mobile-landscape .car-hopper.attached .car-tint{ fill:#00B2E3; fill-opacity:.22; stroke:#0077a8; }
+  body.mobile-landscape .car-hopper.selected .car-tint{ fill:#f0b429; fill-opacity:.30; stroke:#a87c22; }
+  body.mobile-landscape .car-hopper.defect .car-tint{ fill:#e05555; fill-opacity:.30; stroke:#8a1f1f; }
+
   /* 기관차: 모바일에서는 그림으로 교체 (도형은 감추고 hornFx는 남긴다) */
   .loco-img{ display:none; }
   body.mobile-landscape #engineNode > *{ display:none; }
@@ -237,7 +251,8 @@
     paint-order:stroke fill; stroke:rgba(8,14,26,.9) !important; stroke-width:2px !important;
     stroke-linejoin:round;
   }
-  body.mobile-landscape .car-num{ stroke-width:1.4px !important; }
+  /* 화차 간격(24)보다 번호가 길면 옆 화차 번호와 붙어 읽을 수 없다 — 모바일에선 한 단계 작게 */
+  body.mobile-landscape .car-num{ stroke-width:1.2px !important; font-size:5px; }
   .select-ring{ fill:none; stroke:transparent; stroke-width:2.5; stroke-dasharray:4 3; }
   .select-ring.active{ stroke:var(--gold); filter:drop-shadow(0 0 4px rgba(201,151,47,.9)); animation:ringSpin 6s linear infinite; }
   @keyframes ringSpin{ to{ stroke-dashoffset:-40; } }
@@ -1052,6 +1067,9 @@
   body.mobile-landscape .tut-icon{ width:58px; height:44px; }
   body.mobile-landscape .tut-title{ font-size:12px; }
   body.mobile-landscape .tut-desc{ font-size:11px; line-height:1.65; }
+  /* 밝은 크림색 말풍선 위에서는 흰색·연노랑 레벨 글자가 안 보인다 */
+  body.mobile-landscape .tut-desc .lv-white{ color:#3d4a63 !important; }
+  body.mobile-landscape .tut-desc .lv-pale{ color:#b08900 !important; }
   body.mobile-landscape .tut-desc br{ margin-top:6px; }
   body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
@@ -1492,7 +1510,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     <table class="rank-table">
       <thead>
         <tr>
-          <th data-key="name">이름</th>
+          <th data-key="name">수송원</th>
           <th data-key="totalTime" class="rank-detail">입환 총시간</th>
           <th data-key="plays" class="rank-detail">참여횟수</th>
           <th data-key="totalOps">해결한 입환수</th>
@@ -1529,7 +1547,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </div>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">① 어떻게 움직여?</div>
-            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 달려. 관성이 있어서 바로 안 멈춰 — <span class="key-badge wide">Space</span>로 미리 제동 걸어.</span><span class="only-mobile">아래 <b>◀ ▶</b> 로 달려. 관성이 있어서 바로 안 멈춰 — <b>정지</b>를 미리 눌러야 해.<br>지도는 손가락으로 <b>끌면</b> 움직이고, <b>두 손가락 모으면</b> 작아져. <b>🎯</b> 누르면 다시 나한테 돌아와.</span></div>
+            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 달려!<br>관성이 있어서 바로 안 멈춰~<br><span class="key-badge wide">Space</span>로 미리 제동 걸어야 해!<br>브레이크는 항상 한 박자 빠르게!</span><span class="only-mobile">아래 <b>◀ ▶</b> 로 달려!<br>관성이 있어서 바로 안 멈춰~<br><b>정지</b>는 미리 눌러야 해!<br>지도는 손가락으로 <b>끌면</b> 움직여.<br><b>두 손가락 모으면</b> 작아지고!<br>길 잃으면 <b>🎯</b> 눌러~ 바로 돌아와!</span></div>
           </div>
         </div>
 
@@ -1544,7 +1562,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">② 전환기 다루기</div>
-            <div class="tut-desc">전환기를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span>하면 진로가 바뀌어. <b>파란색(좌)</b>이랑 <b>주황색(우)</b> 둘 중 하나로 열려.<br>내가 그 위에 있으면 못 바꿔. 미리 맞춰놓자.<br><span style="opacity:.8">* 색은 양회기지에서 들어갈 때 기준이야. 본선에서 나올 땐 반대로 보여.</span></div>
+            <div class="tut-desc">전환기를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span>하면 진로가 바뀌어!<br><b>파란색(좌)</b> 아니면 <b>주황색(우)</b>야~<br>내가 그 위에 있으면 못 바꿔!<br>출발 전에 미리 맞춰놓자~<br><span style="opacity:.8">* 색은 양회기지에서 들어갈 때 기준이야. 본선에서 나올 땐 반대로 보여.</span></div>
           </div>
         </div>
 
@@ -1554,28 +1572,28 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </div>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">③ 붙이고 떼기</div>
-            <div class="tut-desc">화차 가까이 가면 붙일 수 있어. 지도에서 <b>화차를 탭</b>해서 고르고 <span class="only-desktop"><span class="key-badge wide">Ctrl</span></span><span class="only-mobile"><b>연결</b> 버튼</span>을 누르면 돼.<br>끝까지 바짝 붙어야 걸린다는 거 잊지 마.</div>
+            <div class="tut-desc">화차 가까이 가면 붙일 수 있어!<br>지도에서 <b>화차를 탭</b>해서 고르고,<br><span class="only-desktop"><span class="key-badge wide">Ctrl</span></span><span class="only-mobile"><b>연결</b> 버튼</span>을 누르면 돼~<br>끝까지 바짝 붙어야 걸려!<br>어중간하면 헛수고야~</div>
           </div>
         </div>
 
         <div class="tut-card">
           <div class="tut-icon tut-icon-row">
-            <img src="assets/worker-yard.png" alt="" class="tut-pic tut-pic-tall">
+            <img src="assets/worker-yard.png?v=11" alt="" class="tut-pic tut-pic-tall">
           </div>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">④ 양회수송원이야</div>
-            <div class="tut-desc">나 같은 수송원이 301~310호 전환기 근처를 돌아다녀. 가끔 전환기를 <b>제멋대로 바꿔</b>버리거든.<br>출발 전에 진로 다시 확인하는 습관 들이자.</div>
+            <div class="tut-desc">나 같은 수송원이 301~310호 근처에서 일해!<br>사람이라 가끔 <b>전환기를 잘못 놓기도</b> 해~<br>그러니까 출발 전엔 진로 한 번 더 확인!</div>
           </div>
         </div>
 
         <div class="tut-card">
           <div class="tut-icon tut-icon-row">
-            <img src="assets/worker-main.png" alt="" class="tut-pic tut-pic-tall">
+            <img src="assets/worker-main.png?v=11" alt="" class="tut-pic tut-pic-tall">
             <img src="assets/icons/btn-horn.png" alt="" class="tut-pic tut-pic-btn">
           </div>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">⑤ 본선 직원 조심</div>
-            <div class="tut-desc">본선에 직원이 나오면 위험해. 열차 오는 걸 모를 수도 있으니까.<br>닿으면 <b>사상사고</b>야. 보이면 바로 <span class="only-desktop"><span class="key-badge wide">Shift</span></span><span class="only-mobile"><b>기적</b> 버튼</span>으로 알려줘.</div>
+            <div class="tut-desc">본선에 직원이 나오면 진짜 위험해!<br>열차 오는 걸 못 볼 수도 있거든~<br>닿으면 바로 <b>사상사고</b>야!<br>보이는 즉시 <span class="only-desktop"><span class="key-badge wide">Shift</span></span><span class="only-mobile"><b>기적</b> 버튼</span>으로 알려주자~</div>
           </div>
         </div>
 
@@ -1587,7 +1605,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">⑥ 이러면 끝이야</div>
-            <div class="tut-desc"><b>후부돌파</b> — 막다른 끝을 넘어갔을 때<br><b>탈선</b> — 안 열린 전환기를 지났을 때<br><b>사상사고</b> — 본선 직원과 닿았을 때<br>셋 다 그 자리에서 게임 끝나.</div>
+            <div class="tut-desc">이 세 가지는 바로 게임 끝이야!<br><b>후부돌파</b> — 막다른 끝을 넘었을 때<br><b>탈선</b> — 안 열린 전환기를 지났을 때<br><b>사상사고</b> — 본선 직원과 닿았을 때<br>천천히 확인하며 가면 안 무서워~</div>
           </div>
         </div>
 
@@ -1603,7 +1621,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">⑦ 본선은 한 번에</div>
-            <div class="tut-desc">본선은 전환기를 하나씩 안 만져도 돼. 지도에서 <b>본17·본16 같은 번호를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span></b>하면 필요한 게 한꺼번에 맞춰져.<br><b>초록색</b>으로 켜졌는지 보고 출발해.</div>
+            <div class="tut-desc">본선은 전환기를 하나씩 안 만져도 돼!<br>지도에서 <b>본17·본16 번호를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span></b>해봐~<br>필요한 전환기가 한꺼번에 맞춰져!<br>진로가 <b>초록색</b>으로 켜졌는지 보고 출발!</div>
           </div>
         </div>
 
@@ -1619,7 +1637,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">⑧ 레벨은 이렇게</div>
-            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가 10 늘 때마다 레벨이 1 올라가.<br><span style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;<span style="color:#4ade80;font-weight:800;">6~10</span>&nbsp;<span style="color:#a78bfa;font-weight:800;">11~15</span>&nbsp;<span style="color:#60a5fa;font-weight:800;">16~20</span><br><span style="color:#b5651d;font-weight:800;">21~25</span>&nbsp;<span style="color:#ff9f1c;font-weight:800;">26~30</span>&nbsp;<span style="color:#ff6fb0;font-weight:800;">31~35</span>&nbsp;<span style="color:#fff59d;font-weight:800;">36+</span></div>
+            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가<br>10 늘 때마다 레벨이 1 올라가!<br>사고 없이 꾸준히 하는 게 제일 빨라~<br><span class="lv-white" style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;<span style="color:#4ade80;font-weight:800;">6~10</span>&nbsp;<span style="color:#a78bfa;font-weight:800;">11~15</span>&nbsp;<span style="color:#60a5fa;font-weight:800;">16~20</span><br><span style="color:#b5651d;font-weight:800;">21~25</span>&nbsp;<span style="color:#ff9f1c;font-weight:800;">26~30</span>&nbsp;<span style="color:#ff6fb0;font-weight:800;">31~35</span>&nbsp;<span class="lv-pale" style="color:#fff59d;font-weight:800;">36+</span></div>
           </div>
         </div>
 
@@ -3391,7 +3409,7 @@ workerG.innerHTML = `
   <line x1="5" y1="1" x2="9" y2="7" stroke="#ffb300" stroke-width="2.4" stroke-linecap="round"/>
   <line x1="-3" y1="10" x2="-4" y2="18" stroke="#3a3a3a" stroke-width="2.6" stroke-linecap="round"/>
   <line x1="3" y1="10" x2="4" y2="18" stroke="#3a3a3a" stroke-width="2.6" stroke-linecap="round"/>
-  <image class="npc-img" href="assets/worker-yard.png" x="-11" y="-18" width="22" height="38" preserveAspectRatio="xMidYMax meet"/>
+  <image class="npc-img" href="assets/worker-yard.png?v=11" x="-11" y="-18" width="22" height="38" preserveAspectRatio="xMidYMax meet"/>
 `;
 workerGroup.appendChild(workerG);
 const workerBubble = document.createElementNS(svgNS,'g');
@@ -3509,7 +3527,7 @@ mainWorkerG.innerHTML = `
   <line x1="5" y1="1" x2="9" y2="7" stroke="#005BAC" stroke-width="2.4" stroke-linecap="round"/>
   <line x1="-3" y1="10" x2="-4" y2="18" stroke="#3a3a3a" stroke-width="2.6" stroke-linecap="round"/>
   <line x1="3" y1="10" x2="4" y2="18" stroke="#3a3a3a" stroke-width="2.6" stroke-linecap="round"/>
-  <image class="npc-img" href="assets/worker-main.png" x="-11" y="-18" width="22" height="38" preserveAspectRatio="xMidYMax meet"/>
+  <image class="npc-img" href="assets/worker-main.png?v=11" x="-11" y="-18" width="22" height="38" preserveAspectRatio="xMidYMax meet"/>
 `;
 mainWorkerGroup.appendChild(mainWorkerG);
 
@@ -4036,6 +4054,17 @@ const carGroup = document.getElementById('carGroup');
 const actionToastEl = document.getElementById('actionToast');
 
 const CAR_SPACING = 24, CAR_LEN = 20, CAR_W = 13;
+// 모바일 화차 그림 상자. 폭은 CAR_SPACING에 맞춰 서로 거의 맞닿게, 높이는 여유 있게 잡고
+// preserveAspectRatio="meet"이 실제 크기(26 x 10.04)를 정한다.
+const CAR_IMG_W = 24, CAR_IMG_H = 12;
+// 모바일 화차 그림은 낮고 길어서 번호를 한가운데 얹으면 화차가 안 보인다 — 그림 위로 올린다.
+// (데스크톱은 예전처럼 네모 안 가운데)
+// 번호는 화차 간격(24)보다 길어서 옆 화차 번호와 붙는다 — 홀짝으로 두 줄에 나눠 얹는다.
+function carLabelY(idx){
+  if(!document.body.classList.contains('mobile-landscape')) return 3;
+  const top = -(CAR_IMG_W/2.59)/2 - 1.5;
+  return (idx % 2 === 0) ? top : top - 5.5;
+}
 const ENGINE_CAR_GAP = 38; // 기관차와 첫 화차 사이 간격(겹침 방지: 기관차 반폭22.7 + 연결기2 + 화차 반폭10 + 여유3)
 const MAX_CARS_PER_TRACK = 20;
 
@@ -4452,13 +4481,30 @@ function getOrCreateCarEl(car){
   g.appendChild(body);
   [-CAR_LEN/2+3, CAR_LEN/2-3].forEach(lx=>{
     const line = document.createElementNS(svgNS,'line');
+    line.setAttribute('class','car-seam');
     line.setAttribute('x1',lx); line.setAttribute('y1',-CAR_W/2);
     line.setAttribute('x2',lx); line.setAttribute('y2',CAR_W/2);
     line.setAttribute('stroke','#000'); line.setAttribute('stroke-opacity','0.25');
     g.appendChild(line);
   });
+  // 모바일 전용 양회화차 그림 (기관차와 같은 방식: 데스크톱은 도형 유지)
+  // 그림 비율이 2.59:1. meet으로 넣으면 CAR_IMG_W x (CAR_IMG_W/2.59)로 세로 가운데에 놓인다.
+  const img = document.createElementNS(svgNS,'image');
+  img.setAttribute('class','car-img');
+  img.setAttribute('href','assets/wagon.png?v=11');
+  img.setAttribute('x', -CAR_IMG_W/2); img.setAttribute('y', -CAR_IMG_H/2);
+  img.setAttribute('width', CAR_IMG_W); img.setAttribute('height', CAR_IMG_H);
+  img.setAttribute('preserveAspectRatio','xMidYMid meet');
+  g.appendChild(img);
+  // 연결·선택·불량 상태는 그림 위에 반투명 색을 덮어 표시한다
+  const tint = document.createElementNS(svgNS,'rect');
+  tint.setAttribute('class','car-tint');
+  tint.setAttribute('x', -CAR_IMG_W/2); tint.setAttribute('y', -CAR_IMG_W/2.59/2);
+  tint.setAttribute('width', CAR_IMG_W); tint.setAttribute('height', CAR_IMG_W/2.59);
+  tint.setAttribute('rx', 2);
+  g.appendChild(tint);
   const label = document.createElementNS(svgNS,'text');
-  label.setAttribute('x',0); label.setAttribute('y',3);
+  label.setAttribute('x',0); label.setAttribute('y', carLabelY(0));
   label.setAttribute('text-anchor','middle'); label.setAttribute('font-size','6');
   label.setAttribute('class','car-num');
   label.textContent = car.number;
@@ -4505,6 +4551,7 @@ function renderCars(){
       entry.g.style.display = '';
       entry.g.setAttribute('transform', `translate(${car._pos.x},${car._pos.y}) rotate(${car._pos.angle*180/Math.PI})`);
       entry.label.setAttribute('transform', `rotate(${-car._pos.angle*180/Math.PI})`);
+      entry.label.setAttribute('y', carLabelY(idx));
       entry.label.textContent = car.number;
       entry.label.setAttribute('fill', '#1a1f29');
       const clickable = (track===name);
@@ -4527,6 +4574,7 @@ function renderCars(){
     const entry = getOrCreateCarEl(car);
     entry.g.setAttribute('transform', `translate(${p.x},${p.y}) rotate(${p.angle*180/Math.PI})`);
     entry.label.setAttribute('transform', `rotate(${-p.angle*180/Math.PI})`);
+    entry.label.setAttribute('y', carLabelY(i));
     entry.label.textContent = car.number;
     entry.label.setAttribute('fill', '#fff');
     let cls = 'car-hopper attached';

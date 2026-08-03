@@ -65,14 +65,13 @@ def main():
         html = html.replace(f'src="{path}"', f'src="data:image/png;base64,{b64}"')
 
     # 캐릭터·기관차 그림 인라인 (img src / SVG image href 참조)
+    # 일부 경로엔 캐시 무효화용 ?v=N이 붙어 있으므로 정규식으로 함께 걷어낸다.
     for path in ['assets/loco.png', 'assets/hud-char.png', 'assets/note.png',
-                 'assets/worker-yard.png', 'assets/worker-main.png']:
+                 'assets/worker-yard.png', 'assets/worker-main.png', 'assets/wagon.png']:
         with open(path, 'rb') as f:
             b64 = base64.b64encode(f.read()).decode()
         data = f'data:image/png;base64,{b64}'
-        html = html.replace(f'src="{path}"', f'src="{data}"')
-        html = html.replace(f"'{path}'", f"'{data}'")
-        html = html.replace(f'href="{path}"', f'href="{data}"')
+        html = re.sub(re.escape(path) + r'(\?v=\d+)?', data, html)
 
     # 시작화면 캐릭터 이미지 인라인
     html = inline_asset(
