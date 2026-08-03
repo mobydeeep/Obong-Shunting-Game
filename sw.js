@@ -1,169 +1,116 @@
-const CACHE_ASSETS = [
+// 오봉역 입환게임 서비스워커
+//
+// 이전 버전은 모든 same-origin 요청에 "캐시 우선"을 썼고, 캐시 갱신은
+//   (1) activate 이벤트  (2) setInterval(30초)
+// 두 가지에 의존했다. 그런데
+//   - activate는 sw.js 파일 자체가 바뀔 때만 실행되고,
+//   - 서비스워커는 놀고 있으면 브라우저가 종료시키므로 setInterval은 사실상 안 돈다.
+// 그래서 index.html만 배포하면 설치된 앱에는 계속 옛 화면이 남았다.
+//
+// 지금은 문서(HTML)를 네트워크 우선으로 가져오고, 나머지 자산은 캐시를 먼저 주되
+// 뒤에서 조용히 갱신한다(stale-while-revalidate).
+// 온라인이면 앱을 다시 열 때 최신 화면이 뜨고, 오프라인이면 캐시로 동작한다.
+//
+// 주의: 자산을 추가했다면 아래 CACHE 이름의 숫자를 올려야 이전 캐시가 정리된다.
+
+const CACHE = 'obong-game-v8';
+
+const PRECACHE = [
   './',
   './index.html',
+  './manifest.webmanifest',
   './assets/bgm.mp3',
   './assets/engine-move.mp3',
   './assets/horn.mp3',
   './assets/start-character.png',
   './assets/bg-game.jpg',
   './assets/bg-start.jpg',
+  './assets/loco.png',
+  './assets/hud-char.png',
+  './assets/note.png',
+  './assets/worker-yard.png',
+  './assets/worker-main.png',
   './assets/icons/btn-stop.png',
   './assets/icons/btn-horn.png',
   './assets/icons/btn-couple.png',
-  './assets/loco.png',
-  './assets/hud-char.png',
-  './assets/worker-yard.png',
-  './assets/worker-main.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-256.png',
-  './assets/icons/icon-512.png'
+  './assets/icons/icon-512.png',
 ];
+
 const EXTERNAL_HOSTS = ['firebaseio.com', 'firebasedatabase.app', 'gstatic.com'];
 
-// 버전 확인 및 캐시 갱신
-async function checkAndUpdateCache() {
-  try {
-    const response = await fetch('./version.json?t=' + Date.now());
-    const data = await response.json();
-    const newVersion = data.version;
-    const currentVersion = await getCacheVersion();
-
-    if (newVersion > currentVersion) {
-      // 새 버전이 있으면 캐시 갱신
-      const cacheName = 'obong-game-v' + newVersion;
-      const cache = await caches.open(cacheName);
-      await cache.addAll(CACHE_ASSETS).catch((err) => {
-        console.warn('Service Worker: 일부 자산 캐싱 실패', err);
-      });
-      await setCacheVersion(newVersion);
-      // 이전 캐시 정리
-      const cacheNames = await caches.keys();
-      for (const name of cacheNames) {
-        if (name.startsWith('obong-game-') && name !== cacheName) {
-          await caches.delete(name);
-        }
-      }
-      console.log('Service Worker: 캐시 업데이트됨 (v' + newVersion + ')');
-      // 클라이언트에 업데이트 알림
-      self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({ type: 'CACHE_UPDATED', version: newVersion });
-        });
-      });
-    }
-  } catch (err) {
-    console.warn('Service Worker: 버전 확인 실패', err);
-  }
-}
-
-async function getCacheVersion() {
-  const cache = await caches.open('obong-meta');
-  const response = await cache.match('version');
-  if (response) {
-    const data = await response.json();
-    return data.version || 0;
-  }
-  return 0;
-}
-
-async function setCacheVersion(version) {
-  const cache = await caches.open('obong-meta');
-  await cache.put('version', new Response(JSON.stringify({ version })));
-}
-
-// Install: 초기 캐싱 + 백그라운드 업데이트 스케줄
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    (async () => {
-      try {
-        const data = await fetch('./version.json?t=' + Date.now()).then(r => r.json());
-        const cacheName = 'obong-game-v' + data.version;
-        const cache = await caches.open(cacheName);
-        await cache.addAll(CACHE_ASSETS).catch((err) => {
-          console.warn('Service Worker: 일부 자산 캐싱 실패', err);
-        });
-        await setCacheVersion(data.version);
-      } catch (err) {
-        console.error('Service Worker install 실패:', err);
-      }
-      return self.skipWaiting();
-    })()
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    // 파일 하나가 없어도 설치 자체는 계속되도록 개별로 담는다
+    await Promise.all(PRECACHE.map(u =>
+      cache.add(new Request(u, { cache: 'reload' })).catch(() => {})
+    ));
+    await self.skipWaiting();
+  })());
 });
 
-// Activate: 이전 캐시 정리 + 주기적 업데이트 시작
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    (async () => {
-      // 버전 메타 캐시 외 이전 버전 정리
-      const cacheNames = await caches.keys();
-      const currentVersion = await getCacheVersion();
-      const expectedCacheName = 'obong-game-v' + currentVersion;
-
-      for (const cacheName of cacheNames) {
-        if (cacheName.startsWith('obong-game-') && cacheName !== expectedCacheName) {
-          await caches.delete(cacheName);
-        }
-      }
-
-      await self.clients.claim();
-
-      // 처음 활성화 시 버전 확인
-      await checkAndUpdateCache();
-    })()
-  );
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) {
+      if (name !== CACHE) await caches.delete(name);
+    }
+    await self.clients.claim();
+  })());
 });
 
-// Fetch: Firebase는 네트워크로, 나머지는 캐시 우선
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+function isHtmlRequest(req) {
+  return req.mode === 'navigate'
+      || req.destination === 'document'
+      || (req.headers.get('accept') || '').includes('text/html');
+}
 
-  // version.json은 항상 최신 버전 확인 (캐싱 안 함)
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  let url;
+  try { url = new URL(req.url); } catch (e) { return; }
+
+  // 랭킹 등 실시간 데이터는 서비스워커가 손대지 않는다
+  if (EXTERNAL_HOSTS.some(h => url.hostname.includes(h))) return;
+  if (url.origin !== self.location.origin) return;
+
   if (url.pathname.endsWith('version.json')) {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response('{"version": 0}', { status: 503 });
-      })
+      fetch(req).catch(() => new Response('{"version":0}', { status: 503 }))
     );
     return;
   }
 
-  // Firebase 도메인은 항상 네트워크로
-  if (EXTERNAL_HOSTS.some(host => url.hostname.includes(host))) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response('Network error', { status: 503 });
-      })
-    );
+  // 화면(HTML)은 네트워크 우선 — "배포했는데 앱은 그대로"를 막는 핵심
+  if (isHtmlRequest(req)) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(CACHE);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch (err) {
+        return (await caches.match(req))
+            || (await caches.match('./index.html'))
+            || new Response('오프라인입니다', {
+                 status: 503,
+                 headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+               });
+      }
+    })());
     return;
   }
 
-  // Same-origin 자산: 캐시 우선 전략
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      (async () => {
-        const currentVersion = await getCacheVersion();
-        const cacheName = 'obong-game-v' + currentVersion;
-        const cached = await caches.match(event.request);
-        if (cached) {
-          return cached;
-        }
-        try {
-          const fetchResponse = await fetch(event.request);
-          const cache = await caches.open(cacheName);
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
-        } catch (err) {
-          return new Response('Offline', { status: 503 });
-        }
-      })()
-    );
-    return;
-  }
-
-  // 다른 도메인: 그대로 네트워크로
-  event.respondWith(fetch(event.request));
+  // 그 외 자산: 캐시를 바로 주고 뒤에서 새 버전을 받아 다음 실행에 반영
+  event.respondWith((async () => {
+    const cached = await caches.match(req);
+    const network = fetch(req).then(res => {
+      if (res && res.ok) caches.open(CACHE).then(c => c.put(req, res.clone()));
+      return res;
+    }).catch(() => null);
+    return cached || (await network) || new Response('', { status: 504 });
+  })());
 });
-
-// 백그라운드에서 주기적으로 버전 확인 (30초마다)
-setInterval(checkAndUpdateCache, 30000);

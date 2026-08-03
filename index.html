@@ -101,6 +101,72 @@
   .switch-num{ fill:#fff; font-size:10px; font-weight:bold; text-anchor:middle; }
   .switch-state{ font-size:9px; text-anchor:middle; fill:#0a0d12; font-weight:bold; }
   .car-num{ fill:#1a2233; font-weight:700; }
+  /* 11) 밝은 팝업 위에서 흐려 보이던 글자들.
+     튜토리얼·랭킹 패널은 .overlay-panel이 아니라서 앞의 글자색 규칙이 안 먹었다. */
+  body.mobile-landscape .tutorial-panel,
+  body.mobile-landscape .tutorial-panel *{ color:#22304a; }
+  body.mobile-landscape .tutorial-head b{ color:#12405c; }
+  body.mobile-landscape .tut-skip-btn{
+    color:#3c4a66 !important; border-color:#9aa8bd !important;
+    background:rgba(255,255,255,.5) !important;
+  }
+  body.mobile-landscape .tut-step-label{ color:#3c4a66 !important; }
+  body.mobile-landscape .tut-nav-btn{
+    background:rgba(255,255,255,.62) !important; border-color:#9aa8bd !important;
+    color:#22304a !important;
+  }
+  body.mobile-landscape .tut-nav-btn.primary{
+    background:linear-gradient(180deg,#2f7fd6,#1c5fae) !important;
+    border-color:#12406f !important; color:#fff !important;
+  }
+  body.mobile-landscape .tut-nav-btn:disabled{ opacity:.4; }
+  body.mobile-landscape .tut-title{ color:#12556f !important; }
+  body.mobile-landscape .key-badge{
+    background:linear-gradient(180deg,#e9eef7,#cdd7e6) !important;
+    border-color:#9aa8bd !important; color:#22304a !important;
+  }
+  body.mobile-landscape .rank-panel,
+  body.mobile-landscape .rank-panel *{ color:#22304a; }
+  body.mobile-landscape .rank-table th{ color:#12556f !important; }
+  body.mobile-landscape .rank-table td.bad-col{ color:#a33 !important; }
+  body.mobile-landscape .rank-page-btn{
+    background:rgba(255,255,255,.62) !important; border-color:#9aa8bd !important;
+    color:#22304a !important;
+  }
+  body.mobile-landscape .admin-close-btn{ color:#22304a !important; }
+  /* 미션 노트: 숫자 칸이 노트 밖으로 밀리지 않게 */
+  body.mobile-landscape .mission-col-sign{ flex:0 0 34%; }
+
+  /* 알림 토스트: 제작자 표시(상단 중앙 12px) 바로 아래로 올린다 */
+  body.mobile-landscape .action-toast{
+    position:fixed !important; top:42px !important; z-index:45;
+    font-size:12px; padding:6px 14px;
+    background:rgba(12,20,34,.88); border-color:#c9972f;
+  }
+
+  /* 12) 제작자 표시: 배경을 거의 지우고 글자만 흐릿하게 */
+  body.mobile-landscape .credit-tag{
+    background:none !important; backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    padding:0 !important; opacity:.55 !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.85);
+  }
+
+  /* 13) 랭킹 팝업을 작게 */
+  body.mobile-landscape .rank-panel{
+    top:34px !important; right:8px !important;
+    width:min(560px, 92vw) !important; max-height:78vh !important;
+    padding:10px 12px !important;
+  }
+  body.mobile-landscape .rank-panel h3,
+  body.mobile-landscape .rank-panel > div:first-child{ font-size:13px !important; }
+  body.mobile-landscape .rank-table{ font-size:10px !important; }
+  body.mobile-landscape .rank-table th{ padding:4px 3px !important; font-size:10px !important; }
+  body.mobile-landscape .rank-table td{ padding:4px 3px !important; }
+  body.mobile-landscape .rank-page-btn{ padding:6px 12px !important; font-size:11px !important; }
+  body.mobile-landscape .rank-page-label{ font-size:11px !important; }
+  body.mobile-landscape .rank-empty{ font-size:11px !important; }
+
   /* 랭킹 페이지 넘김 */
   .rank-pager{
     display:flex; align-items:center; justify-content:center; gap:12px;
@@ -562,6 +628,24 @@
     border-radius:12px; padding:12px;
   }
   .tut-icon{ width:80px; height:60px; flex:none; }
+  /* 수송원이 옆에서 설명해주는 모양 */
+  .tut-speaker{ display:none; }
+  body.mobile-landscape .tut-speaker{
+    display:block; width:46px; height:auto; flex:none; align-self:flex-end;
+    margin-right:2px;
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,.4));
+  }
+  body.mobile-landscape .tut-text{
+    background:rgba(255,255,255,.34); border:1.5px solid rgba(255,236,175,.7);
+    border-radius:12px; padding:8px 10px; position:relative;
+  }
+  /* 말풍선 꼬리 */
+  body.mobile-landscape .tut-text::before{
+    content:''; position:absolute; left:-7px; bottom:14px;
+    border-top:6px solid transparent; border-bottom:6px solid transparent;
+    border-right:8px solid rgba(255,255,255,.34);
+  }
+
   /* 실제 게임 그림을 쓰는 튜토리얼 아이콘 */
   .tut-icon-row{ display:flex; align-items:center; justify-content:center; gap:6px; }
   .tut-pic{ object-fit:contain; display:block; }
@@ -893,7 +977,7 @@
 
   /* 튜토리얼 패널: 가로 모바일은 세로 공간이 좁으므로 전체적으로 축소.
      한 번에 한 장만 보이므로 폭을 좁혀 가로로 길쭉하지 않게 하고, 배경은 반투명 처리 */
-  body.mobile-landscape .tutorial-overlay{ padding:8px; background:rgba(6,9,16,.55); }
+  body.mobile-landscape .tutorial-overlay{ padding:8px; background:rgba(6,9,16,.22); }
   body.mobile-landscape .tutorial-panel{
     width:min(430px, 88vw); max-height:94vh; padding:12px 14px; border-radius:16px;
     background:rgba(20,27,44,.80); border-color:rgba(77,212,239,.22);
@@ -1037,8 +1121,20 @@
   body.mobile-landscape .status-panel{ display:none !important; }
 
   /* 미션 패널: 좌상단에 배치, 높이 제한, 투명도 높임 */
+  /* 미션은 노트 그림 위에 얹는다 (참고 이미지). 배경·테두리는 그림이 대신하므로 지운다. */
+  .mission-note-bg{ display:none; }
+  body.mobile-landscape .mission-note-bg{
+    display:block; position:absolute; inset:0;
+    width:100%; height:100%; object-fit:fill;
+    pointer-events:none; z-index:-1;
+    opacity:.72;                                   /* 반투명 */
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
+  }
   body.mobile-landscape .mission-panel.overlay-panel{
-    top:48px !important; bottom:auto !important; left:6px !important; max-width:168px !important;
+    background:none !important; border:none !important; box-shadow:none !important;
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+    padding:9px 16px 11px 30px !important;
+    top:48px !important; bottom:auto !important; left:6px !important; max-width:210px !important;
     /* 화면이 짧은 기기에서 좌측 하단 제작자 표시·조작버튼까지 내려오지 않도록 비율로 제한 */
     max-height:min(200px, 40vh);
     /* 0.3은 너무 투명해서 뒤 선로 글자가 비쳐 제목과 뒤섞였다. 읽히도록 올린다. */
@@ -1052,9 +1148,24 @@
   }
   body.mobile-landscape .car-select-panel .car-btn{ font-size:12px; padding:9px 12px; border-radius:8px; }
   body.mobile-landscape .car-select-panel .cs-small-btn{ font-size:12px; padding:11px 6px; border-radius:8px; }
+  /* 노트 줄처럼 보이도록: 배경 없이 밑줄만, 좌측=선로명 / 우측=증감 */
   body.mobile-landscape .mission-format-line{
-    font-size:9.5px !important; line-height:1.35; padding:4px 6px; gap:5px;
+    font-size:10px !important; line-height:1.35; padding:5px 2px; gap:6px;
+    background:none !important; border-radius:0 !important;
+    border-bottom:1px solid rgba(120,100,70,.32);
   }
+  body.mobile-landscape .mission-col-sign{
+    border-left:none !important; padding-left:6px; text-align:right; flex:0 0 40%;
+  }
+  body.mobile-landscape .mission-col-track{ flex:1 1 60%; }
+  body.mobile-landscape .mission-format-line span{ color:#3b2f1c !important; font-weight:700; }
+  body.mobile-landscape .mission-format-line span.done{ color:#7a6a4a !important; }
+  body.mobile-landscape .mission-panel .ov-head{ color:#3b2f1c !important; font-size:13px; }
+  body.mobile-landscape .mission-panel .ov-head *{ color:#3b2f1c !important; }
+  body.mobile-landscape .mission-panel .ov-btns{ display:none; }  /* 노트에는 버튼을 두지 않는다 */
+  body.mobile-landscape .mission-panel.collapsed .ov-body{ display:none; }
+  body.mobile-landscape .mission-panel.collapsed{ padding-bottom:6px !important; }
+  body.mobile-landscape .mission-panel.collapsed .mission-note-bg{ opacity:.95; }
   /* 미션 목록이 패널 높이를 넘으면 스크롤되게 하고, 각 줄은 칸 안에서 줄바꿈시킨다 */
   body.mobile-landscape .mission-panel .ov-body{
     max-height:calc(min(200px, 40vh) - 34px); overflow-y:auto; overflow-x:hidden;
@@ -1102,8 +1213,36 @@
   }
   /* HUD 캐릭터: 패널 왼쪽 밖으로 걸치게 세운다 (참고 이미지) */
   .hud-char{ display:none; }
+  /* 요청: 운전 HUD와 화차선택 팝업은 당분간 숨긴다.
+     화차는 지도에서 직접 탭해 고를 수 있으므로 연결·분리는 그대로 된다.
+     나중에 설정에서 body에 show-hud / show-carselect 를 붙이면 다시 보인다. */
+  body.mobile-landscape .hud-panel.overlay-panel{ display:none !important; }
+  body.mobile-landscape.show-hud .hud-panel.overlay-panel{ display:block !important; }
+  body.mobile-landscape .car-select-panel.overlay-panel{ display:none !important; }
+  body.mobile-landscape.show-carselect .car-select-panel.overlay-panel{ display:block !important; }
+
+  /* HUD: 참고 이미지처럼 어두운 반투명 카드 + 좌측 캐릭터 */
   body.mobile-landscape .hud-panel.overlay-panel{
-    overflow:visible; padding:3px 6px 3px 34px !important;
+    overflow:visible; padding:4px 10px 5px 36px !important;
+    background:linear-gradient(180deg, rgba(38,52,48,.72), rgba(24,36,34,.78)) !important;
+    border:2px solid rgba(190,205,190,.45) !important;
+    border-radius:14px !important;
+  }
+  body.mobile-landscape .hud-panel .ov-head,
+  body.mobile-landscape .hud-panel .ov-head *,
+  body.mobile-landscape .hud-panel .ov-summary,
+  body.mobile-landscape .hud-panel .hud-item .value{
+    color:#eaf6ee !important;
+    text-shadow:0 1px 3px rgba(0,0,0,.85) !important;
+  }
+  body.mobile-landscape .hud-panel .hud-item .label{ color:#a9c2b4 !important; text-shadow:0 1px 3px rgba(0,0,0,.85) !important; }
+  body.mobile-landscape .hud-panel .hud-item .value.speed{ color:#ffe066 !important; }
+  body.mobile-landscape .hud-panel .hud-item{
+    background:rgba(16,26,24,.5) !important; border:1px solid rgba(190,205,190,.3) !important;
+  }
+  /* 접힌 상태 요약: 속도계 이모지 + 속도 + 상태 */
+  body.mobile-landscape .hud-panel .ov-summary{
+    font-size:12px; font-weight:800; padding:0 2px 3px;
   }
   body.mobile-landscape .hud-char{
     display:block; position:absolute; left:-22px; bottom:-3px;
@@ -1114,11 +1253,11 @@
   body.mobile-landscape .hud-panel .ov-head{ justify-content:center; font-size:10.5px; padding:2px 6px; min-height:0; }
   /* 튜토리얼·랭킹은 전체 화면 오버레이라 별도 지정 */
   body.mobile-landscape .tutorial-panel{
-    background:linear-gradient(180deg, rgba(255,244,205,.62), rgba(250,232,178,.66)) !important;
+    background:linear-gradient(180deg, rgba(255,244,205,.30), rgba(250,232,178,.34)) !important;
     border:2px solid rgba(255,236,175,.6) !important;
   }
   body.mobile-landscape .tut-card{
-    background:rgba(255,248,220,.36) !important; border-color:rgba(255,236,175,.45) !important;
+    background:rgba(255,248,220,.26) !important; border-color:rgba(255,236,175,.4) !important;
   }
   body.mobile-landscape .rank-panel{
     background:linear-gradient(180deg, rgba(255,244,205,.72), rgba(250,232,178,.76)) !important;
@@ -1295,9 +1434,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
             <img src="assets/loco.png" alt="" class="tut-pic tut-pic-wide">
             <img src="assets/icons/btn-stop.png" alt="" class="tut-pic tut-pic-btn">
           </div>
-          <div class="tut-text">
-            <div class="tut-title">① 이동 방법</div>
-            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 기관차를 움직입니다. 가속에는 관성이 있어서, 멈추려면 미리 <span class="key-badge wide">Space</span>로 제동해야 합니다.</span><span class="only-mobile"><b>◀ ▶</b> 버튼으로 움직입니다. 관성이 있으니 <b>정지</b>를 미리 눌러 제동하세요.<br>지도는 <b>끌어서</b> 이동, <b>두 손가락을 모으면</b> 축소됩니다. <b>🎯</b> 버튼을 누르면 기관차로 돌아옵니다.</span></div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">① 어떻게 움직여?</div>
+            <div class="tut-desc"><span class="only-desktop">방향키 <span class="key-badge">←</span> <span class="key-badge">→</span> 로 달려. 관성이 있어서 바로 안 멈춰 — <span class="key-badge wide">Space</span>로 미리 제동 걸어.</span><span class="only-mobile">아래 <b>◀ ▶</b> 로 달려. 관성이 있어서 바로 안 멈춰 — <b>정지</b>를 미리 눌러야 해.<br>지도는 손가락으로 <b>끌면</b> 움직이고, <b>두 손가락 모으면</b> 작아져. <b>🎯</b> 누르면 다시 나한테 돌아와.</span></div>
           </div>
         </div>
 
@@ -1310,9 +1449,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
             <circle cx="60" cy="30" r="13" fill="#f0b429" stroke="#3a2c0a" stroke-width="2"/>
             <text x="60" y="34" font-size="11" fill="#3a2c0a" text-anchor="middle" font-weight="800">R</text>
           </svg>
-          <div class="tut-text">
-            <div class="tut-title">② 선로 취급 방법</div>
-            <div class="tut-desc"><b>전환기를 <span class="only-desktop">마우스로 클릭</span><span class="only-mobile">손가락으로 탭</span></b>하면 진로가 전환됩니다. 파란색(L)·주황색(R) 두 진로 중 하나로 열립니다. 기관차·화차가 근처에 있으면 취급할 수 없습니다.<br>* 양회기지 진입방향 기준 색상이며, 본선방향으로 나올때 보이는 실제 색상은 반대입니다.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">② 전환기 다루기</div>
+            <div class="tut-desc">전환기를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span>하면 진로가 바뀌어. <b>파란색(좌)</b>이랑 <b>주황색(우)</b> 둘 중 하나로 열려.<br>내가 그 위에 있으면 못 바꿔. 미리 맞춰놓자.<br><span style="opacity:.8">* 색은 양회기지에서 들어갈 때 기준이야. 본선에서 나올 땐 반대로 보여.</span></div>
           </div>
         </div>
 
@@ -1320,9 +1459,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           <div class="tut-icon tut-icon-row">
             <img src="assets/icons/btn-couple.png" alt="" class="tut-pic tut-pic-btn">
           </div>
-          <div class="tut-text">
-            <div class="tut-title">③ 연결·분리 방법</div>
-            <div class="tut-desc">화차 가까이 다가가면 화차 선택창이 뜹니다. 원하는 화차를 고르고 <span class="only-desktop"><span class="key-badge wide">Ctrl</span>을 누르면</span><span class="only-mobile">우측 아래 <b>연결</b> 버튼을 누르면</span> 연결하거나 분리합니다. 실제로 화차 끝까지 붙어야 연결됩니다.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">③ 붙이고 떼기</div>
+            <div class="tut-desc">화차 가까이 가면 붙일 수 있어. 지도에서 <b>화차를 탭</b>해서 고르고 <span class="only-desktop"><span class="key-badge wide">Ctrl</span></span><span class="only-mobile"><b>연결</b> 버튼</span>을 누르면 돼.<br>끝까지 바짝 붙어야 걸린다는 거 잊지 마.</div>
           </div>
         </div>
 
@@ -1330,9 +1469,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           <div class="tut-icon tut-icon-row">
             <img src="assets/worker-yard.png" alt="" class="tut-pic tut-pic-tall">
           </div>
-          <div class="tut-text">
-            <div class="tut-title">④ 양회수송원</div>
-            <div class="tut-desc">301~310호 전환기 주변을 돌아다니며 가끔 전환기를 무작위로 바꿉니다. 출발 전 진로를 반드시 다시 확인하세요.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">④ 양회수송원이야</div>
+            <div class="tut-desc">나 같은 수송원이 301~310호 전환기 근처를 돌아다녀. 가끔 전환기를 <b>제멋대로 바꿔</b>버리거든.<br>출발 전에 진로 다시 확인하는 습관 들이자.</div>
           </div>
         </div>
 
@@ -1341,9 +1480,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
             <img src="assets/worker-main.png" alt="" class="tut-pic tut-pic-tall">
             <img src="assets/icons/btn-horn.png" alt="" class="tut-pic tut-pic-btn">
           </div>
-          <div class="tut-text">
-            <div class="tut-title">⑤ 본선 직원</div>
-            <div class="tut-desc">본선 선로에 있는 직원으로, 열차운행여부를 모를 수 있어 위험합니다. 접촉하면 사상사고로 게임이 종료됩니다. 가까이 있으면 <span class="only-desktop"><span class="key-badge wide">Shift</span>로</span><span class="only-mobile">우측 아래 <b>기적</b> 버튼으로</span> 주의기적을 울려 대피시키세요.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">⑤ 본선 직원 조심</div>
+            <div class="tut-desc">본선에 직원이 나오면 위험해. 열차 오는 걸 모를 수도 있으니까.<br>닿으면 <b>사상사고</b>야. 보이면 바로 <span class="only-desktop"><span class="key-badge wide">Shift</span></span><span class="only-mobile"><b>기적</b> 버튼</span>으로 알려줘.</div>
           </div>
         </div>
 
@@ -1353,9 +1492,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
             <line x1="60" y1="35" x2="60" y2="58" stroke="#dc2626" stroke-width="6" stroke-linecap="round"/>
             <circle cx="60" cy="68" r="3.4" fill="#dc2626"/>
           </svg>
-          <div class="tut-text">
-            <div class="tut-title">⑥ 위험 상황</div>
-            <div class="tut-desc"><b>후부돌파</b>: 막다른 선로 끝을 넘어서면 발생<br><b>탈선</b>: 진로가 열리지 않은 전환기를 통과하면 발생<br><b>사상사고</b>: 본선 직원과 접촉하면 발생<br>셋 다 즉시 게임이 종료됩니다.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">⑥ 이러면 끝이야</div>
+            <div class="tut-desc"><b>후부돌파</b> — 막다른 끝을 넘어갔을 때<br><b>탈선</b> — 안 열린 전환기를 지났을 때<br><b>사상사고</b> — 본선 직원과 닿았을 때<br>셋 다 그 자리에서 게임 끝나.</div>
           </div>
         </div>
 
@@ -1369,9 +1508,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
               <path d="M-2,-9 L-2,7 L1.5,3.5 L4,10 L7,8.5 L4.5,2 L9,2 Z" fill="#fff" stroke="#1a2440" stroke-width="1"/>
             </g>
           </svg>
-          <div class="tut-text">
-            <div class="tut-title">⑦ 본선 진로 확인</div>
-            <div class="tut-desc">본선 진로는 전환기를 하나씩 조작하지 않고, 지도에 표시된 <b>원하는 본선(본17~본12 등) 선로나 번호를 <span class="only-desktop">마우스로 클릭</span><span class="only-mobile">손가락으로 탭</span></b>하면 필요한 전환기가 한 번에 맞춰지며 그 진로가 <b>초록색</b>으로 개통 표시됩니다. 출발 전 목표 본선이 초록색으로 켜졌는지 꼭 확인하세요.</div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">⑦ 본선은 한 번에</div>
+            <div class="tut-desc">본선은 전환기를 하나씩 안 만져도 돼. 지도에서 <b>본17·본16 같은 번호를 <span class="only-desktop">클릭</span><span class="only-mobile">탭</span></b>하면 필요한 게 한꺼번에 맞춰져.<br><b>초록색</b>으로 켜졌는지 보고 출발해.</div>
           </div>
         </div>
 
@@ -1385,12 +1524,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
             <circle cx="90" cy="24" r="8" fill="#ff9f1c" stroke="#1a2440" stroke-width="1.5"/>
             <text x="90" y="27" font-size="8" fill="#3a2200" text-anchor="middle" font-weight="800">Lv</text>
           </svg>
-          <div class="tut-text">
-            <div class="tut-title">⑧ 레벨 안내</div>
-            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가 10 늘 때마다 레벨이 1 오릅니다.<br>
-            <span style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;&nbsp;<span style="color:#4ade80;font-weight:800;">Lv.6~10</span>&nbsp;&nbsp;<span style="color:#a78bfa;font-weight:800;">Lv.11~15</span><br>
-            <span style="color:#60a5fa;font-weight:800;">Lv.16~20</span>&nbsp;&nbsp;<span style="color:#b5651d;font-weight:800;">Lv.21~25</span>&nbsp;&nbsp;<span style="color:#ff9f1c;font-weight:800;">Lv.26~30</span><br>
-            <span style="color:#ff6fb0;font-weight:800;">Lv.31~35</span>&nbsp;&nbsp;<span style="color:#fff59d;font-weight:800;">Lv.36 이상</span></div>
+          <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
+            <div class="tut-title">⑧ 레벨은 이렇게</div>
+            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가 10 늘 때마다 레벨이 1 올라가.<br><span style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;<span style="color:#4ade80;font-weight:800;">6~10</span>&nbsp;<span style="color:#a78bfa;font-weight:800;">11~15</span>&nbsp;<span style="color:#60a5fa;font-weight:800;">16~20</span><br><span style="color:#b5651d;font-weight:800;">21~25</span>&nbsp;<span style="color:#ff9f1c;font-weight:800;">26~30</span>&nbsp;<span style="color:#ff6fb0;font-weight:800;">31~35</span>&nbsp;<span style="color:#fff59d;font-weight:800;">36+</span></div>
           </div>
         </div>
 
@@ -1660,8 +1796,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     <!-- 화차 선택 (근처에 화차가 있을 때만 표시, SVG 클릭이 아닌 확실한 HTML 버튼 방식) -->
     <!-- 미션 패널: 좌상단(관리자기능 버튼 바로 아래), 미션 진행 중일 때만 표시 -->
     <div class="mission-panel overlay-panel" id="missionPanel" style="display:none; top:24px; left:8px;">
+      <img class="mission-note-bg" src="assets/note.png" alt="">
       <div class="ov-head drag-handle" id="missionHead">
-        <span>🎯 미션</span>
+        <span><span class="mission-icon">📖</span> 미션</span>
         <div class="ov-btns">
           <button class="mini-btn" id="missionOpacityBtn" title="투명하게 (누르면 더 투명해짐)">◐</button>
         </div>
@@ -2915,8 +3052,8 @@ engineG.setAttribute('id','engineNode');
 const engineImg = document.createElementNS(svgNS,'image');
 engineImg.setAttribute('class','loco-img');
 engineImg.setAttribute('href','assets/loco.png');
-engineImg.setAttribute('x',-24); engineImg.setAttribute('y',-10);
-engineImg.setAttribute('width',48); engineImg.setAttribute('height',22);
+engineImg.setAttribute('x',-29); engineImg.setAttribute('y',-12);
+engineImg.setAttribute('width',58); engineImg.setAttribute('height',26);
 engineImg.setAttribute('preserveAspectRatio','xMidYMid meet');
 engineG.appendChild(engineImg);
 
@@ -3112,7 +3249,11 @@ function updateHud(){
     document.getElementById('hudRange').textContent = `${posOnEdge.toFixed(0)} / ${currentEdge.len.toFixed(0)} m`;
   }
   const summaryEl = document.getElementById('hudSummary');
-  if(summaryEl) summaryEl.textContent = `${kmh}km/h · ${dirTxt}`;
+  if(summaryEl){
+    // 참고 이미지처럼 속도계와 상태를 나란히
+    const shortDir = vScreen > 1 ? '본선▶' : (vScreen < -1 ? '◀양회' : '정지');
+    summaryEl.textContent = `🕐 ${kmh} km/h · ${shortDir}`;
+  }
 }
 
 // 초기 위치: 301~31 사이 고정 구간 중앙
@@ -3723,18 +3864,55 @@ bindHold('mBtnLeft','ArrowLeft');
 bindHold('mBtnRight','ArrowRight');
 bindHold('mBtnBrake',' ');
 bindHold('mBtnStop',' ');
-document.getElementById('mBtnHorn').addEventListener('click', ()=>{ triggerWarningHorn(); });
-document.getElementById('mBtnSpace').addEventListener('click', ()=>{ if(gameStarted && !gameOver) performCarAction(); });
+// click은 "누르고 떼기"가 한 요소에서 끝나야 발생한다. 방향키 버튼을 누른 채
+// 다른 손가락으로 기적을 누르면 click이 오지 않아 눌리지 않았다.
+// pointerdown은 손가락이 닿는 즉시 오므로 동시 입력이 된다.
+function bindTap(btnId, fn){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  let last = 0;
+  btn.addEventListener('pointerdown', ev=>{
+    ev.preventDefault();
+    const now = Date.now();
+    if(now - last < 200) return;   // 중복 방지
+    last = now;
+    fn();
+  });
+}
+bindTap('mBtnHorn', ()=>{ triggerWarningHorn(); });
+bindTap('mBtnSpace', ()=>{ if(gameStarted && !gameOver) performCarAction(); });
 // 화면을 기관차로 되돌린다: 손으로 옮긴 상태·확대비율을 모두 초기값으로
-document.getElementById('mBtnRecenter').addEventListener('click', ()=>{
+// 과녁 버튼: 누를 때마다 시점이 세 가지로 돌아간다
+//   0) 기본 배율로 기관차 추적
+//   1) 전체가 보이도록 축소 (추적 없음)
+//   2) 지금 배율을 유지한 채 기관차 추적
+let recenterMode = 0;
+document.getElementById('mBtnRecenter').addEventListener('pointerdown', (ev)=>{
+  ev.preventDefault();
   if(MAP_PAN.resumeTimer){ clearTimeout(MAP_PAN.resumeTimer); MAP_PAN.resumeTimer = null; }
-  MAP_PAN.manual = false;
   MAP_PAN.active = false;
-  CAMERA.zoom = 1;
-  CAMERA.w = CAMERA.wMin;
-  CAMERA.h = CAMERA.w * (CAMERA.h / CAMERA.w || 1);
-  fitMapToViewport();          // wMin/wMax와 화면비를 다시 계산해 기본 배율로 되돌린다
-  if(engineXY){ CAMERA.x = engineXY.x; CAMERA.y = engineXY.y; }
+  const aspect = CAMERA.h / CAMERA.w;
+
+  if(recenterMode === 0){
+    CAMERA.zoom = 1;
+    fitMapToViewport();                 // wMin/wMax·화면비를 다시 계산해 기본 배율로
+    MAP_PAN.manual = false;             // 기관차 추적 재개
+    if(engineXY){ CAMERA.x = engineXY.x; CAMERA.y = engineXY.y; }
+    showToast('🎯 기관차 추적', 900);
+  } else if(recenterMode === 1){
+    CAMERA.w = CAMERA.wMax;             // 야드 전체가 들어오는 배율
+    CAMERA.h = CAMERA.w * aspect;
+    CAMERA.zoom = CAMERA.w / CAMERA.wMin;
+    MAP_PAN.manual = true;              // 추적 정지 — 전체를 계속 보여준다
+    CAMERA.x = (YARD_BOUNDS.minX + YARD_BOUNDS.maxX)/2;
+    CAMERA.y = (YARD_BOUNDS.minY + YARD_BOUNDS.maxY)/2;
+    showToast('🗺 전체 보기', 900);
+  } else {
+    MAP_PAN.manual = false;             // 지금 배율 그대로 추적만 재개
+    if(engineXY){ CAMERA.x = engineXY.x; CAMERA.y = engineXY.y; }
+    showToast('🎯 현재 배율로 추적', 900);
+  }
+  recenterMode = (recenterMode + 1) % 3;
   clampCameraToYard();
   applyCameraViewBox();
 });
@@ -5645,7 +5823,9 @@ document.getElementById('missionRetryBtn').addEventListener('click', ()=>{
   startMission(lastMissionSnapshot);
 });
 
-makePanelDraggable(document.getElementById('missionPanel'), document.getElementById('missionHead'), null);
+makePanelDraggable(document.getElementById('missionPanel'), document.getElementById('missionHead'), ()=>{
+  document.getElementById('missionPanel').classList.toggle('collapsed');
+});
 bindOpacityBtn('missionOpacityBtn', document.getElementById('missionPanel'));
 
 // ---- 관리자 미션 탭 ----
