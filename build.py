@@ -35,6 +35,15 @@ def main():
         lambda b64: f'<audio id="bgMusic" loop preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
     )
 
+    # 시작화면 배경음악 인라인
+    html = inline_asset(
+        html,
+        r'<audio id="bgMusicStart" loop preload="auto"><source src="assets/bgm-start\.mp3" type="audio/mpeg"></audio>',
+        'assets/bgm-start.mp3',
+        'audio/mpeg',
+        lambda b64: f'<audio id="bgMusicStart" loop preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
+    )
+
     # 효과음 인라인 (주행음 / 기적)
     html = inline_asset(
         html,
