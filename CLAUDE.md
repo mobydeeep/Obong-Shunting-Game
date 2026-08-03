@@ -36,6 +36,35 @@ dist/                    빌드 결과물 (git에는 커밋하지 않음, 매번
 - KORAIL Light Blue: `#00B2E3` (Pantone 306C)
 - 주요 버튼 그라데이션: `#003D7A → #005BAC`
 
+## CSS 접두사 규약 (반드시 지킬 것)
+
+`<body>`에 붙는 세 클래스는 **각각 다른 것을 뜻한다.** 새 규칙을 넣을 땐 어디에 속하는지 먼저 정하고 그 접두사를 쓴다.
+
+| 접두사 | 뜻 | 예 |
+|---|---|---|
+| `body.skin` | **디자인.** 배경 일러스트, 크림색 패널, 캐릭터·화차 그림, 금색 버튼. PC·폰 공통이며 항상 켜져 있다 | `body.skin .overlay-panel{ background:크림 }` |
+| `body.mobile-landscape` | **좁은 화면 사정.** 글자 축소, 요소 숨김, 위치·크기 고정 | `body.mobile-landscape .mission-panel{ width:186px }` |
+| `body.is-mobile` | **터치 사정.** 히트영역 확장, 조작 안내 문구 전환 | `body.is-mobile .mini-btn::after{ inset:-11px }` |
+
+**규칙: 위치·크기 속성(`position`, `top/right/bottom/left`, `width/height/max-*`, `transform`, `inset`)은 절대 `body.skin`에 넣지 않는다.**
+이 규칙들은 대부분 `!important`인데, JS가 같은 속성을 인라인 스타일로 쓴다(`makePanelDraggable`, `layoutTopLeftPanels`, `layoutBottomRightPanels`, `fitMapToViewport`). `skin`으로 올리면 전 기기에서 **패널 드래그가 먹통이 된다.**
+
+`skin`은 `mobile-landscape`와 명시도(0,2,0)가 같고 소스 위치도 그대로다. 그래서 `mobile-landscape` → `skin` 교체는 **폰 화면을 수학적으로 바꿀 수 없다.** 이 성질 덕에 "모바일 스크린샷이 1픽셀이라도 바뀌면 잘못 옮긴 것"이라는 회귀 감지선이 성립한다. 접두사를 아예 지워 전역화하면 명시도가 0,1,0으로 떨어져 예전 어두운 규칙이 이길 수 있으므로 하지 말 것.
+
+## UI 검증 도구 — `tools/ui-audit.mjs`
+
+```
+node tools/ui-audit.mjs --label before          # 전체(10 프로필 × 14 상태, 약 30분)
+node tools/ui-audit.mjs --profile desktop-hd    # 한 프로필만
+node tools/ui-audit.mjs --profile ip14-land --state S6
+```
+
+겹침 / 터치 히트박스 / 폰트 하한 세 가지를 자동 검사하고 `/tmp/ui-shots/<label>/`에 스크린샷, `<label>.json`에 리포트를 남긴다.
+
+- 모바일 판정이 UA 기반이라 반드시 `devices[]` 디스크립터로 컨텍스트를 만든다. `viewport`만 주면 `mobile-landscape`가 안 켜진다.
+- 스크린샷 직전 애니메이션을 정지시키므로 PNG 단순 비교로 회귀를 잡을 수 있다.
+- **`ctx.route(...)`의 Firebase 네트워크 차단을 절대 제거하지 말 것.** 상태 S10(사고)이 `updateRankRecord → saveRankRecords → .set()`을 타고 공용 랭킹을 통째로 덮어쓴다. 실제로 기록을 날린 적이 있다. `window.firebase`를 감싸는 방식은 게임이 먼저 `firebase.database()`를 잡아가서 막지 못한다.
+
 ## UI 패널 시스템 (중요한 아키텍처 패턴)
 
 모든 오버레이 패널(`.overlay-panel`)은 `.map-wrap`(position:relative) 안에서 `position:absolute`로 배치된다. 각 패널은 `makePanelDraggable(panel, handle, onTapCallback)`로 드래그 가능하며, 사용자가 직접 옮기면 `panel.dataset.userMoved = '1'`이 설정되어 이후 자동 배치 로직이 그 패널을 건드리지 않는다.
@@ -46,6 +75,12 @@ dist/                    빌드 결과물 (git에는 커밋하지 않음, 매번
 - `layoutTopLeftPanels()` — 미션 패널 오른쪽에 화차선택 패널을 배치, 화차선택 패널의 스크롤 영역(`.cs-scroll-area`) 최대높이를 지도 상단 여백(y:-140~0)에 맞춰 동적 계산
 
 화차선택 패널 구조: `.ov-body` 안에 `.cs-scroll-area`(화차 목록, 스크롤됨)와 `.cs-action-row`(연결/분리 버튼, 항상 고정 표시)가 분리되어 있다 — 화차가 많이 연결되어 목록이 길어져도 버튼이 잘리지 않도록 하기 위함. 이 구조를 건드릴 땐 반드시 유지할 것.
+
+`.overlay-panel`은 `pointer-events:none`이고 자식만 `auto`다 — 패널의 빈 배경으로 클릭을 통과시켜 그 아래 선로·화차를 누를 수 있게 하는 장치다. 배경·테두리를 바꿀 때 이 두 줄은 건드리지 말 것.
+
+`--panel-alpha`: `.overlay-panel`의 배경 알파를 ◐ 버튼 5개(`bindOpacityBtn`)가 이 CSS 변수로 조절한다. 배경을 다른 값으로 덮어쓸 땐 알파 자리에 `calc(var(--panel-alpha,.86) * N)` 형태로 변수를 살려둬야 투명도 버튼이 계속 작동한다.
+
+`.map-wrap`에는 **절대 `z-index`를 주지 않는다.** 쌓임 맥락이 생기면 그 안의 오버레이 패널(z:20)이 통째로 한 층에 갇혀 조작 패드(30)·상단 버튼(70) 아래로 내려간다.
 
 ## 게임 시스템
 

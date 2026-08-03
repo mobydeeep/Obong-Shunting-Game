@@ -20,11 +20,15 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const PORT = 8765;
-const ROOT = path.resolve(import.meta.dirname, '..');
+const REPO_ROOT = path.resolve(import.meta.dirname, '..');
 const SHOT_DIR = '/tmp/ui-shots';
 
 // ---------------------------------------------------------------- 기준값
-const FONT_MIN = 10;      // 모바일 절대 하한(px)
+// 폰트 하한은 기기별로 다르다. 데스크톱은 .pad-legend(8.5px) 같은 보조 문구가
+// 정상이라, 모바일 하한 10을 그대로 들이대면 매번 오탐이 수십 건 쏟아져
+// 리포트를 안 읽게 된다.
+const FONT_MIN_MOBILE = 10;
+const FONT_MIN_DESKTOP = 8;
 const TOUCH_MIN = 44;     // 터치 타깃 권장 최소(px)
 const OVERLAP_MAX = 4;    // 이 면적(px^2)을 넘게 겹치면 실패
 
@@ -209,6 +213,9 @@ const AUDIT_FN = ({ fontMin, touchMin, overlapMax, touchWhitelist }) => {
     '#gameStartBtn', '#gameEndBtn', '#homeBtn', '#rankToggleBtn', '#tutorialToggleBtn',
     '#musicToggleBtn', '#adminToggleBtn', '#installBtn',
     '#missionPanel', '#carSelectPanel', '#hudPanel', '#statusPanel',
+    // #controlPad는 데스크톱에서 제일 큰 요소인데 그동안 감시 밖이었다.
+    // 이게 없으면 패드↔HUD, 패드↔제작자표기 겹침을 못 잡는다.
+    '#controlPad',
     '.pad-left', '.pad-right', '.credit-tag', '#actionToast',
   ];
   const boxes = [];
@@ -381,13 +388,20 @@ function parseArgs(){
     profile: get('--profile'),
     state: get('--state'),
     label: get('--label') || 'run',
+    // 검사할 사본의 경로. 한 번 도는 데 15~30분이 걸리므로, 스냅샷을 떠서
+    // 그쪽을 검사하게 하면 그동안 저장소의 index.html을 계속 편집할 수 있다.
+    root: get('--root'),
+    port: Number(get('--port')) || PORT,
     quiet: a.includes('--quiet'),
   };
 }
 
 async function main(){
   const args = parseArgs();
-  const server = spawn('python3', ['-m', 'http.server', String(PORT)], { cwd: ROOT, stdio: 'ignore' });
+  const root = args.root ? path.resolve(args.root) : REPO_ROOT;
+  const port = args.port;
+  console.log(`검사 대상: ${root}  (포트 ${port})`);
+  const server = spawn('python3', ['-m', 'http.server', String(port)], { cwd: root, stdio: 'ignore' });
   await new Promise(r => setTimeout(r, 900));
 
   // --profile / --state 는 쉼표로 여러 개 지정할 수 있다
@@ -421,6 +435,19 @@ async function main(){
 
       for(const st of states){
         const page = await ctx.newPage();
+        // 난수 고정. 게임은 화차 번호(genCarNumber)·야드 초기 배치·미션 생성·NPC 배회를
+        // 전부 Math.random()으로 만들기 때문에, 이걸 두면 같은 화면을 두 번 찍어도
+        // 야드가 달라져서 "이전 대비 안 변했는가"를 스크린샷으로 확인할 수 없다.
+        // addInitScript는 페이지 스크립트보다 먼저 돌므로 게임이 첫 난수를 뽑기 전에 갈아끼운다.
+        await page.addInitScript(() => {
+          let s = 0x9e3779b9;                      // 고정 시드
+          Math.random = function(){                // mulberry32
+            s |= 0; s = (s + 0x6D2B79F5) | 0;
+            let t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+        });
         // 이 하네스는 실서비스 Firebase 랭킹에 절대 쓰면 안 된다.
         // S10(사고)이나 미션 완료가 updateRankRecord -> saveRankRecords -> firebaseDb.set 을 타고
         // 공용 기록을 덮어쓴 적이 있다. SDK를 window.firebase 수준에서 감싸는 방식은
@@ -430,15 +457,26 @@ async function main(){
         page.on('pageerror', e => {
           results.push({ profile: prof.name, state: st.id, jsError: String(e).slice(0, 200) });
         });
-        await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'load' });
+        await page.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
         await page.waitForTimeout(400);
         try{ await st.setup(page); }catch(e){ /* 상태 구성 실패는 아래 audit에서 드러난다 */ }
         await page.waitForTimeout(200);
 
         const audit = await page.evaluate(AUDIT_FN, {
-          fontMin: FONT_MIN, touchMin: TOUCH_MIN, overlapMax: OVERLAP_MAX,
+          fontMin: prof.mobile ? FONT_MIN_MOBILE : FONT_MIN_DESKTOP,
+          touchMin: TOUCH_MIN, overlapMax: OVERLAP_MAX,
           touchWhitelist: [...TOUCH_WHITELIST],
         });
+        // 스크린샷 직전에 화면을 "정지"시킨다. 이걸 안 하면 같은 코드로 두 번 찍어도
+        // 픽셀이 달라져서 "이전 대비 안 변했는가"를 PNG 비교로 확인할 수 없다.
+        //   - 애니메이션/전환: btnShine(3.2s)·ringSpin(6s)·hornPop
+        //   - NPC(수송원·본선직원): 시간에 따라 계속 걸어다닌다. 실측 결과 난수를 고정한
+        //     뒤에도 화면 차이의 유일한 원인이 이것이었다(55x93px, 전체의 0.18%).
+        //     NPC 그림 자체를 확인해야 할 땐 이 하네스 말고 별도 스크린샷을 쓸 것.
+        await page.addStyleTag({ content:
+          '*,*::before,*::after{animation:none!important;transition:none!important}' +
+          '#workerFigure,#mainWorkerFigure{visibility:hidden!important}' });
+        await page.waitForTimeout(60);
         await page.screenshot({ path: path.join(dir, `${st.id}.png`) });
         await page.close();
 

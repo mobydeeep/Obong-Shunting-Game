@@ -65,7 +65,6 @@
     -webkit-background-clip:text; background-clip:text; color:transparent;
     text-shadow:0 0 24px rgba(0,178,227,.25);
   }
-  .sub{font-size:11px; color:var(--text-soft); margin-bottom:10px; text-align:center;}
   .map-wrap{
     position:relative;
     background:var(--canvas-bg); border:1px solid #24466e;
@@ -87,11 +86,11 @@
   .track-label{ fill:#e8edf3; font-size:13px; font-weight:bold; }
   .facility-label{ fill:rgba(255,255,255,.35); font-size:9px; font-weight:600; }
   /* 밝은 지반 위에서는 흰 반투명 글자·점선이 보이지 않는다 */
-  body.mobile-landscape .facility-label{
+  body.skin .facility-label{
     fill:#fff !important; font-size:12px; font-weight:800;
     stroke:rgba(10,18,32,.8) !important; stroke-width:2.6px !important;
   }
-  body.mobile-landscape .facility-box{
+  body.skin .facility-box{
     fill:rgba(255,255,255,.22) !important;
     stroke:rgba(255,255,255,.7) !important;
     stroke-width:2 !important; stroke-dasharray:none !important;
@@ -103,37 +102,37 @@
   .car-num{ fill:#1a2233; font-weight:700; }
   /* 11) 밝은 팝업 위에서 흐려 보이던 글자들.
      튜토리얼·랭킹 패널은 .overlay-panel이 아니라서 앞의 글자색 규칙이 안 먹었다. */
-  body.mobile-landscape .tutorial-panel,
-  body.mobile-landscape .tutorial-panel *{ color:#22304a; }
-  body.mobile-landscape .tutorial-head b{ color:#12405c; }
-  body.mobile-landscape .tut-skip-btn{
+  body.skin .tutorial-panel,
+  body.skin .tutorial-panel *{ color:#22304a; }
+  body.skin .tutorial-head b{ color:#12405c; }
+  body.skin .tut-skip-btn{
     color:#3c4a66 !important; border-color:#9aa8bd !important;
     background:rgba(255,255,255,.5) !important;
   }
-  body.mobile-landscape .tut-step-label{ color:#3c4a66 !important; }
-  body.mobile-landscape .tut-nav-btn{
+  body.skin .tut-step-label{ color:#3c4a66 !important; }
+  body.skin .tut-nav-btn{
     background:rgba(255,255,255,.62) !important; border-color:#9aa8bd !important;
     color:#22304a !important;
   }
-  body.mobile-landscape .tut-nav-btn.primary{
+  body.skin .tut-nav-btn.primary{
     background:linear-gradient(180deg,#2f7fd6,#1c5fae) !important;
     border-color:#12406f !important; color:#fff !important;
   }
-  body.mobile-landscape .tut-nav-btn:disabled{ opacity:.4; }
-  body.mobile-landscape .tut-title{ color:#12556f !important; }
-  body.mobile-landscape .key-badge{
+  body.skin .tut-nav-btn:disabled{ opacity:.4; }
+  body.skin .tut-title{ color:#12556f !important; }
+  body.skin .key-badge{
     background:linear-gradient(180deg,#e9eef7,#cdd7e6) !important;
     border-color:#9aa8bd !important; color:#22304a !important;
   }
-  body.mobile-landscape .rank-panel,
-  body.mobile-landscape .rank-panel *{ color:#22304a; }
-  body.mobile-landscape .rank-table th{ color:#12556f !important; }
-  body.mobile-landscape .rank-table td.bad-col{ color:#a33 !important; }
-  body.mobile-landscape .rank-page-btn{
+  body.skin .rank-panel,
+  body.skin .rank-panel *{ color:#22304a; }
+  body.skin .rank-table th{ color:#12556f !important; }
+  body.skin .rank-table td.bad-col{ color:#a33 !important; }
+  body.skin .rank-page-btn{
     background:rgba(255,255,255,.62) !important; border-color:#9aa8bd !important;
     color:#22304a !important;
   }
-  body.mobile-landscape .admin-close-btn{ color:#22304a !important; }
+  body.skin .admin-close-btn{ color:#22304a !important; }
   /* 미션 노트: 숫자 칸이 노트 밖으로 밀리지 않게 */
   body.mobile-landscape .mission-col-sign{ flex:0 0 34%; }
 
@@ -165,11 +164,15 @@
   body.mobile-landscape .rank-table{ font-size:10px !important; }
   body.mobile-landscape .rank-table th{ padding:4px 3px !important; font-size:10px !important; }
   body.mobile-landscape .rank-table td{ padding:4px 3px !important; }
-  body.mobile-landscape .rank-detail-btn{
+  /* 제작자 표기: PC는 일러스트 위에 앉으므로 대비를 조금 준다.
+     폰은 사용자가 "흐릿하지만 보이게"를 요청한 상태이므로 건드리지 않는다. */
+  body.skin:not(.mobile-landscape) .credit-tag{ color:#dfe7f2 !important; text-shadow:0 1px 3px rgba(0,0,0,.85); }
+  body.skin .rank-detail-btn{
     background:rgba(255,255,255,.5) !important; border-color:rgba(180,150,90,.5) !important;
-    color:#3a4a66 !important; padding:5px 12px !important;
+    color:#3a4a66 !important;
     position:relative;
   }
+  body.mobile-landscape .rank-detail-btn{ padding:5px 12px !important; }
   /* 보이는 크기는 그대로 두고 손가락이 닿는 범위만 넓힌다 */
   body.mobile-landscape .rank-detail-btn::after{ content:''; position:absolute; inset:-10px; }
   body.mobile-landscape .rank-page-btn{ padding:6px 12px !important; font-size:11px !important; }
@@ -209,50 +212,51 @@
 
   /* NPC: 모바일에서는 그림으로 교체 */
   .npc-img{ display:none; }
-  body.mobile-landscape #workerFigure > *,
-  body.mobile-landscape #mainWorkerFigure > *{ display:none; }
-  body.mobile-landscape #workerFigure > .npc-img,
-  body.mobile-landscape #mainWorkerFigure > .npc-img{ display:block; }
+  body.skin #workerFigure > *,
+  body.skin #mainWorkerFigure > *{ display:none; }
+  body.skin #workerFigure > .npc-img,
+  body.skin #mainWorkerFigure > .npc-img{ display:block; }
 
   /* 양회화차: 모바일에서는 그림으로 교체 (기관차와 같은 방식) */
   .car-img, .car-tint{ display:none; }
-  body.mobile-landscape .car-hopper .body,
-  body.mobile-landscape .car-hopper .car-seam{ display:none; }
-  body.mobile-landscape .car-img{ display:block; }
+  body.skin .car-hopper .body,
+  body.skin .car-hopper .car-seam{ display:none; }
+  body.skin .car-img{ display:block; }
   /* 상태 표시: 화차 그림을 가리지 않도록 옅은 색 + 테두리로만 표시
      (연결=파랑, 선택=노랑, 불량=빨강) */
-  body.mobile-landscape .car-hopper.attached .car-tint,
-  body.mobile-landscape .car-hopper.selected .car-tint,
-  body.mobile-landscape .car-hopper.defect .car-tint{ display:block; stroke-width:1.2; }
-  body.mobile-landscape .car-hopper.attached .car-tint{ fill:#00B2E3; fill-opacity:.22; stroke:#0077a8; }
-  body.mobile-landscape .car-hopper.selected .car-tint{ fill:#f0b429; fill-opacity:.30; stroke:#a87c22; }
-  body.mobile-landscape .car-hopper.defect .car-tint{ fill:#e05555; fill-opacity:.30; stroke:#8a1f1f; }
+  body.skin .car-hopper.attached .car-tint,
+  body.skin .car-hopper.selected .car-tint,
+  body.skin .car-hopper.defect .car-tint{ display:block; stroke-width:1.2; }
+  body.skin .car-hopper.attached .car-tint{ fill:#00B2E3; fill-opacity:.22; stroke:#0077a8; }
+  body.skin .car-hopper.selected .car-tint{ fill:#f0b429; fill-opacity:.30; stroke:#a87c22; }
+  body.skin .car-hopper.defect .car-tint{ fill:#e05555; fill-opacity:.30; stroke:#8a1f1f; }
 
   /* 기관차: 모바일에서는 그림으로 교체 (도형은 감추고 hornFx는 남긴다) */
   .loco-img{ display:none; }
-  body.mobile-landscape #engineNode > *{ display:none; }
-  body.mobile-landscape #engineNode > .loco-img,
-  body.mobile-landscape #engineNode > .horn-fx{ display:block; }
-  body.mobile-landscape #engineNode.engine-selected .loco-img{
+  body.skin #engineNode > *{ display:none; }
+  body.skin #engineNode > .loco-img,
+  body.skin #engineNode > .horn-fx{ display:block; }
+  body.skin #engineNode.engine-selected .loco-img{
     filter:drop-shadow(0 0 3px #ffd54a) drop-shadow(0 0 6px #ffb300);
   }
 
   /* 지반 배경판 — 데스크톱은 원래 어두운 배경이라 필요 없다 */
   #groundGroup{ display:none; }
-  body.mobile-landscape #groundGroup{ display:block; }
+  body.skin #groundGroup{ display:block; }
     /* 흰색으로 아주 옅게 — 배경 일러스트가 그대로 보이면서 선로 영역만 살짝 밝아진다 */
   .ground-plate{ fill:rgba(255,255,255,.30); stroke:none; }
   /* 밝은 배경 위에서는 어두운 글자가 묻힌다 — 흰 글자에 진한 외곽선 */
   /* 원·화차 위에 얹히는 흰 글자들은 흰 외곽선을 쓰면 사라진다 — 어두운 외곽선으로 */
-  body.mobile-landscape .switch-num,
-  body.mobile-landscape .switch-state,
-  body.mobile-landscape .car-num{
+  body.skin .switch-num,
+  body.skin .switch-state,
+  body.skin .car-num{
     fill:#fff !important;
     paint-order:stroke fill; stroke:rgba(8,14,26,.9) !important; stroke-width:2px !important;
     stroke-linejoin:round;
   }
-  /* 화차 간격(24)보다 번호가 길면 옆 화차 번호와 붙어 읽을 수 없다 — 모바일에선 한 단계 작게 */
-  body.mobile-landscape .car-num{ stroke-width:1.2px !important; font-size:5px; }
+  /* 화차 간격(24)보다 번호가 길면 옆 화차 번호와 붙어 읽을 수 없다.
+     화면 크기가 아니라 화차 그림 간격이 원인이므로 PC에도 똑같이 적용한다. */
+  body.skin .car-num{ stroke-width:1.2px !important; font-size:5px; }
   .select-ring{ fill:none; stroke:transparent; stroke-width:2.5; stroke-dasharray:4 3; }
   .select-ring.active{ stroke:var(--gold); filter:drop-shadow(0 0 4px rgba(201,151,47,.9)); animation:ringSpin 6s linear infinite; }
   @keyframes ringSpin{ to{ stroke-dashoffset:-40; } }
@@ -279,9 +283,6 @@
   .overlay-panel.tr{ top:8px; right:8px; }
   .overlay-panel.bl{ bottom:8px; left:8px; }
 
-  .key-board{ width:198px; }
-  .key-row{ display:flex; align-items:center; gap:8px; padding:3px 0; }
-  .key-row.sub{ color:#8b98a8; font-size:10px; padding-top:6px; border-top:1px solid rgba(255,255,255,.08); margin-top:4px; }
   .key-badge{
     display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:20px;
     padding:0 6px; border-radius:6px; background:linear-gradient(180deg,#3a4460,#2a3350);
@@ -289,7 +290,6 @@
     color:#dbe6ff; font-size:11px; font-weight:800; font-family:inherit;
   }
   .key-badge.wide{ min-width:52px; }
-  .key-desc{ font-size:11px; color:#c7d2e0; }
   .drag-handle{ cursor:grab; }
   .drag-handle:active{ cursor:grabbing; }
   .pad-grip{
@@ -394,8 +394,6 @@
   .hud-item .value{ font-size:11px; font-weight:800; color:#e8edf3; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hud-item .value.speed{ color:#4ade80; }
   .hud-item .value.warn{ color:#f0b429; }
-  .key-legend{ margin-top:8px; font-size:10px; color:#8b98a8; line-height:1.5; }
-  .key-legend b{ color:#8FE6F5; }
 
   /* ---- 시작 오버레이 ---- */
   .start-overlay{
@@ -699,21 +697,25 @@
   .tut-icon{ width:80px; height:60px; flex:none; }
   /* 수송원이 옆에서 설명해주는 모양 */
   .tut-speaker{ display:none; }
-  body.mobile-landscape .tut-speaker{
+  body.skin .tut-speaker{
     display:block; width:46px; height:auto; flex:none; align-self:flex-end;
     margin-right:2px;
     filter:drop-shadow(0 2px 5px rgba(0,0,0,.4));
   }
-  body.mobile-landscape .tut-text{
+  body.skin .tut-text{
     background:rgba(255,255,255,.34); border:1.5px solid rgba(255,236,175,.7);
     border-radius:12px; padding:8px 10px; position:relative;
   }
   /* 말풍선 꼬리 */
-  body.mobile-landscape .tut-text::before{
+  body.skin .tut-text::before{
     content:''; position:absolute; left:-7px; bottom:14px;
     border-top:6px solid transparent; border-bottom:6px solid transparent;
     border-right:8px solid rgba(255,255,255,.34);
   }
+  /* PC는 8장이 한 화면에 격자로 깔린다. 카드마다 수송원을 세우면 같은 캐릭터가
+     여덟 번 반복돼 산만하므로 첫 장에만 남긴다(말풍선은 전부 유지). */
+  body.skin:not(.mobile-landscape) .tut-card:not(:first-child) .tut-speaker{ display:none; }
+  body.skin:not(.mobile-landscape) .tut-speaker{ width:56px; }
 
   /* 실제 게임 그림을 쓰는 튜토리얼 아이콘 */
   .tut-icon-row{ display:flex; align-items:center; justify-content:center; gap:6px; }
@@ -894,7 +896,6 @@
   @media (max-width: 760px){
     body{ padding:8px; padding-bottom:112px; }
     h1{ font-size:14px; }
-    .sub{ font-size:10px; margin-bottom:8px; }
     .desktop-pad{ display:none !important; }
     .mobile-pad{ display:grid; }
     .credit-tag{ bottom:auto; top:8px; right:auto; left:50%; transform:translateX(-50%); font-size:9px; }
@@ -923,8 +924,6 @@
     .hud-item{ padding:4px 6px; }
     .hud-item .label{ font-size:7.5px; }
     .hud-item .value{ font-size:10px; }
-    .key-legend{ display:none; } /* 모바일에서는 하단바로 대체하므로 키 설명 숨김 */
-    .key-board{ display:none; } /* 모바일에서는 조작키 안내 패널 제거 */
     .status-panel table{ font-size:9.5px; }
     .control-pad.overlay-panel.br{ display:none; } /* 모바일은 하단 고정바를 사용 */
 
@@ -974,6 +973,24 @@
     display:flex !important;
   }
 
+  /* ================================================================
+     접두사 규약 (CLAUDE.md에도 같은 표가 있다)
+
+       body.skin              디자인. PC·폰 공통, 항상 켜져 있다.
+                              배경 일러스트 / 크림 패널 / 캐릭터·화차 그림 / 금색 버튼
+       body.mobile-landscape  좁은 화면 사정. 글자 축소, 요소 숨김, 위치·크기 고정
+       body.is-mobile         터치 사정. 히트영역 확장, 조작 안내 문구 전환
+
+     규칙: position / top·right·bottom·left / width·height·max-* / transform / inset
+     선언은 절대 body.skin에 넣지 않는다. 이 속성들은 JS가 인라인 스타일로 쓰기 때문에
+     (makePanelDraggable, layoutTopLeftPanels, layoutBottomRightPanels, fitMapToViewport)
+     !important가 전 기기에 걸리면 패널 드래그가 먹통이 된다.
+
+     skin과 mobile-landscape는 명시도(0,2,0)가 같고 소스 위치도 그대로라,
+     접두사 교체는 폰 화면을 바꿀 수 없다. 접두사를 아예 지워 전역화하면
+     명시도가 0,1,0으로 떨어져 예전 어두운 규칙이 이길 수 있으므로 하지 말 것.
+     ================================================================ */
+
   /* ---- 가로(랜드스케이프) 모바일: 진짜 게임 화면처럼 재배치 — 조작은 우측 세로 스트립, 정보는 좌측 콤팩트 ---- */
   body.mobile-landscape{
     padding:0 !important; display:block !important;
@@ -984,9 +1001,7 @@
   }
   body.mobile-landscape .desktop-pad{ display:none !important; }
   body.mobile-landscape h1,
-  body.mobile-landscape .sub,
-  body.mobile-landscape .start-howto,
-  body.mobile-landscape .key-legend{ display:none !important; }
+  body.mobile-landscape .start-howto{ display:none !important; }
   /* 모바일에서는 관리자 버튼을 노출하지 않는다(오조작 방지 + 상단 공간 확보) */
   body.is-mobile .admin-toggle-btn{ display:none !important; }
 
@@ -1026,34 +1041,46 @@
     /* display에 !important를 주면 안 된다 — 인라인 display:none으로 숨기는 로직을
        덮어써서 시작·종료 버튼이 동시에 보이게 된다 */
     align-items:center; justify-content:center; border-radius:20px; line-height:40px;
+  }
+  /* 색은 PC·폰 공통. 위치·크기는 위 블록(모바일)에만 둔다. */
+  body.skin .game-toggle-btn{
     background:linear-gradient(180deg,#fffdf5,#f2e3c2) !important;
     border:2.5px solid #d9a441 !important;
     box-shadow:0 4px 0 #b9863098, 0 6px 14px rgba(0,0,0,.3) !important;
     color:#263a5e;
   }
-  body.mobile-landscape .game-toggle-btn.danger{
+  body.skin .game-toggle-btn.danger{
     background:linear-gradient(180deg,#a41f1f,#6d1010) !important;
     border-color:#ff9c9c !important; color:#ffe4e4;
   }
   /* 상단 아이콘 버튼도 밝은 배경에서 또렷하게 */
   /* 참고 이미지: 크림색 바탕 + 금색 테두리 + 진한 남색 글자 */
-  body.mobile-landscape .rank-toggle-btn,
-  body.mobile-landscape .home-toggle-btn,
-  body.mobile-landscape .tutorial-toggle-btn,
-  body.mobile-landscape .music-toggle-btn{
+  body.skin .rank-toggle-btn,
+  body.skin .home-toggle-btn,
+  body.skin .tutorial-toggle-btn,
+  body.skin .music-toggle-btn{
     background:linear-gradient(180deg,#fffdf5,#f2e3c2) !important;
     border:2.5px solid #d9a441 !important;
     box-shadow:0 3px 0 #b9863098, 0 5px 12px rgba(0,0,0,.28) !important;
     color:#263a5e !important;
   }
-  body.mobile-landscape .music-toggle-btn.muted{ color:#8b7d63 !important; }
+  body.skin .music-toggle-btn.muted{ color:#8b7d63 !important; }
+  /* Admin 버튼도 같은 계열이되 한 단계 차분하게 — 게임 조작이 아니라 관리 기능이다 */
+  body.skin .admin-toggle-btn{
+    background:linear-gradient(180deg,#f6f1e2,#e3d7bd) !important;
+    border:2px solid #c2a260 !important;
+    box-shadow:0 3px 0 #a98f5a80, 0 4px 10px rgba(0,0,0,.22) !important;
+    color:#4a5a78 !important;
+  }
+  body.skin .admin-toggle-btn:hover{ background:linear-gradient(180deg,#fffdf5,#eee3c9) !important; }
   body.mobile-landscape .game-toggle-btn .btn-label{ display:none; }
   .game-toggle-btn .btn-short{ display:none; }
   body.mobile-landscape .game-toggle-btn .btn-short{ display:inline; }
 
   /* 튜토리얼 패널: 가로 모바일은 세로 공간이 좁으므로 전체적으로 축소.
      한 번에 한 장만 보이므로 폭을 좁혀 가로로 길쭉하지 않게 하고, 배경은 반투명 처리 */
-  body.mobile-landscape .tutorial-overlay{ padding:8px; background:rgba(6,9,16,.22); }
+  body.skin .tutorial-overlay{ background:rgba(6,9,16,.22); }
+  body.mobile-landscape .tutorial-overlay{ padding:8px; }
   body.mobile-landscape .tutorial-panel{
     width:min(430px, 88vw); max-height:94vh; padding:12px 14px; border-radius:16px;
     background:rgba(20,27,44,.80); border-color:rgba(77,212,239,.22);
@@ -1068,33 +1095,46 @@
   body.mobile-landscape .tut-title{ font-size:12px; }
   body.mobile-landscape .tut-desc{ font-size:11px; line-height:1.65; }
   /* 밝은 크림색 말풍선 위에서는 흰색·연노랑 레벨 글자가 안 보인다 */
-  body.mobile-landscape .tut-desc .lv-white{ color:#3d4a63 !important; }
-  body.mobile-landscape .tut-desc .lv-pale{ color:#b08900 !important; }
+  /* 밝은 크림 말풍선 위에서는 흰색·연노랑 레벨 글자가 사라진다 (PC·폰 공통) */
+  body.skin .tut-desc .lv-white{ color:#3d4a63 !important; }
+  body.skin .tut-desc .lv-pale{ color:#b08900 !important; }
   body.mobile-landscape .tut-desc br{ margin-top:6px; }
   body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
   /* 지도를 화면 전체로. z-index는 절대 주지 말 것(위 62행 주석 참고) */
   /* 배경 일러스트 위에서는 SVG의 어두운 배경판을 걷어내고,
      밝은 하늘·잔디 위에서도 글자가 읽히도록 외곽선을 준다. */
-  body.mobile-landscape .map-bg{ display:none; }
+  body.skin .map-bg{ display:none; }
   /* 지반 배경판 위(양회기지·본선)는 밝으므로 글자는 진한 색 + 흰 외곽선이 읽기 좋다.
      지반 밖(하늘·잔디)에 걸리는 글자도 같은 처리로 대비가 확보된다. */
-  body.mobile-landscape #trackSvg text{
+  body.skin #trackSvg text{
     paint-order:stroke fill;
     stroke:rgba(10,18,32,.85); stroke-width:2.8px; stroke-linejoin:round;
   }
-  body.mobile-landscape .track-label,
-  body.mobile-landscape .main-label,
-  body.mobile-landscape .zone-label{ fill:#fff; }
+  body.skin .track-label,
+  body.skin .main-label,
+  body.skin .zone-label{ fill:#fff; }
+  /* 좁은 PC 창(900px 등)에서는 야드 전체가 작게 그려져 글자가 7~8px까지 내려간다.
+     이때 외곽선 2.8은 획을 파먹어 오히려 안 읽힌다. 폰은 카메라가 확대돼 있어 해당 없음. */
+  @media (max-width:1100px){
+    body.skin:not(.mobile-landscape) #trackSvg text{ stroke-width:1.8px; }
+    body.skin:not(.mobile-landscape) .facility-label{ stroke-width:1.8px !important; }
+  }
   /* 배경 일러스트. 지도(SVG)는 이 위에 투명하게 얹힌다. */
-  body.mobile-landscape{
+  body.skin{
     background:#7ec8f0 url('assets/bg-game.jpg') center/cover no-repeat fixed !important;
   }
-  body.mobile-landscape .map-wrap{
+  /* 디자인: 배경 일러스트가 비치도록 지도 상자를 투명하게. 크기·위치는 건드리지 않는다.
+     데스크톱은 overflow:hidden(기본값)을 유지해야 오버레이 패널이 상자 밖으로 안 삐져나온다. */
+  body.skin .map-wrap{
     background:transparent !important;
+    border:none !important; box-shadow:none !important;
+  }
+  /* 폰 레이아웃: 지도를 화면 전체로. z-index는 절대 주지 말 것(위 z 계층표 주석 참고) */
+  body.mobile-landscape .map-wrap{
     position:fixed !important; inset:0;
     width:100vw !important; height:100vh !important; margin:0 !important;
-    border:none !important; border-radius:0 !important; box-shadow:none !important;
+    border-radius:0 !important;
     overflow:visible !important;
   }
 
@@ -1211,7 +1251,7 @@
        세로 사용가능 비율 397/520 = 0.7635 -> height 131.0%, top  -(54/520)/0.7635 = -13.6%
      (absolute 요소의 left/width는 컨테이너 너비, top/height는 컨테이너 높이 기준)
      이렇게 하면 패널 크기가 어떻게 변해도 글자는 항상 속지 안에 머문다. */
-  body.mobile-landscape .mission-note-bg{
+  body.skin .mission-note-bg{
     display:block; position:absolute;
     left:-22.9%; top:-13.6%; width:152.7%; height:131.0%;
     object-fit:fill;
@@ -1219,16 +1259,24 @@
     opacity:.72;                                   /* 반투명 */
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
   }
-  body.mobile-landscape .mission-panel.overlay-panel{
+  /* 노트 그림이 배경 역할을 하므로 패널 자체의 카드 스타일은 지운다. */
+  body.skin .mission-panel.overlay-panel{
     background:none !important; border:none !important; box-shadow:none !important;
     -webkit-backdrop-filter:none; backdrop-filter:none;
     /* 속지 안쪽 여백. 위 계산이 속지=패널상자를 보장하므로 사방 균등하게 준다. */
     padding:8px 10px !important;
-    top:48px !important; bottom:auto !important; left:14px !important; width:186px !important;
-    max-width:186px !important;
-    /* 화면이 짧은 기기에서 좌측 하단 제작자 표시·조작버튼까지 내려오지 않도록 비율로 제한 */
-    max-height:min(200px, 40vh);
     overflow:visible;
+  }
+  /* 폭은 반드시 고정해야 한다. max-width만 두면 내용 길이에 따라 폭이 출렁여
+     노트 그림이 같이 늘었다 줄었다 한다. */
+  body.mobile-landscape .mission-panel.overlay-panel{
+    top:48px !important; bottom:auto !important; left:14px !important;
+    width:186px !important; max-width:186px !important;
+    max-height:min(200px, 40vh);
+  }
+  body.skin:not(.mobile-landscape) .mission-panel.overlay-panel{
+    width:236px !important; max-width:236px !important;
+    max-height:min(340px, 48vh);
   }
   /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
      화면 오른쪽 밖으로 밀려나거나 우측 버튼 위로 겹치지 않게 한다 */
@@ -1240,26 +1288,35 @@
   body.mobile-landscape .car-select-panel .car-btn{ font-size:12px; padding:9px 12px; border-radius:8px; }
   body.mobile-landscape .car-select-panel .cs-small-btn{ font-size:12px; padding:11px 6px; border-radius:8px; }
   /* 노트 줄처럼 보이도록: 배경 없이 밑줄만, 좌측=선로명 / 우측=증감 */
-  body.mobile-landscape .mission-format-line{
-    font-size:10px !important; line-height:1.35; padding:5px 2px; gap:6px;
+  body.skin .mission-format-line{
+    line-height:1.35; padding:5px 2px; gap:6px;
     background:none !important; border-radius:0 !important;
     border-bottom:1px solid rgba(120,100,70,.32);
   }
-  body.mobile-landscape .mission-col-sign{
+  body.mobile-landscape .mission-format-line{ font-size:10px !important; }
+  body.skin:not(.mobile-landscape) .mission-format-line{ font-size:11.5px !important; }
+  body.skin .mission-col-sign{
     border-left:none !important; padding-left:6px; text-align:right; flex:0 0 40%;
   }
-  body.mobile-landscape .mission-col-track{ flex:1 1 60%; }
-  body.mobile-landscape .mission-format-line span{ color:#3b2f1c !important; font-weight:700; }
-  body.mobile-landscape .mission-format-line span.done{ color:#7a6a4a !important; }
-  body.mobile-landscape .mission-panel .ov-head{ color:#3b2f1c !important; font-size:13px; }
-  body.mobile-landscape .mission-panel .ov-head *{ color:#3b2f1c !important; }
-  body.mobile-landscape .mission-panel .ov-btns{ display:none; }  /* 노트에는 버튼을 두지 않는다 */
+  body.skin .mission-col-track{ flex:1 1 60%; }
+  body.skin .mission-format-line span{ color:#3b2f1c !important; font-weight:700; }
+  body.skin .mission-format-line span.done{ color:#7a6a4a !important; }
+  body.skin .mission-panel .ov-head{ color:#3b2f1c !important; font-size:13px; }
+  body.skin .mission-panel .ov-head *{ color:#3b2f1c !important; }
+  body.skin .mission-panel .ov-btns{ display:none; }  /* 노트에는 버튼을 두지 않는다 */
+  /* 경과시간·선로이동도 노트 위에 올라가므로 같은 잉크색·밑줄 스타일로 */
+  body.skin .mission-panel .mission-stat{
+    background:none !important; border:none !important;
+    border-bottom:1px solid rgba(120,100,70,.32) !important; border-radius:0 !important;
+  }
+  body.skin .mission-panel .mission-stat .label{ color:#7a6a4a !important; }
+  body.skin .mission-panel .mission-stat .value{ color:#3b2f1c !important; }
   /* 접으면 노트를 통째로 감추고 책 아이콘 하나만 남긴다 (다른 상단 버튼과 같은 모양) */
-  body.mobile-landscape .mission-panel.collapsed .ov-body,
-  body.mobile-landscape .mission-panel.collapsed .mission-note-bg,
-  body.mobile-landscape .mission-panel.collapsed .mission-head-label{ display:none; }
+  body.skin .mission-panel.collapsed .ov-body,
+  body.skin .mission-panel.collapsed .mission-note-bg,
+  body.skin .mission-panel.collapsed .mission-head-label{ display:none; }
   /* .overlay-panel 공통 규칙이 아래에 있으므로 선택자를 한 단계 더 좁혀 이긴다 */
-  body.mobile-landscape .mission-panel.overlay-panel.collapsed{
+  body.skin .mission-panel.overlay-panel.collapsed{
     width:44px !important; max-width:44px !important; height:44px;
     padding:0 !important; border-radius:50% !important;
     background:linear-gradient(180deg,#fff3c4,#f5d98a) !important;
@@ -1267,56 +1324,124 @@
     box-shadow:0 3px 8px rgba(0,0,0,.35) !important;
     display:flex; align-items:center; justify-content:center;
   }
-  body.mobile-landscape .mission-panel.collapsed .ov-head{
+  body.skin .mission-panel.collapsed .ov-head{
     margin:0; padding:0; min-height:0; justify-content:center;
   }
-  body.mobile-landscape .mission-panel.collapsed .ov-btns{ display:none; }
-  body.mobile-landscape .mission-panel.collapsed .mission-icon{ font-size:22px; line-height:1; }
+  body.skin .mission-panel.collapsed .ov-btns{ display:none; }
+  body.skin .mission-panel.collapsed .mission-icon{ font-size:22px; line-height:1; }
   /* 미션 목록이 패널 높이를 넘으면 스크롤되게 하고, 각 줄은 칸 안에서 줄바꿈시킨다 */
-  body.mobile-landscape .mission-panel .ov-body{
-    max-height:calc(min(200px, 40vh) - 42px); overflow-y:auto; overflow-x:hidden;
-  }
+  body.skin .mission-panel .ov-body{ overflow-y:auto; overflow-x:hidden; }
+  body.mobile-landscape .mission-panel .ov-body{ max-height:calc(min(200px, 40vh) - 42px); }
+  body.skin:not(.mobile-landscape) .mission-panel .ov-body{ max-height:calc(min(340px, 48vh) - 46px); }
   body.mobile-landscape .mission-task-list{ gap:2px; }
-  /* ---- 패널 공통 색: 참고 이미지의 청록 계열, 배경이 비치도록 반투명 ---- */
-  body.mobile-landscape .overlay-panel,
-  body.mobile-landscape .mission-panel.overlay-panel,
-  body.mobile-landscape .car-select-panel.overlay-panel,
-  body.mobile-landscape .hud-panel.overlay-panel{
-    background:linear-gradient(180deg, rgba(255,244,205,.44), rgba(250,232,178,.48)) !important;
+  /* ---- 패널 공통 색: 크림 카드 (PC·폰 공통) ----
+     알파를 calc(var(--panel-alpha)) 로 쓰는 이유: ◐ 투명도 버튼 5개(bindOpacityBtn)가
+     이 CSS 변수로 패널 투명도를 조절한다. 고정값으로 덮으면 버튼이 조용히 죽는다. */
+  body.skin .overlay-panel,
+  body.skin .mission-panel.overlay-panel,
+  body.skin .car-select-panel.overlay-panel,
+  body.skin .hud-panel.overlay-panel{
+    background:linear-gradient(180deg,
+        rgba(255,244,205, calc(var(--panel-alpha,.86) * .52)),
+        rgba(250,232,178, calc(var(--panel-alpha,.86) * .56))) !important;
     border:2px solid rgba(255,236,175,.6) !important;
     border-radius:16px !important;
     box-shadow:0 6px 18px rgba(0,0,0,.3) !important;
     -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
   }
   /* 배경이 밝은 연노랑이므로 글자는 진한 남색. 흰 글자 + 검은 그림자는 읽히지 않는다. */
-  body.mobile-landscape .overlay-panel,
-  body.mobile-landscape .overlay-panel *{
+  body.skin .overlay-panel,
+  body.skin .overlay-panel *{
     color:#22304a;
     text-shadow:0 1px 2px rgba(255,255,255,.85);
   }
-  body.mobile-landscape .ov-head{ color:#1a2740; font-weight:800; }
-  body.mobile-landscape .ov-summary{ color:#33507a !important; }
-  body.mobile-landscape .hud-item .label{ color:#5a6a86 !important; }
-  body.mobile-landscape .hud-item .value{ color:#1a2740 !important; }
-  body.mobile-landscape .hud-item .value.speed{ color:#136b3a !important; }
-  body.mobile-landscape .mission-format-line span{ color:#22304a !important; }
-  body.mobile-landscape .mission-format-line span.done{ color:#137a44 !important; }
-  body.mobile-landscape .cs-section-label,
-  body.mobile-landscape .cs-hint{ color:#3a4a66 !important; }
-  body.mobile-landscape .car-btn{ color:#1a2740 !important; }
-  body.mobile-landscape .tut-title{ color:#0f5b7a !important; }
-  body.mobile-landscape .tut-desc{ color:#22304a !important; }
-  body.mobile-landscape .rank-table th{ color:#0f5b7a !important; }
-  body.mobile-landscape .rank-table td{ color:#22304a !important; }
-  body.mobile-landscape .mini-btn{ color:#3a4a66 !important; }
-  body.mobile-landscape .car-btn{
+  body.skin .ov-head{ color:#1a2740; font-weight:800; }
+  body.skin .ov-summary{ color:#33507a !important; }
+  body.skin .hud-item .label{ color:#5a6a86 !important; }
+  body.skin .hud-item .value{ color:#1a2740 !important; }
+  body.skin .hud-item .value.speed{ color:#136b3a !important; }
+  body.skin .mission-format-line span{ color:#22304a !important; }
+  body.skin .mission-format-line span.done{ color:#137a44 !important; }
+  body.skin .cs-section-label,
+  body.skin .cs-hint{ color:#3a4a66 !important; }
+  body.skin .car-btn{ color:#1a2740 !important; }
+  body.skin .tut-title{ color:#0f5b7a !important; }
+  body.skin .tut-desc{ color:#22304a !important; }
+  body.skin .rank-table th{ color:#0f5b7a !important; }
+  body.skin .rank-table td{ color:#22304a !important; }
+  body.skin .mini-btn{ color:#3a4a66 !important; }
+  body.skin .car-btn{
     background:rgba(255,248,220,.4) !important; border-color:rgba(255,236,175,.6) !important;
   }
-  body.mobile-landscape .car-btn.on{ background:#f0b429 !important; color:#1a1306 !important; }
-  body.mobile-landscape .hud-item{
+  body.skin .car-btn.on{ background:#f0b429 !important; color:#1a1306 !important; }
+  body.skin .hud-item{
     background:rgba(255,248,220,.34) !important; border:1px solid rgba(255,236,175,.5) !important;
     border-radius:10px;
   }
+
+  /* ---- 크림 패널 예외: PC에만 있는 요소들 ----
+     위의 `body.skin .overlay-panel *{ color:#22304a }`는 패널 안 "모든" 글자를 남색으로
+     바꾼다. 폰에서는 아래 요소들이 숨겨져 있어 문제가 없었지만, PC에서는 전부 보인다.
+     특히 #controlPad는 class에 overlay-panel이 들어 있어(마크업 참고) 조작 버튼 글자가
+     통째로 남색이 된다 — 파랑·빨강 버튼 위에서 안 읽힌다. */
+  body.skin .pad-btn,
+  body.skin .pad-btn *{
+    color:#fff !important;
+    text-shadow:0 1px 2px rgba(0,0,0,.45) !important;
+  }
+  body.skin .cs-small-btn.primary,
+  body.skin .cs-small-btn.primary *,
+  body.skin .cs-small-btn.ghost,
+  body.skin .cs-small-btn.ghost *{
+    color:#fff !important; text-shadow:0 1px 2px rgba(0,0,0,.4) !important;
+  }
+  body.skin .pad-grip{ color:#7a6a4a !important; }
+  body.skin .pad-legend{ color:#4a3f2a !important; }
+  body.skin .pad-legend b{ color:#12556f !important; }
+  body.skin .cs-hint{ color:#5a6a86 !important; }
+  /* 크림 위에서 5~10% 흰색 배경은 보이지 않는다 — 눈에 띄는 최소한의 대비를 준다 */
+  body.skin .mission-task,
+  body.skin .mission-stat{
+    background:rgba(255,255,255,.42) !important;
+    border:1px solid rgba(201,154,82,.35) !important;
+  }
+  body.skin .cs-section.cs-parked{ background:rgba(120,100,70,.10) !important; }
+  body.skin .cs-section.cs-attached{ background:rgba(0,140,190,.12) !important; }
+  /* 미니 버튼(◐·—)은 글자색만 바꾸면 크림 위에서 유령이 된다 — 배경·테두리도 함께 */
+  body.skin .mini-btn{
+    background:rgba(255,255,255,.55) !important;
+    border:1px solid rgba(180,150,90,.55) !important;
+  }
+  body.skin .mini-btn:hover{ background:rgba(255,255,255,.8) !important; }
+
+  /* ---- PC 전용 크롬 ---- */
+  /* 제목: 청록 그라데이션 글자는 하늘 배경 위에서 안 읽힌다 — 크림 알약으로.
+     주의: fitMapToViewport가 h1의 getBoundingClientRect().top으로 지도 높이를 잡으므로
+     세로 크기(font-size / margin)는 기존과 같게 유지한다. */
+  body.skin h1{
+    display:inline-block;
+    background:linear-gradient(180deg,#fffdf5,#f2e3c2);
+    -webkit-background-clip:border-box; background-clip:border-box;
+    color:#263a5e;
+    border:2.5px solid #d9a441;
+    border-radius:20px;
+    padding:3px 20px;
+    box-shadow:0 3px 0 #b9863098, 0 5px 12px rgba(0,0,0,.28);
+    text-shadow:none;
+  }
+  /* 개통 진로 표: 어두운 배경 전제의 청록·민트 색을 크림용으로 바꾼다 */
+  body.skin .status-panel th,
+  body.skin .status-panel td{ border-bottom-color:rgba(120,100,70,.30) !important; }
+  body.skin .status-panel th{ color:#5a6a86 !important; }
+  body.skin .status-panel td.num{ color:#12556f !important; }
+  body.skin .dest{ color:#137a44 !important; }
+  body.skin .dest-line{ border-top-color:rgba(120,100,70,.30) !important; }
+  /* 조작 패드 버튼: 모바일 이동 버튼과 같은 입체 어휘(두꺼운 아래 테두리 + 눌림) */
+  body.skin .pad-btn{
+    border-radius:8px; border-bottom-width:3px;
+    box-shadow:0 2px 6px rgba(0,0,0,.3);
+  }
+  body.skin .pad-btn:active{ transform:translateY(2px); border-bottom-width:1px; }
   /* HUD 캐릭터: 패널 왼쪽 밖으로 걸치게 세운다 (참고 이미지) */
   .hud-char{ display:none; }
   /* 요청: 운전 HUD와 화차선택 팝업은 당분간 숨긴다.
@@ -1328,45 +1453,67 @@
   body.mobile-landscape.show-carselect .car-select-panel.overlay-panel{ display:block !important; }
 
   /* HUD: 참고 이미지처럼 어두운 반투명 카드 + 좌측 캐릭터 */
-  body.mobile-landscape .hud-panel.overlay-panel{
-    overflow:visible; padding:4px 10px 5px 36px !important;
-    background:linear-gradient(180deg, rgba(38,52,48,.72), rgba(24,36,34,.78)) !important;
+  /* HUD만 유일하게 어두운 카드다. 위의 크림 규칙보다 뒤에 있어야 이긴다. */
+  body.skin .hud-panel.overlay-panel{
+    overflow:visible;
+    background:linear-gradient(180deg,
+        rgba(38,52,48, calc(var(--panel-alpha,.86) * .84)),
+        rgba(24,36,34, calc(var(--panel-alpha,.86) * .91))) !important;
     border:2px solid rgba(190,205,190,.45) !important;
     border-radius:14px !important;
   }
-  body.mobile-landscape .hud-panel .ov-head,
-  body.mobile-landscape .hud-panel .ov-head *,
-  body.mobile-landscape .hud-panel .ov-summary,
-  body.mobile-landscape .hud-panel .hud-item .value{
+  body.mobile-landscape .hud-panel.overlay-panel{ padding:4px 10px 5px 36px !important; }
+  /* PC는 HUD가 헤더 + 2열 4항목이라 세로가 훨씬 길다. 캐릭터 자리도 그만큼 넓게. */
+  body.skin:not(.mobile-landscape) .hud-panel.overlay-panel{ padding-left:44px !important; }
+  body.skin .hud-panel .ov-head,
+  body.skin .hud-panel .ov-head *,
+  body.skin .hud-panel .ov-summary,
+  body.skin .hud-panel .hud-item .value{
     color:#eaf6ee !important;
     text-shadow:0 1px 3px rgba(0,0,0,.85) !important;
   }
-  body.mobile-landscape .hud-panel .hud-item .label{ color:#a9c2b4 !important; text-shadow:0 1px 3px rgba(0,0,0,.85) !important; }
-  body.mobile-landscape .hud-panel .hud-item .value.speed{ color:#ffe066 !important; }
-  body.mobile-landscape .hud-panel .hud-item{
+  body.skin .hud-panel .hud-item .label{ color:#a9c2b4 !important; text-shadow:0 1px 3px rgba(0,0,0,.85) !important; }
+  body.skin .hud-panel .hud-item .value.speed{ color:#ffe066 !important; }
+  body.skin .hud-panel .hud-item{
     background:rgba(16,26,24,.5) !important; border:1px solid rgba(190,205,190,.3) !important;
   }
   /* 접힌 상태 요약: 속도계 이모지 + 속도 + 상태 */
   body.mobile-landscape .hud-panel .ov-summary{
     font-size:12px; font-weight:800; padding:0 2px 3px;
   }
-  body.mobile-landscape .hud-char{
-    display:block; position:absolute; left:-22px; bottom:-3px;
-    height:calc(100% + 14px); width:auto; pointer-events:none;
+  body.skin .hud-char{
+    display:block; position:absolute; width:auto; pointer-events:none;
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.45));
   }
+  /* 폰: HUD가 3열 한 줄(약 34px)이라 패널 높이에 비례시켜도 캐릭터가 작게 나온다 */
+  body.mobile-landscape .hud-char{ left:-22px; bottom:-3px; height:calc(100% + 14px); }
+  /* PC: 패널이 100px가 넘어 비례식을 쓰면 캐릭터가 114px까지 커져 지도 밖으로 잘린다.
+     절대값으로 고정한다. */
+  body.skin:not(.mobile-landscape) .hud-char{ left:-26px; bottom:-2px; height:66px; }
   body.mobile-landscape .hud-title-icon{ display:none; }
   body.mobile-landscape .hud-panel .ov-head{ justify-content:center; font-size:10.5px; padding:2px 6px; min-height:0; }
   /* 튜토리얼·랭킹은 전체 화면 오버레이라 별도 지정 */
-  body.mobile-landscape .tutorial-panel{
+  body.skin .tutorial-panel{
     background:linear-gradient(180deg, rgba(255,244,205,.30), rgba(250,232,178,.34)) !important;
     border:2px solid rgba(255,236,175,.6) !important;
   }
-  body.mobile-landscape .tut-card{
+  /* PC는 8장이 한꺼번에 뜨고 뒤에 지도가 꽉 차 있어, 폰과 같은 투명도로는 안 읽힌다 */
+  body.skin:not(.mobile-landscape) .tutorial-overlay{ background:rgba(6,9,16,.55); }
+  body.skin:not(.mobile-landscape) .tutorial-panel{
+    background:linear-gradient(180deg, rgba(255,246,214,.93), rgba(250,232,178,.95)) !important;
+  }
+  body.skin:not(.mobile-landscape) .tut-card{
+    background:rgba(255,252,240,.72) !important; border-color:rgba(201,154,82,.45) !important;
+  }
+  body.skin:not(.mobile-landscape) .tut-text{
+    background:rgba(255,255,255,.72); border-color:rgba(201,154,82,.5);
+  }
+  body.skin:not(.mobile-landscape) .tut-text::before{ border-right-color:rgba(255,255,255,.72); }
+  body.skin .tut-card{
     background:rgba(255,248,220,.26) !important; border-color:rgba(255,236,175,.4) !important;
   }
   /* 랭킹은 숫자를 읽는 화면이라 뒤 선로 글자가 비치면 안 된다 — 다른 패널보다 불투명하게 */
-  body.mobile-landscape .rank-panel{
+  body.skin .rank-panel{
     background:linear-gradient(180deg, rgba(255,246,214,.95), rgba(250,232,178,.96)) !important;
     border:2px solid rgba(255,236,175,.6) !important;
   }
@@ -1377,41 +1524,53 @@
   body.is-mobile .mini-btn::after{ content:''; position:absolute; inset:-11px; }
   body.mobile-landscape .mission-stats{ display:none; } /* 공간이 빠듯하므로 통계는 생략, 목록만 */
 
-  /* 시작 화면: 모바일 가로 레이아웃 (캐릭터 좌측 + 콘텐츠 우측) */
+  /* 시작 화면 배경 일러스트 (PC·폰 공통) */
+  body.skin .start-overlay{
+    background:
+      linear-gradient(180deg, rgba(6,12,26,.55) 0%, rgba(6,12,26,.32) 45%, rgba(6,12,26,.60) 100%),
+      url('assets/bg-start.jpg') center/cover no-repeat !important;
+  }
+  /* 폰은 왼쪽에 캐릭터가 서므로 좌측만 더 어둡게 깔고, 2단으로 배치한다 */
   body.mobile-landscape .start-overlay{
     display:flex !important; align-items:center; justify-content:center; gap:16px;
-    /* 일러스트 배경 위에 왼쪽만 살짝 어둡게 깔아 캐릭터가 묻히지 않게 한다 */
     background:
       linear-gradient(90deg, rgba(6,12,26,.72) 0%, rgba(6,12,26,.30) 42%, rgba(6,12,26,.42) 100%),
       url('assets/bg-start.jpg') center/cover no-repeat !important;
   }
   /* 밝은 배경 위에서 읽히도록 글자에 그림자를 준다 */
-  body.mobile-landscape .start-overlay h2,
-  body.mobile-landscape .start-overlay p,
-  body.mobile-landscape .start-badge,
-  body.mobile-landscape .start-keys{
+  body.skin .start-overlay h2,
+  body.skin .start-overlay p,
+  body.skin .start-badge,
+  body.skin .start-keys,
+  body.skin .start-howto{
     text-shadow:0 2px 6px rgba(0,0,0,.8), 0 0 2px rgba(0,0,0,.9);
   }
-  body.mobile-landscape .start-overlay p{ color:#eaf2ff; }
+  body.skin .start-overlay p{ color:#eaf2ff; }
+  /* PC 전용 안내 상자도 사진 위에 앉으므로 대비를 준다 */
+  body.skin:not(.mobile-landscape) .start-howto{
+    background:rgba(8,14,26,.62) !important;
+    border-color:rgba(127,196,255,.45) !important;
+  }
+  body.skin:not(.mobile-landscape) .start-keys{ color:#dce8f7 !important; }
   /* 시작 버튼: 참고 이미지처럼 금색 입체 버튼 */
-  body.mobile-landscape .start-btn{
+  body.skin .start-btn{
     background:linear-gradient(180deg,#ffd257 0%,#f5a623 55%,#d97e06 100%) !important;
     color:#3d2600 !important; border:3px solid #a75f04 !important;
     box-shadow:0 6px 0 #a75f04, 0 10px 20px rgba(0,0,0,.4) !important;
     font-size:18px; font-weight:900; padding:12px 44px; border-radius:26px;
   }
-  body.mobile-landscape .start-btn:disabled{
+  body.skin .start-btn:disabled{
     filter:grayscale(.55) brightness(.8); box-shadow:0 4px 0 #6b4a1a !important;
   }
-  body.mobile-landscape .start-btn:active:not(:disabled){
+  body.skin .start-btn:active:not(:disabled){
     transform:translateY(4px); box-shadow:0 2px 0 #a75f04, 0 4px 10px rgba(0,0,0,.35) !important;
   }
-  body.mobile-landscape .start-name-row input{
+  body.skin .start-name-row input{
     background:rgba(8,14,26,.72) !important; border:2px solid #7fc4ff !important;
     color:#fff; border-radius:22px;
   }
   /* 배경 일러스트에 이미 인물이 들어 있어 캐릭터를 겹쳐 두면 어색하다 */
-  body.mobile-landscape .start-char-img{ display:none !important; }
+  body.skin .start-char-img{ display:none !important; }
   body.mobile-landscape .start-content{
     flex:1; width:auto; max-width:none; gap:10px;
     align-items:center; text-align:center;
@@ -1468,7 +1627,10 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 });
 </script>
 </head>
-<body>
+<!-- skin: 새 디자인(배경 일러스트·크림 패널·캐릭터 그림)을 켜는 표식. 항상 켜져 있다.
+     화면 크기·터치 사정에 따른 규칙은 skin이 아니라 mobile-landscape / is-mobile 을 쓴다.
+     자세한 규약은 CLAUDE.md "CSS 접두사 규약" 참고. -->
+<body class="skin">
   <div class="credit-tag">제작 : <span class="korail-mark">K</span><span class="korail-name">Korail</span> 임승진</div>
   <button class="admin-toggle-btn" id="adminToggleBtn">🛠️ Admin</button>
   <button class="rank-toggle-btn" id="rankToggleBtn">🏆<span class="btn-label"> 랭킹</span></button>
@@ -4063,7 +4225,7 @@ const CAR_IMG_DRAWN_H = CAR_IMG_W / CAR_IMG_RATIO;
 // (데스크톱은 예전처럼 네모 안 가운데)
 // 번호는 화차 간격(24)보다 길어서 옆 화차 번호와 붙는다 — 홀짝으로 두 줄에 나눠 얹는다.
 function carLabelY(idx){
-  if(!document.body.classList.contains('mobile-landscape')) return 3;
+  if(!document.body.classList.contains('skin')) return 3;
   const top = -CAR_IMG_DRAWN_H/2 - 1.5;
   return (idx % 2 === 0) ? top : top - 5.5;
 }
@@ -5431,15 +5593,17 @@ function updateRankRecord(name, {timeDelta=0, opsDelta=0, playInc=0, derailInc=0
 function getLevelInfo(r){
   const net = (r.totalOps||0) - ((r.derailCount||0)+(r.breachCount||0)+(r.fatalityCount||0));
   const level = 1 + Math.max(0, Math.floor(net/10));
+  // 랭킹표 배경이 크림색이라 흰색·연노랑은 보이지 않는다. 구간별 색을 유지하되
+  // 밝은 바탕에서 읽히는 명도로 잡는다.
   let color;
-  if(level<=5) color = '#ffffff';
-  else if(level<=10) color = '#4ade80';       // 초록
-  else if(level<=15) color = '#a78bfa';       // 보라
-  else if(level<=20) color = '#60a5fa';       // 파랑
-  else if(level<=25) color = '#b5651d';       // 갈색
-  else if(level<=30) color = '#ff9f1c';       // 밝은 주황
-  else if(level<=35) color = '#ff6fb0';       // 밝은 분홍
-  else color = '#fff59d';                    // 연노랑
+  if(level<=5) color = '#3d4a63';            // 진회청 (예전 흰색)
+  else if(level<=10) color = '#1f9d55';      // 초록
+  else if(level<=15) color = '#7c5cd6';      // 보라
+  else if(level<=20) color = '#2f7fd6';      // 파랑
+  else if(level<=25) color = '#8a4a12';      // 갈색
+  else if(level<=30) color = '#d97706';      // 주황
+  else if(level<=35) color = '#d63384';      // 분홍
+  else color = '#b08900';                    // 황금 (예전 연노랑)
   return { level, color };
 }
 function formatSecAsTime(sec){
