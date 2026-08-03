@@ -158,11 +158,20 @@
     width:min(560px, 92vw) !important; max-height:78vh !important;
     padding:10px 12px !important;
   }
+  /* 간단히 보기(기본)일 땐 두 칸만 있으므로 훨씬 좁게 */
+  body.mobile-landscape .rank-panel:not(.detailed){ width:min(280px, 62vw) !important; }
   body.mobile-landscape .rank-panel h3,
   body.mobile-landscape .rank-panel > div:first-child{ font-size:13px !important; }
   body.mobile-landscape .rank-table{ font-size:10px !important; }
   body.mobile-landscape .rank-table th{ padding:4px 3px !important; font-size:10px !important; }
   body.mobile-landscape .rank-table td{ padding:4px 3px !important; }
+  body.mobile-landscape .rank-detail-btn{
+    background:rgba(255,255,255,.5) !important; border-color:rgba(180,150,90,.5) !important;
+    color:#3a4a66 !important; padding:5px 12px !important;
+    position:relative;
+  }
+  /* 보이는 크기는 그대로 두고 손가락이 닿는 범위만 넓힌다 */
+  body.mobile-landscape .rank-detail-btn::after{ content:''; position:absolute; inset:-10px; }
   body.mobile-landscape .rank-page-btn{ padding:6px 12px !important; font-size:11px !important; }
   body.mobile-landscape .rank-page-label{ font-size:11px !important; }
   body.mobile-landscape .rank-empty{ font-size:11px !important; }
@@ -424,38 +433,73 @@
   .start-keys{ margin-top:22px; font-size:11px; color:#6b7690; }
   .start-soon{ margin-top:14px; font-size:11px; color:#5a6478; font-style:italic; }
 
-  /* ---- 탈선(게임오버) 오버레이 ---- */
+  /* ---- 탈선·사상사고·미션성공 오버레이 ----
+     예전엔 화면 전체를 어두운 붉은/초록 그라데이션으로 덮었는데, 게임 화면이
+     밝은 일러스트로 바뀌면서 혼자 튀었다. 지금은 게임을 살짝 어둡게 깔고
+     그 위에 다른 패널과 같은 크림색 카드를 얹는다. 성패는 카드 머리띠 색으로 구분. */
   .crash-overlay{
     position:fixed; inset:0; z-index:300; display:none;
-    background:radial-gradient(circle at 50% 30%, #3a0f14 0%, #180507 75%);
+    background:rgba(12,18,30,.58);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
     flex-direction:column; align-items:center; justify-content:center;
-    color:#ffe3e3; text-align:center;
+    text-align:center;
   }
-  .crash-overlay h2{ font-size:32px; margin:0 0 6px; font-weight:900; color:#ff5a5a; letter-spacing:1px; }
-  .crash-overlay p{ font-size:14px; color:#ffb3b3; margin:0 0 26px; }
+  .result-card{
+    width:min(380px, 86vw);
+    background:linear-gradient(180deg,#fff6dc,#f6e4b4);
+    border:3px solid #c99a52; border-radius:24px;
+    box-shadow:0 14px 34px rgba(0,0,0,.45);
+    overflow:hidden;
+  }
+  .result-band{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 16px; color:#fff; font-weight:900; font-size:21px;
+    letter-spacing:.5px; text-shadow:0 2px 3px rgba(0,0,0,.3);
+    background:linear-gradient(180deg,#e0453f,#b3221d);
+  }
+  .result-band .result-emoji{ font-size:24px; }
+  .result-body{ padding:14px 18px 18px; }
+  .result-char{ width:62px; height:auto; margin:-2px auto 6px; display:block; }
+  .crash-overlay p{ font-size:14px; line-height:1.5; color:#4a3a1e; margin:0 0 16px; font-weight:700; }
   .restart-btn{
-    background:linear-gradient(135deg,#b91c1c,#dc2626);
-    color:#fff; border:none; padding:14px 40px; font-size:16px; font-weight:800;
-    border-radius:30px; cursor:pointer; letter-spacing:1px;
-    box-shadow:0 8px 24px rgba(220,38,38,.5);
+    background:linear-gradient(180deg,#e0453f,#a81f1a);
+    color:#fff; border:none; padding:13px 34px; font-size:16px; font-weight:900;
+    border-radius:16px; cursor:pointer; letter-spacing:.5px;
+    box-shadow:0 4px 0 #7d1512, 0 8px 18px rgba(0,0,0,.3);
   }
-  .restart-btn:hover{ filter:brightness(1.08); }
-  .mission-success-overlay{
-    background:radial-gradient(circle at 50% 30%, #0f3a1f 0%, #051807 75%) !important;
-  }
-  .mission-success-overlay h2{ color:#4ade80 !important; }
-  .mission-success-overlay p{ color:#b3ffcb !important; }
+  .restart-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 #7d1512; }
+  .restart-btn:hover{ filter:brightness(1.06); }
+  .mission-success-overlay .result-band{ background:linear-gradient(180deg,#3fbf6a,#1d8446); }
   .mission-success-overlay .restart-btn{
-    background:linear-gradient(135deg,#15803d,#22c55e); box-shadow:0 8px 24px rgba(34,197,94,.5);
+    background:linear-gradient(180deg,#3fbf6a,#1a7a40); box-shadow:0 4px 0 #146032, 0 8px 18px rgba(0,0,0,.3);
   }
+  .mission-success-overlay .restart-btn:active{ box-shadow:0 2px 0 #146032; }
   .mission-success-overlay .retry-btn{
-    margin-top:12px; padding:10px 28px; font-size:13px;
-    background:rgba(255,255,255,.08); box-shadow:none; border:1px solid rgba(255,255,255,.25);
+    margin-top:10px; padding:9px 26px; font-size:13px; border-radius:14px;
+    background:linear-gradient(180deg,#fff3c4,#e6cf92); color:#5a4520;
+    box-shadow:0 3px 0 #b99752;
   }
-  .mission-success-overlay .retry-btn:hover{ background:rgba(255,255,255,.15); }
-  .mission-success-stats{ display:flex; gap:24px; margin-bottom:26px; }
-  .mission-success-stats .label{ font-size:11px; color:#8fe0a8; margin-bottom:4px; }
-  .mission-success-stats .value{ font-size:24px; font-weight:900; color:#4ade80; }
+  .mission-success-overlay .retry-btn:active{ box-shadow:0 1px 0 #b99752; }
+  .mission-success-stats{ display:flex; gap:10px; margin:0 0 16px; justify-content:center; }
+  .mission-success-stats > div{
+    flex:1 1 0; background:rgba(255,255,255,.55);
+    border:2px solid rgba(201,154,82,.45); border-radius:14px; padding:7px 4px;
+  }
+  .mission-success-stats .label{ font-size:11px; color:#7a6231; margin-bottom:2px; font-weight:700; }
+  .mission-success-stats .value{ font-size:20px; font-weight:900; color:#1d6b3d; }
+  .result-btn-row{ display:flex; gap:10px; justify-content:center; align-items:center; }
+  /* 가로모드 폰은 세로가 390px 남짓이라 카드가 화면을 꽉 채운다. 여기선 전부 한 단계 줄인다. */
+  body.mobile-landscape .result-card{ width:min(330px, 76vw); border-radius:20px; }
+  body.mobile-landscape .result-band{ padding:8px 12px; font-size:17px; }
+  body.mobile-landscape .result-band .result-emoji{ font-size:19px; }
+  body.mobile-landscape .result-body{ padding:10px 14px 13px; }
+  body.mobile-landscape .result-char{ width:44px; margin-bottom:4px; }
+  body.mobile-landscape .crash-overlay p{ font-size:12px; margin-bottom:10px; }
+  body.mobile-landscape .mission-success-stats{ margin-bottom:10px; gap:8px; }
+  body.mobile-landscape .mission-success-stats .label{ font-size:10px; }
+  body.mobile-landscape .mission-success-stats .value{ font-size:16px; }
+  body.mobile-landscape .restart-btn{ padding:10px 22px; font-size:14px; border-radius:14px; }
+  body.mobile-landscape .mission-success-overlay .retry-btn{ margin-top:0; padding:8px 18px; font-size:12px; }
 
   /* ---- 레일 느낌 장식: 패널 상단에 침목(枕木) 스트라이프 ---- */
   .rail-deco{
@@ -578,6 +622,16 @@
     border:1px solid #2a3350; border-radius:14px; padding:16px 18px; overflow-y:auto;
   }
   .rank-panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; font-size:15px; }
+  .rank-head-right{ display:flex; align-items:center; gap:8px; }
+  .rank-detail-btn{
+    background:rgba(255,255,255,.1); color:#9fd8ff; border:1px solid rgba(159,216,255,.35);
+    border-radius:999px; padding:4px 12px; font-size:11px; font-weight:700; cursor:pointer;
+  }
+  .rank-detail-btn:hover{ background:rgba(255,255,255,.18); }
+  /* "자세히 보기" 전에는 이름·해결한 입환수만 남긴다 */
+  .rank-panel:not(.detailed) .rank-detail{ display:none; }
+  /* 두 칸만 보일 땐 표가 넓을 이유가 없다 */
+  .rank-panel:not(.detailed){ width:min(340px,86vw); }
   .rank-table{ width:100%; border-collapse:collapse; font-size:12px; }
   .rank-table th{
     text-align:center; padding:8px 6px; color:#4DD4EF; cursor:pointer; user-select:none;
@@ -656,8 +710,15 @@
   body.mobile-landscape .tut-pic-wide{ width:42px; }
   body.mobile-landscape .tut-pic-btn{ width:26px; }
   body.mobile-landscape .tut-pic-tall{ height:42px; }
-  .tut-title{ font-size:13px; font-weight:800; color:#4DD4EF; margin-bottom:4px; }
-  .tut-desc{ font-size:11.5px; line-height:1.55; color:#c7d2e0; }
+  .tut-title{ font-size:13px; font-weight:800; color:#4DD4EF; margin-bottom:6px; }
+  /* 문단 정리:
+     - word-break:keep-all 로 한국어 단어가 줄 끝에서 쪼개지지 않게 한다("정 / 지" 방지)
+     - <br>을 블록으로 만들어 문장 사이에 실제 여백을 준다 (문장마다 태그를 감싸지 않아도 됨) */
+  .tut-desc{
+    font-size:11.5px; line-height:1.65; color:#c7d2e0;
+    word-break:keep-all; overflow-wrap:break-word; text-align:left;
+  }
+  .tut-desc br{ display:block; content:''; margin-top:7px; }
   .key-badge{
     display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:16px;
     padding:0 5px; border-radius:5px; background:linear-gradient(180deg,#3a4460,#2a3350);
@@ -990,7 +1051,8 @@
   }
   body.mobile-landscape .tut-icon{ width:58px; height:44px; }
   body.mobile-landscape .tut-title{ font-size:12px; }
-  body.mobile-landscape .tut-desc{ font-size:10.5px; line-height:1.5; }
+  body.mobile-landscape .tut-desc{ font-size:11px; line-height:1.65; }
+  body.mobile-landscape .tut-desc br{ margin-top:6px; }
   body.mobile-landscape .tut-nav{ margin-top:10px; }
   body.mobile-landscape .tut-nav-btn{ padding:7px 14px; font-size:11px; }
   /* 지도를 화면 전체로. z-index는 절대 주지 말 것(위 62행 주석 참고) */
@@ -1123,9 +1185,18 @@
   /* 미션 패널: 좌상단에 배치, 높이 제한, 투명도 높임 */
   /* 미션은 노트 그림 위에 얹는다 (참고 이미지). 배경·테두리는 그림이 대신하므로 지운다. */
   .mission-note-bg{ display:none; }
+  /* note.png는 426x520 중 실제로 글을 쓸 수 있는 속지가 x 64~342, y 54~450 뿐이다.
+     (나머지는 왼쪽 스프링·가죽 테두리·오른쪽 잠금고리)
+     그래서 그림을 패널에 그대로 늘리면 글자가 속지 밖으로 넘어간다.
+     대신 그림을 패널보다 크게 잡아 "속지 영역이 패널 상자와 정확히 겹치도록" 밀어낸다.
+       가로 사용가능 비율 279/426 = 0.6549 -> width 152.7%, left -(64/426)/0.6549 = -22.9%
+       세로 사용가능 비율 397/520 = 0.7635 -> height 131.0%, top  -(54/520)/0.7635 = -13.6%
+     (absolute 요소의 left/width는 컨테이너 너비, top/height는 컨테이너 높이 기준)
+     이렇게 하면 패널 크기가 어떻게 변해도 글자는 항상 속지 안에 머문다. */
   body.mobile-landscape .mission-note-bg{
-    display:block; position:absolute; inset:0;
-    width:100%; height:100%; object-fit:fill;
+    display:block; position:absolute;
+    left:-22.9%; top:-13.6%; width:152.7%; height:131.0%;
+    object-fit:fill;
     pointer-events:none; z-index:-1;
     opacity:.72;                                   /* 반투명 */
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
@@ -1133,11 +1204,13 @@
   body.mobile-landscape .mission-panel.overlay-panel{
     background:none !important; border:none !important; box-shadow:none !important;
     -webkit-backdrop-filter:none; backdrop-filter:none;
-    padding:9px 16px 11px 30px !important;
-    top:48px !important; bottom:auto !important; left:6px !important; max-width:210px !important;
+    /* 속지 안쪽 여백. 위 계산이 속지=패널상자를 보장하므로 사방 균등하게 준다. */
+    padding:8px 10px !important;
+    top:48px !important; bottom:auto !important; left:14px !important; width:186px !important;
+    max-width:186px !important;
     /* 화면이 짧은 기기에서 좌측 하단 제작자 표시·조작버튼까지 내려오지 않도록 비율로 제한 */
     max-height:min(200px, 40vh);
-    /* 0.3은 너무 투명해서 뒤 선로 글자가 비쳐 제목과 뒤섞였다. 읽히도록 올린다. */
+    overflow:visible;
   }
   /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
      화면 오른쪽 밖으로 밀려나거나 우측 버튼 위로 겹치지 않게 한다 */
@@ -1163,12 +1236,27 @@
   body.mobile-landscape .mission-panel .ov-head{ color:#3b2f1c !important; font-size:13px; }
   body.mobile-landscape .mission-panel .ov-head *{ color:#3b2f1c !important; }
   body.mobile-landscape .mission-panel .ov-btns{ display:none; }  /* 노트에는 버튼을 두지 않는다 */
-  body.mobile-landscape .mission-panel.collapsed .ov-body{ display:none; }
-  body.mobile-landscape .mission-panel.collapsed{ padding-bottom:6px !important; }
-  body.mobile-landscape .mission-panel.collapsed .mission-note-bg{ opacity:.95; }
+  /* 접으면 노트를 통째로 감추고 책 아이콘 하나만 남긴다 (다른 상단 버튼과 같은 모양) */
+  body.mobile-landscape .mission-panel.collapsed .ov-body,
+  body.mobile-landscape .mission-panel.collapsed .mission-note-bg,
+  body.mobile-landscape .mission-panel.collapsed .mission-head-label{ display:none; }
+  /* .overlay-panel 공통 규칙이 아래에 있으므로 선택자를 한 단계 더 좁혀 이긴다 */
+  body.mobile-landscape .mission-panel.overlay-panel.collapsed{
+    width:44px !important; max-width:44px !important; height:44px;
+    padding:0 !important; border-radius:50% !important;
+    background:linear-gradient(180deg,#fff3c4,#f5d98a) !important;
+    border:2px solid rgba(255,236,175,.9) !important;
+    box-shadow:0 3px 8px rgba(0,0,0,.35) !important;
+    display:flex; align-items:center; justify-content:center;
+  }
+  body.mobile-landscape .mission-panel.collapsed .ov-head{
+    margin:0; padding:0; min-height:0; justify-content:center;
+  }
+  body.mobile-landscape .mission-panel.collapsed .ov-btns{ display:none; }
+  body.mobile-landscape .mission-panel.collapsed .mission-icon{ font-size:22px; line-height:1; }
   /* 미션 목록이 패널 높이를 넘으면 스크롤되게 하고, 각 줄은 칸 안에서 줄바꿈시킨다 */
   body.mobile-landscape .mission-panel .ov-body{
-    max-height:calc(min(200px, 40vh) - 34px); overflow-y:auto; overflow-x:hidden;
+    max-height:calc(min(200px, 40vh) - 42px); overflow-y:auto; overflow-x:hidden;
   }
   body.mobile-landscape .mission-task-list{ gap:2px; }
   /* ---- 패널 공통 색: 참고 이미지의 청록 계열, 배경이 비치도록 반투명 ---- */
@@ -1259,8 +1347,9 @@
   body.mobile-landscape .tut-card{
     background:rgba(255,248,220,.26) !important; border-color:rgba(255,236,175,.4) !important;
   }
+  /* 랭킹은 숫자를 읽는 화면이라 뒤 선로 글자가 비치면 안 된다 — 다른 패널보다 불투명하게 */
   body.mobile-landscape .rank-panel{
-    background:linear-gradient(180deg, rgba(255,244,205,.72), rgba(250,232,178,.76)) !important;
+    background:linear-gradient(180deg, rgba(255,246,214,.95), rgba(250,232,178,.96)) !important;
     border:2px solid rgba(255,236,175,.6) !important;
   }
   /* 투명도 버튼(◐)은 모바일에서 감춘다 — 패널이 이미 반투명이고, 헤더 폭만 잡아먹는다 */
@@ -1394,18 +1483,22 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <div class="rank-panel" id="rankPanel" style="display:none;">
     <div class="rank-panel-head">
       <b>🏆 입환 랭킹</b>
-      <button class="admin-close-btn" id="rankCloseBtn">✕</button>
+      <span class="rank-head-right">
+        <button class="rank-detail-btn" id="rankDetailBtn">자세히 보기</button>
+        <button class="admin-close-btn" id="rankCloseBtn">✕</button>
+      </span>
     </div>
+    <!-- 기본은 이름·해결한 입환수만. rank-detail 칸은 "자세히 보기"를 눌러야 나온다 -->
     <table class="rank-table">
       <thead>
         <tr>
           <th data-key="name">이름</th>
-          <th data-key="totalTime">입환 총시간</th>
-          <th data-key="plays">참여횟수</th>
+          <th data-key="totalTime" class="rank-detail">입환 총시간</th>
+          <th data-key="plays" class="rank-detail">참여횟수</th>
           <th data-key="totalOps">해결한 입환수</th>
-          <th data-key="derailCount" class="bad-col">탈선</th>
-          <th data-key="breachCount" class="bad-col">후부돌파</th>
-          <th data-key="fatalityCount" class="bad-col">사상사고</th>
+          <th data-key="derailCount" class="bad-col rank-detail">탈선</th>
+          <th data-key="breachCount" class="bad-col rank-detail">후부돌파</th>
+          <th data-key="fatalityCount" class="bad-col rank-detail">사상사고</th>
         </tr>
       </thead>
       <tbody id="rankTableBody"></tbody>
@@ -1717,20 +1810,32 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
 
   <div class="crash-overlay" id="crashOverlay">
-    <h2 id="crashTitle">💥 탈선! 사고발생!</h2>
-    <p id="crashDesc">진로가 열리지 않은 전환기를 통과했습니다.</p>
-    <button class="restart-btn" id="restartBtn">🔄 다시 시작</button>
+    <div class="result-card">
+      <div class="result-band"><span id="crashTitle">💥 탈선! 사고발생!</span></div>
+      <div class="result-body">
+        <!-- 사고 화면에는 캐릭터를 넣지 않는다 (웃는 얼굴이 상황과 안 맞음) -->
+        <p id="crashDesc">진로가 열리지 않은 전환기를 통과했습니다.</p>
+        <button class="restart-btn" id="restartBtn">🔄 다시 시작</button>
+      </div>
+    </div>
   </div>
 
   <div class="crash-overlay mission-success-overlay" id="missionSuccessOverlay">
-    <h2>🎉 미션 성공!</h2>
-    <p id="missionSuccessDesc">모든 화차 작업을 완료했습니다.</p>
-    <div class="mission-success-stats">
-      <div><div class="label">작업시간</div><div class="value" id="missionSuccessTime">-</div></div>
-      <div><div class="label">선로이동횟수</div><div class="value" id="missionSuccessMoves">-</div></div>
+    <div class="result-card">
+      <div class="result-band"><span class="result-emoji">🎉</span> 미션 성공!</div>
+      <div class="result-body">
+        <img class="result-char" src="assets/hud-char.png" alt="">
+        <p id="missionSuccessDesc">모든 화차 작업을 완료했습니다.</p>
+        <div class="mission-success-stats">
+          <div><div class="label">작업시간</div><div class="value" id="missionSuccessTime">-</div></div>
+          <div><div class="label">선로이동</div><div class="value" id="missionSuccessMoves">-</div></div>
+        </div>
+        <div class="result-btn-row">
+          <button class="restart-btn" id="missionNextBtn">🎯 다음 미션</button>
+          <button class="restart-btn retry-btn" id="missionRetryBtn">🔁 다시하기</button>
+        </div>
+      </div>
     </div>
-    <button class="restart-btn" id="missionNextBtn">🎯 다음 미션</button>
-    <button class="restart-btn retry-btn" id="missionRetryBtn">🔁 다시하기</button>
   </div>
 
   <audio id="bgMusic" loop preload="auto"><source src="assets/bgm.mp3" type="audio/mpeg"></audio>
@@ -1798,7 +1903,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
     <div class="mission-panel overlay-panel" id="missionPanel" style="display:none; top:24px; left:8px;">
       <img class="mission-note-bg" src="assets/note.png" alt="">
       <div class="ov-head drag-handle" id="missionHead">
-        <span><span class="mission-icon">📖</span> 미션</span>
+        <span><span class="mission-icon">📖</span><span class="mission-head-label"> 미션</span></span>
         <div class="ov-btns">
           <button class="mini-btn" id="missionOpacityBtn" title="투명하게 (누르면 더 투명해짐)">◐</button>
         </div>
@@ -5328,12 +5433,12 @@ function renderRankTable(){
     return `
     <tr>
       <td><span style="color:${lv.color}; font-weight:800; margin-right:5px;">Lv.${lv.level}</span>${r.name}</td>
-      <td>${formatSecAsTime(r.totalTime)}</td>
-      <td>${r.plays}회</td>
+      <td class="rank-detail">${formatSecAsTime(r.totalTime)}</td>
+      <td class="rank-detail">${r.plays}회</td>
       <td>${r.totalOps}회</td>
-      <td class="bad-col">${r.derailCount}회</td>
-      <td class="bad-col">${r.breachCount}회</td>
-      <td class="bad-col">${r.fatalityCount}회</td>
+      <td class="bad-col rank-detail">${r.derailCount}회</td>
+      <td class="bad-col rank-detail">${r.breachCount}회</td>
+      <td class="bad-col rank-detail">${r.fatalityCount}회</td>
     </tr>
   `;}).join('');
 }
@@ -5350,6 +5455,12 @@ document.getElementById('rankNextBtn').addEventListener('click', ()=>{
 });
 document.getElementById('rankCloseBtn').addEventListener('click', ()=>{
   document.getElementById('rankPanel').style.display = 'none';
+});
+// 기본은 이름 + 해결한 입환수만 보이고, 이 버튼으로 나머지 항목을 펼친다
+document.getElementById('rankDetailBtn').addEventListener('click', ()=>{
+  const panel = document.getElementById('rankPanel');
+  const on = panel.classList.toggle('detailed');
+  document.getElementById('rankDetailBtn').textContent = on ? '간단히 보기' : '자세히 보기';
 });
 
 // ---- Admin: 저장된 랭킹 기록 직접 수정/삭제 ----
