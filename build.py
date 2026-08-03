@@ -26,14 +26,13 @@ def main():
     with open(SRC, 'r', encoding='utf-8') as f:
         html = f.read()
 
-    # 오디오 인라인
-    html = inline_asset(
-        html,
-        r'<audio id="bgMusic" loop preload="auto"><source src="assets/bgm\.mp3" type="audio/mpeg"></audio>',
-        'assets/bgm.mp3',
-        'audio/mpeg',
-        lambda b64: f'<audio id="bgMusic" loop preload="auto"><source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg"></audio>'
-    )
+    # 게임 배경음악 2번째 곡 인라인 (JS가 src를 갈아끼우므로 경로 문자열을 치환한다)
+    with open('assets/bgm2.mp3','rb') as f:
+        b64 = base64.b64encode(f.read()).decode()
+    html = html.replace("'assets/bgm2.mp3'", f"'data:audio/mpeg;base64,{b64}'")
+    with open('assets/bgm.mp3','rb') as f:
+        b64 = base64.b64encode(f.read()).decode()
+    html = html.replace("'assets/bgm.mp3'", f"'data:audio/mpeg;base64,{b64}'")
 
     # 시작화면 배경음악 인라인
     html = inline_asset(

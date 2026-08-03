@@ -59,6 +59,14 @@
   #trackSvg, #trackSvg text{
     -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
   }
+  /* user-select만으로는 안드로이드 크롬이 여전히 글자를 집어 "검색/복사" 팝업을 띄운다.
+     클릭이 필요 없는 라벨은 아예 포인터 대상에서 빼면 글자를 집을 수 없다.
+     (화차 번호는 화차 그룹 안에 있어, 글자를 통과한 클릭이 그룹으로 그대로 전달된다)
+     본선 이름(본17 등)은 눌러서 진로를 여는 기능이 있으므로 여기서 제외한다. */
+  .car-num, .track-label, .facility-label, .zone-label,
+  .switch-num, .switch-state, .main-info{
+    pointer-events:none;
+  }
   html,body{
     height:100%;
     width:100%;
@@ -1099,6 +1107,20 @@
     color:#263a5e !important;
   }
   body.skin .music-toggle-btn.muted{ color:#8b7d63 !important; }
+  /* 앱 종료 버튼: 폰 시작화면에서만 보인다 (PC는 브라우저 탭을 닫으면 되므로 불필요) */
+  .quit-app-btn{ display:none; }
+  body.is-mobile .quit-app-btn{
+    display:flex; align-items:center; justify-content:center;
+    position:fixed; top:6px; right:6px; z-index:220;
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(180deg,#ffe0e0,#e79a9a);
+    border:2.5px solid #b34a4a; color:#6d1010;
+    font-size:16px; font-weight:900; cursor:pointer;
+    box-shadow:0 3px 0 #8f2f2f, 0 5px 12px rgba(0,0,0,.3);
+  }
+  body.is-mobile .quit-app-btn:active{ transform:translateY(3px); box-shadow:0 0 0 #8f2f2f; }
+  /* 게임에 들어가면 숨긴다 — 시작화면에서만 쓰는 버튼 */
+  body.game-started .quit-app-btn{ display:none !important; }
   /* Admin 버튼도 같은 계열이되 한 단계 차분하게 — 게임 조작이 아니라 관리 기능이다 */
   body.skin .admin-toggle-btn{
     background:linear-gradient(180deg,#f6f1e2,#e3d7bd) !important;
@@ -1290,7 +1312,7 @@
     left:-22.9%; top:-13.6%; width:152.7%; height:131.0%;
     object-fit:fill;
     pointer-events:none; z-index:-1;
-    opacity:.72;                                   /* 반투명 */
+    opacity:.88;                                   /* 반투명(뒤 선로가 살짝 비치는 정도) */
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
   }
   /* 노트 그림이 배경 역할을 하므로 패널 자체의 카드 스타일은 지운다. */
@@ -1310,9 +1332,12 @@
     width:186px !important; max-width:186px !important;
     max-height:min(200px, 40vh);
   }
+  /* PC: 선로·지반판과 겹치지 않는 빈 하늘 자리에 둔다.
+     양회기지(좌측 구내)의 오른쪽, 본선 사다리(우하단)의 위쪽이 비어 있다. */
   body.skin:not(.mobile-landscape) .mission-panel.overlay-panel{
     width:236px !important; max-width:236px !important;
     max-height:min(340px, 48vh);
+    top:12% !important; left:52% !important; bottom:auto !important; right:auto !important;
   }
   /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
      화면 오른쪽 밖으로 밀려나거나 우측 버튼 위로 겹치지 않게 한다 */
@@ -1489,6 +1514,53 @@
     box-shadow:0 2px 6px rgba(0,0,0,.3);
   }
   body.skin .pad-btn:active{ transform:translateY(2px); border-bottom-width:1px; }
+
+  /* ---- PC 조작 패드: 실제 키보드 모양 ----
+     아랫줄 = [Shift]/[Ctrl] 두 단 + 기다란 Space, 그 오른쪽에 방향키 묶음.
+     게임의 크림·금색 톤에 맞춘 키캡에 두꺼운 아랫단을 줘 눌리는 느낌을 낸다. */
+  .kb{ display:flex; align-items:flex-end; gap:10px; }
+  .kb-mods{ display:flex; flex-direction:column; gap:5px; }
+  .kb-space-wrap{ display:flex; align-items:flex-end; }
+  .kb-arrows{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .kb-arrow-row{ display:flex; gap:5px; }
+  .kb-arrow-label{ font-size:9px; font-weight:800; color:#6b5a35; letter-spacing:.5px; }
+  .kb-key{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    background:linear-gradient(180deg,#fffdf5,#efe2c4);
+    border:1.5px solid #c9a05a; border-radius:7px; padding:0;
+    cursor:pointer; user-select:none;
+    color:#3a4a66; font-weight:800; font-family:inherit;
+    box-shadow:0 3px 0 #b98630, 0 4px 8px rgba(0,0,0,.22);
+    transition:transform .06s ease, box-shadow .06s ease;
+  }
+  .kb-key:active{ transform:translateY(3px); box-shadow:0 0 0 #b98630, 0 2px 5px rgba(0,0,0,.22); }
+  .kb-cap{ font-size:11px; line-height:1.15; }
+  .kb-use{ font-size:8.5px; font-weight:700; color:#7a6a4a; line-height:1; }
+  .kb-shift, .kb-ctrl{ width:78px; height:33px; }
+  .kb-space{ width:120px; height:71px; }
+  .kb-arrow{ width:38px; height:33px; font-size:14px; }
+  .kb-space{ background:linear-gradient(180deg,#ffdede,#f3b6b6); border-color:#c05a5a; box-shadow:0 3px 0 #a03a3a, 0 4px 8px rgba(0,0,0,.22); }
+  .kb-space:active{ box-shadow:0 0 0 #a03a3a, 0 2px 5px rgba(0,0,0,.22); }
+  .kb-ctrl{ background:linear-gradient(180deg,#dfeaff,#b8cdf0); border-color:#5a7cc0; box-shadow:0 3px 0 #3a5ca0, 0 4px 8px rgba(0,0,0,.22); }
+  .kb-ctrl:active{ box-shadow:0 0 0 #3a5ca0, 0 2px 5px rgba(0,0,0,.22); }
+  .kb-shift{ background:linear-gradient(180deg,#fff2cc,#f0d894); border-color:#c9972f; box-shadow:0 3px 0 #a87c22, 0 4px 8px rgba(0,0,0,.22); }
+  .kb-shift:active{ box-shadow:0 0 0 #a87c22, 0 2px 5px rgba(0,0,0,.22); }
+  .kb-arrow{ background:linear-gradient(180deg,#e3f1ff,#bcd9f5); border-color:#4a86c4; box-shadow:0 3px 0 #2f6ba8, 0 4px 8px rgba(0,0,0,.22); }
+  .kb-arrow:active{ box-shadow:0 0 0 #2f6ba8, 0 2px 5px rgba(0,0,0,.22); }
+  body.skin .kb-key, body.skin .kb-key *{ text-shadow:none !important; }
+  body.skin .kb-cap{ color:#3a4a66 !important; }
+  body.skin .kb-use{ color:#7a6a4a !important; }
+  body.skin .kb-arrow-label{ color:#6b5a35 !important; text-shadow:none !important; }
+  /* .overlay-panel의 max-width(230px)에 걸려 키가 카드 밖으로 삐져나왔다 — 내용에 맞춘다 */
+  body.skin:not(.mobile-landscape) #controlPad{
+    max-width:none !important; width:auto; padding:6px 10px 9px;
+  }
+
+  /* 운전 HUD·조작 패드는 화면 하단 가운데에 나란히 둔다.
+     정확한 left는 layoutBottomRightPanels()가 두 패널의 실측 폭으로 계산하므로
+     여기서는 세로 위치만 맞춘다(가로를 !important로 박으면 드래그가 막힌다). */
+  body.skin:not(.mobile-landscape) #controlPad,
+  body.skin:not(.mobile-landscape) #hudPanel{ bottom:10px; }
   /* HUD 캐릭터: 패널 왼쪽 밖으로 걸치게 세운다 (참고 이미지) */
   .hud-char{ display:none; }
   /* 요청: 운전 HUD와 화차선택 팝업은 당분간 숨긴다.
@@ -1690,6 +1762,8 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <button class="tutorial-toggle-btn" id="tutorialToggleBtn">🎓<span class="btn-label"> 튜토리얼</span></button>
   <button class="home-toggle-btn" id="homeBtn">🏠<span class="btn-label"> 처음으로</span></button>
   <button class="music-toggle-btn" id="musicToggleBtn">🔊</button>
+  <!-- 폰 시작화면에서만 보이는 앱 종료 버튼 -->
+  <button class="quit-app-btn" id="quitAppBtn" title="종료">✕</button>
   <button class="game-toggle-btn" id="gameStartBtn" style="display:none;">🎯 <span class="btn-short">시작</span><span class="btn-label">게임 시작</span></button>
   <button class="game-toggle-btn danger" id="gameEndBtn" style="display:none;">⏹ <span class="btn-short">종료</span><span class="btn-label">게임 종료</span></button>
   <button id="installBtn">📥 앱 설치하기</button>
@@ -1787,7 +1861,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </div>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">③ 붙이고 떼기</div>
-            <div class="tut-desc">화차 가까이 가면 붙일 수 있어!<br>지도에서 <b>화차를 탭</b>해서 고르고,<br><span class="only-desktop"><span class="key-badge wide">Ctrl</span></span><span class="only-mobile"><b>연결</b> 버튼</span>을 누르면 돼~<br>끝까지 바짝 붙어야 걸려!<br>어중간하면 헛수고야~</div>
+            <div class="tut-desc">화차 가까이 가면 붙일 수 있어!<br>지도에서 <b>화차를 <span class="only-desktop">마우스로 클릭</span><span class="only-mobile">탭</span></b>해서 고르고,<br><span class="only-desktop"><span class="key-badge wide">Ctrl</span></span><span class="only-mobile"><b>연결</b> 버튼</span>을 누르면 돼~<br>끝까지 바짝 붙어야 걸려!<br>어중간하면 헛수고야~</div>
           </div>
         </div>
 
@@ -2078,7 +2152,9 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <!-- 시작화면 전용 배경음악. 게임에 들어가면 bgMusic으로 넘어간다 -->
   <audio id="bgMusicStart" loop preload="auto"><source src="assets/bgm-start.mp3" type="audio/mpeg"></audio>
-  <audio id="bgMusic" loop preload="auto"><source src="assets/bgm.mp3" type="audio/mpeg"></audio>
+  <!-- 게임 배경음악 2곡을 순서대로 재생하고 다시 처음으로 돌아간다.
+       loop 속성을 쓰면 첫 곡만 반복되므로 JS에서 ended로 넘긴다. -->
+  <audio id="bgMusic" preload="auto"></audio>
   <!-- 효과음(녹음 파일). 주행음은 반복 재생하며 속도에 따라 음량·재생속도를 조절한다 -->
   <audio id="engineSfx" loop preload="auto"><source src="assets/engine-move.mp3" type="audio/mpeg"></audio>
   <audio id="hornSfx" preload="auto"><source src="assets/horn.mp3" type="audio/mpeg"></audio>
@@ -2232,18 +2308,23 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
         <div class="pad-grip drag-handle" id="padGrip">⠿⠿⠿</div>
         <button class="mini-btn" id="padOpacityBtn" title="투명하게 (누르면 더 투명해짐)">◐</button>
       </div>
-      <div class="pad-row-move">
-        <button class="pad-btn move" id="btnLeft">←</button>
-        <button class="pad-btn brake" id="btnBrake">Space</button>
-        <button class="pad-btn move" id="btnRight">→</button>
-      </div>
-      <div class="pad-row">
-        <button class="pad-btn sw" id="btnTab">Tab</button>
-        <button class="pad-btn sw" id="btnEnter">Enter</button>
-        <button class="pad-btn sw" id="btnSpace">Ctrl</button>
-      </div>
-      <div class="pad-legend">
-        <b>← →</b> 가속 · <b>Space</b> 제동 · <b>Tab</b> 전환기 선택 · <b>Enter</b> 전환 · <b>Ctrl</b> 화차 연결/분리 · <b>Shift</b> 주의기적
+      <!-- 실제 키보드 배치를 흉내낸다: 왼쪽에 Shift/Ctrl(수정자 키), 가운데 긴 스페이스바,
+           오른쪽에 방향키. 전환기는 지도에서 직접 클릭하므로 Tab/Enter는 뺐다. -->
+      <div class="kb">
+        <div class="kb-mods">
+          <button class="kb-key kb-shift" id="btnShift"><span class="kb-cap">Shift</span><span class="kb-use">주의기적</span></button>
+          <button class="kb-key kb-ctrl" id="btnSpace"><span class="kb-cap">Ctrl</span><span class="kb-use">연결·분리</span></button>
+        </div>
+        <div class="kb-space-wrap">
+          <button class="kb-key kb-space" id="btnBrake"><span class="kb-cap">Space</span><span class="kb-use">제동</span></button>
+        </div>
+        <div class="kb-arrows">
+          <div class="kb-arrow-row">
+            <button class="kb-key kb-arrow" id="btnLeft">◀</button>
+            <button class="kb-key kb-arrow" id="btnRight">▶</button>
+          </div>
+          <div class="kb-arrow-label">가속</div>
+        </div>
       </div>
     </div>
   </div>
@@ -2427,13 +2508,31 @@ function layoutBottomRightPanels(){
   const pad = document.getElementById('controlPad');
   const hud = document.getElementById('hudPanel');
   if(!pad || !hud) return;
-  // 사용자가 직접 드래그해서 옮긴 적이 있으면(= left값이 지정돼 있으면) 자동 배치를 건드리지 않는다
-  if(hud.style.left) return;
+  // 사용자가 직접 드래그해서 옮긴 적이 있으면 자동 배치를 건드리지 않는다.
+  // (예전엔 hud.style.left 유무로 판단했는데, PC 가운데 정렬에서 left를 쓰게 되어
+  //  첫 배치 직후 스스로 "옮겨졌다"고 오판했다. 드래그 표식으로 바꾼다.)
+  if(hud.dataset.userMoved === '1' || pad.dataset.userMoved === '1') return;
   const padRect = pad.getBoundingClientRect();
   const mapRect = document.querySelector('.map-wrap').getBoundingClientRect();
   if(padRect.width === 0) { requestAnimationFrame(layoutBottomRightPanels); return; }
-  const padWidthInMap = padRect.width; // pad는 right:8px 고정이므로 폭만 알면 됨
-  hud.style.right = (padWidthInMap + 18) + 'px';
+  const isMobile = document.body.classList.contains('mobile-landscape');
+  if(isMobile){
+    // 폰: 패드는 화면 우측 고정이므로 폭만큼 왼쪽으로 비켜준다
+    hud.style.right = (padRect.width + 18) + 'px';
+    hud.style.left = '';
+    return;
+  }
+  // PC: 조작 패드를 화면 하단 가운데에 두므로, HUD는 그 왼쪽에 나란히 붙인다.
+  // 둘을 합친 폭이 가운데 오도록 패드를 살짝 오른쪽으로 밀어 균형을 맞춘다.
+  const hudW = hud.getBoundingClientRect().width;
+  const gap = 14;
+  const totalW = hudW + gap + padRect.width;
+  const groupLeft = Math.max(8, Math.round((mapRect.width - totalW) / 2));
+  hud.style.left = groupLeft + 'px';
+  hud.style.right = 'auto';
+  pad.style.left = (groupLeft + hudW + gap) + 'px';
+  pad.style.right = 'auto';
+  pad.style.transform = 'none';
 }
 window.addEventListener('resize', layoutBottomRightPanels);
 
@@ -2814,7 +2913,7 @@ Object.entries(mainLeafY).forEach(([name,y])=>{
   full.line.addEventListener('click', ()=> selectQuickRoute(name));
   mainLeafLine[name] = full;
   const nameLbl = text(LEAF_TRACK_X+ (LEAF_TRACK_END-LEAF_TRACK_X)/2, y-6, name, 'main-label', 'middle');
-  text(LEAF_TRACK_X+ (LEAF_TRACK_END-LEAF_TRACK_X)/2, y+9, mainLeafInfo[name], 'main-label', 'middle');
+  text(LEAF_TRACK_X+ (LEAF_TRACK_END-LEAF_TRACK_X)/2, y+9, mainLeafInfo[name], 'main-label main-info', 'middle');
   nameLbl.style.cursor = 'pointer';
   nameLbl.addEventListener('click', ()=> selectQuickRoute(name));
 });
@@ -3987,7 +4086,11 @@ function makePanelDraggable(panel, handle, onTap){
       top = Math.max(0, Math.min(mapRect.height - startRect.height, top));
       panel.style.left = left+'px';
       panel.style.top = top+'px';
+      // right/bottom이 남아 있으면 위·아래(또는 좌·우)가 동시에 고정돼
+      // 패널이 이동하지 않고 늘어난다. 반대쪽 앵커를 반드시 풀어준다.
       panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.transform = 'none';
       panel.dataset.userMoved = '1'; // 사용자가 직접 옮긴 패널은 자동 배치가 건드리지 않도록 표시
     };
     const up = ()=>{
@@ -4087,9 +4190,7 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
   // 시작화면 음악을 멈추고 게임 음악으로 넘어간다
   const bgStart = document.getElementById('bgMusicStart');
   if(bgStart){ bgStart.pause(); bgStart.currentTime = 0; }
-  const bgMusic = document.getElementById('bgMusic');
-  bgMusic.volume = BGM_VOLUME;
-  bgMusic.play().catch(()=>{}); // 자동재생이 막힐 경우 조용히 무시(음소거 버튼으로 수동 재생 가능)
+  startGameMusic();
   openTutorial(); // 최초 입장 시 튜토리얼을 바로 보여준다(모바일이면 1단계부터)
 });
 function softRestartEngine(){
@@ -4201,6 +4302,7 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   if(!el) return;
   if(el.paused){
     el.volume = BGM_VOLUME;
+    if(gameStarted && !el.src) playGameTrack(0);
     el.play().catch(()=>{});
     btn.textContent = '🔊';
     btn.classList.remove('muted');
@@ -4210,6 +4312,39 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
     btn.classList.add('muted');
   }
 });
+
+// ---- 앱 종료 버튼 (폰 시작화면 전용) ----
+// 설치형 앱(TWA/PWA)에서는 window.close()로 창이 닫힌다.
+// 일반 브라우저 탭은 스크립트가 연 창이 아니면 닫히지 않으므로, 그때는 안내만 한다.
+document.getElementById('quitAppBtn').addEventListener('click', ()=>{
+  if(!confirm('게임을 종료할까요?')) return;
+  window.close();
+  // 위 호출이 막혔다면 창이 그대로 남는다 — 잠시 뒤에도 살아 있으면 안내한다.
+  setTimeout(()=>{
+    showToast('브라우저에서는 창을 직접 닫아주세요', 2000);
+  }, 400);
+});
+
+// ---- 게임 배경음악 (2곡 순서 재생) ----
+const GAME_BGM_TRACKS = ['assets/bgm.mp3', 'assets/bgm2.mp3'];
+let bgmIndex = 0;
+function playGameTrack(i){
+  const el = document.getElementById('bgMusic');
+  if(!el) return;
+  bgmIndex = (i + GAME_BGM_TRACKS.length) % GAME_BGM_TRACKS.length;
+  el.src = GAME_BGM_TRACKS[bgmIndex];
+  el.volume = BGM_VOLUME;
+  el.play().catch(()=>{}); // 자동재생이 막히면 조용히 무시(음소거 버튼으로 수동 재생)
+}
+function startGameMusic(){
+  const el = document.getElementById('bgMusic');
+  if(!el) return;
+  if(!el.dataset.wired){
+    el.dataset.wired = '1';
+    el.addEventListener('ended', ()=> playGameTrack(bgmIndex + 1)); // 다음 곡으로
+  }
+  playGameTrack(0);
+}
 
 // ---- 시작화면 배경음악 ----
 // 브라우저 자동재생 정책 때문에 사용자가 한 번이라도 화면을 건드리기 전에는 소리가 안 난다.
@@ -4278,9 +4413,8 @@ function bindHold(btnId, keyName){
 bindHold('btnLeft','ArrowLeft');
 bindHold('btnRight','ArrowRight');
 bindHold('btnBrake',' ');
-document.getElementById('btnTab').addEventListener('click', ()=>{ if(gameStarted && !gameOver) selectNextSwitch(); });
-document.getElementById('btnEnter').addEventListener('click', ()=>{ if(gameStarted && !gameOver) toggleSelectedSwitch(); });
 document.getElementById('btnSpace').addEventListener('click', ()=>{ if(gameStarted && !gameOver) performCarAction(); });
+document.getElementById('btnShift').addEventListener('click', ()=>{ if(gameStarted && !gameOver) triggerWarningHorn(); });
 
 // 모바일 하단바(동일 동작을 그대로 연결)
 bindHold('mBtnLeft','ArrowLeft');
@@ -6144,7 +6278,11 @@ function layoutTopLeftPanels(){
   const isMobile = document.body.classList.contains('mobile-landscape');
 
   if(carSelect.dataset.userMoved !== '1'){
-    if(mission.style.display !== 'none'){
+    if(!isMobile){
+      // PC는 미션 패널이 화면 가운데 빈 하늘로 갔으므로 따라붙이지 않고 좌상단에 둔다
+      carSelect.style.top = '8px';
+      carSelect.style.left = '8px';
+    } else if(mission.style.display !== 'none'){
       const missionRect = mission.getBoundingClientRect();
       if(missionRect.height > 0){
         carSelect.style.top = Math.round(missionRect.top - mapRect.top) + 'px';
