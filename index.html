@@ -1677,6 +1677,24 @@
     border-color:rgba(127,196,255,.45) !important;
   }
   body.skin:not(.mobile-landscape) .start-keys{ color:#dce8f7 !important; }
+  /* ---- 앱 설치 QR (PC 시작화면 하단) ---- */
+  .app-qr{ display:none; }
+  body.skin:not(.is-mobile) .app-qr{
+    display:block; position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+    text-align:center; z-index:211;
+  }
+  .app-qr-title{
+    font-size:11px; font-weight:800; color:#dce8f7; margin-bottom:6px;
+    text-shadow:0 2px 6px rgba(0,0,0,.8);
+  }
+  .app-qr-row{ display:flex; gap:14px; justify-content:center; }
+  .app-qr-item{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:rgba(255,253,245,.92); border:2px solid #d9a441; border-radius:10px;
+    padding:6px 6px 4px;
+  }
+  .app-qr-item img{ width:76px; height:76px; display:block; border-radius:4px; }
+  .app-qr-item span{ font-size:10px; font-weight:800; color:#3a4a66; }
   /* 시작 버튼: 참고 이미지처럼 금색 입체 버튼 */
   body.skin .start-btn{
     background:linear-gradient(180deg,#ffd257 0%,#f5a623 55%,#d97e06 100%) !important;
@@ -1823,8 +1841,8 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <div class="tutorial-head">
         <b>🎓 게임 튜토리얼</b>
         <div class="tutorial-head-btns">
+          <!-- ✕ 대신 건너뛰기 하나만 둔다 (둘 다 튜토리얼을 닫는 같은 동작이었다) -->
           <button class="tut-skip-btn" id="tutSkipBtn">건너뛰기</button>
-          <button class="admin-close-btn" id="tutorialCloseBtn">✕</button>
         </div>
       </div>
       <div class="tutorial-body">
@@ -1926,7 +1944,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
           </svg>
           <img class="tut-speaker" src="assets/hud-char.png" alt=""><div class="tut-text">
             <div class="tut-title">⑧ 레벨은 이렇게</div>
-            <div class="tut-desc"><b>해결한 입환수 − 사고횟수</b>가<br>10 늘 때마다 레벨이 1 올라가!<br>사고 없이 꾸준히 하는 게 제일 빨라~<br><span class="lv-white" style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;<span style="color:#4ade80;font-weight:800;">6~10</span>&nbsp;<span style="color:#a78bfa;font-weight:800;">11~15</span>&nbsp;<span style="color:#60a5fa;font-weight:800;">16~20</span><br><span style="color:#b5651d;font-weight:800;">21~25</span>&nbsp;<span style="color:#ff9f1c;font-weight:800;">26~30</span>&nbsp;<span style="color:#ff6fb0;font-weight:800;">31~35</span>&nbsp;<span class="lv-pale" style="color:#fff59d;font-weight:800;">36+</span></div>
+            <div class="tut-desc"><b>해결한 입환수</b>가 많아질수록 레벨이 올라가!<br>사고가 잦으면 오히려 줄어들 수도 있어~<br>사고 없이 꾸준히 하는 게 제일 빨라!<br><span class="lv-white" style="color:#ffffff;font-weight:800;">Lv.1~5</span>&nbsp;<span style="color:#4ade80;font-weight:800;">6~10</span>&nbsp;<span style="color:#a78bfa;font-weight:800;">11~15</span>&nbsp;<span style="color:#60a5fa;font-weight:800;">16~20</span><br><span style="color:#b5651d;font-weight:800;">21~25</span>&nbsp;<span style="color:#ff9f1c;font-weight:800;">26~30</span>&nbsp;<span style="color:#ff6fb0;font-weight:800;">31~35</span>&nbsp;<span class="lv-pale" style="color:#fff59d;font-weight:800;">36+</span></div>
           </div>
         </div>
 
@@ -2178,7 +2196,23 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
       <input type="text" id="operatorNameInput" placeholder="수송원 이름을 입력하세요" maxlength="12">
     </div>
     <button class="start-btn" id="startBtn" disabled>게임 시작</button>
-    <div class="start-keys"><span class="only-desktop">← → 가속 · Space 제동 · Tab 전환기 선택 · Enter 전환 · Ctrl 연결·분리 · Shift 주의기적 · 클릭으로도 조작 가능</span><span class="only-mobile">◀ ▶ 이동 · 정지 · 기적 · 연결 · 지도는 끌어서 이동</span></div>
+    <div class="start-keys"><span class="only-desktop">← → 가속 · Space 제동 · Ctrl 연결·분리 · Shift 주의기적 · 클릭으로도 조작 가능</span><span class="only-mobile">◀ ▶ 이동 · 정지 · 기적 · 연결 · 지도는 끌어서 이동</span></div>
+    </div>
+    <!-- 앱 설치 QR (PC 시작화면 하단). 이미지가 아직 없으면 onerror로 그 칸만 조용히 숨긴다. -->
+    <div class="app-qr" id="appQr" hidden>
+      <div class="app-qr-title">휴대폰으로 설치하기</div>
+      <div class="app-qr-row">
+        <div class="app-qr-item" id="qrAndroidBox">
+          <img src="assets/qr-android.png" alt="안드로이드 앱 설치 QR"
+               onerror="this.closest('.app-qr-item').style.display='none'">
+          <span>안드로이드</span>
+        </div>
+        <div class="app-qr-item" id="qrIosBox">
+          <img src="assets/qr-ios.png" alt="아이폰 앱 설치 QR"
+               onerror="this.closest('.app-qr-item').style.display='none'">
+          <span>아이폰</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4313,6 +4347,24 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   }
 });
 
+// ---- 앱 설치 QR ----
+// QR 이미지는 나중에 넣을 예정이라, 하나라도 실제로 불러와졌을 때만 영역을 보여준다.
+// (없는 상태로 두면 "휴대폰으로 설치하기" 제목만 덩그러니 남는다)
+(function initAppQr(){
+  const box = document.getElementById('appQr');
+  if(!box) return;
+  const imgs = [...box.querySelectorAll('img')];
+  const settle = ()=>{
+    const anyLoaded = imgs.some(im => im.complete && im.naturalWidth > 0);
+    box.hidden = !anyLoaded;
+  };
+  imgs.forEach(im=>{
+    im.addEventListener('load', settle);
+    im.addEventListener('error', settle);
+  });
+  settle();
+})();
+
 // ---- 앱 종료 버튼 (폰 시작화면 전용) ----
 // 설치형 앱(TWA/PWA)에서는 window.close()로 창이 닫힌다.
 // 일반 브라우저 탭은 스크립트가 연 창이 아니면 닫히지 않으므로, 그때는 안내만 한다.
@@ -6032,7 +6084,7 @@ document.getElementById('adminRecordClearAllBtn').addEventListener('click', ()=>
 document.getElementById('tutorialToggleBtn').addEventListener('click', ()=>{
   openTutorial();
 });
-document.getElementById('tutorialCloseBtn').addEventListener('click', closeTutorial);
+// 닫기(✕)는 없앴다 — 건너뛰기 버튼이 같은 일을 한다
 document.getElementById('tutorialOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'tutorialOverlay') closeTutorial();
 });
@@ -6054,11 +6106,16 @@ function renderTutorialStep(){
   if(next) next.textContent = (tutStep === TUT_CARDS.length-1) ? '시작하기' : '다음 ▶';
   const panel = document.querySelector('#tutorialOverlay .tutorial-panel');
   if(panel) panel.scrollTop = 0;
+  const active = document.querySelector('.tut-card.tut-active');
+  if(active) active.scrollTop = 0;
 }
 function openTutorial(){
   tutStep = 0;
-  renderTutorialStep();
+  // display:flex를 먼저 켠다. 숨겨진(display:none) 요소는 scrollTop이 먹지 않아
+  // renderTutorialStep()의 scrollTop=0이 무시되고, 지난번 스크롤 위치가 남아
+  // 다시 열었을 때 카드가 어긋나 보였다.
   document.getElementById('tutorialOverlay').style.display = 'flex';
+  renderTutorialStep();
 }
 function closeTutorial(){
   document.getElementById('tutorialOverlay').style.display = 'none';
