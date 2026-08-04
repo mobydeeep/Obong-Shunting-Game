@@ -4501,6 +4501,31 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   const m = /[?&]t=([a-z,]+)/.exec(location.search);
   if(!m) return;
   const on = m[1].split(',');
+  // xform: viewBox를 고정하고 CSS transform으로 지도를 옮긴다.
+  //   WebKit에서 viewBox 변경은 내용량과 무관하게 고정 비용을 내는 것으로 보이는데
+  //   (글자·화차를 전부 지워도 fps가 그대로였다), transform은 합성만으로 처리될 수 있다.
+  if(on.includes('xform')){
+    window.addEventListener('load', ()=>setTimeout(()=>{
+      const svg = document.getElementById('trackSvg');
+      const wrap = document.querySelector('.map-wrap');
+      const B = YARD_BOUNDS;
+      const ppu = wrap.getBoundingClientRect().width / CAMERA.w;  // 화면 px / 야드 단위
+      svg.setAttribute('viewBox', `${B.minX} ${B.minY} ${YARD_W} ${YARD_H}`);
+      svg.style.position = 'absolute';
+      svg.style.left = '0'; svg.style.top = '0';
+      svg.style.width  = (YARD_W * ppu) + 'px';
+      svg.style.height = (YARD_H * ppu) + 'px';
+      svg.style.transformOrigin = '0 0';
+      svg.style.willChange = 'transform';
+      window.applyCameraViewBox = function(){
+        const left = CAMERA.x - CAMERA.w/2;
+        const top  = CAMERA.y - CAMERA.h/2;
+        svg.style.transform =
+          `translate3d(${(-(left - B.minX) * ppu).toFixed(1)}px, ${(-(top - B.minY) * ppu).toFixed(1)}px, 0)`;
+      };
+      console.log('xform 모드: viewBox 고정 + transform 이동, ppu=', ppu.toFixed(3));
+    }, 800));
+  }
   const css = {
     nostroke: '#trackSvg text{ paint-order:normal !important; stroke:none !important; }',
     notext:   '#trackSvg text{ display:none !important; }',
