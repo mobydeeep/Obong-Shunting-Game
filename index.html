@@ -124,9 +124,11 @@
     fill:#fff !important; font-size:12px; font-weight:800;
     stroke:rgba(10,18,32,.8) !important; stroke-width:2.6px !important;
   }
+  /* 시설물(고상홈·철강기지): 흰 점선 상자는 도면 자리표시자처럼 보였다.
+     지반과 같은 흙 계열에 살짝 어두운 콘크리트 패드로 그린다. */
   body.skin .facility-box{
-    fill:rgba(255,255,255,.22) !important;
-    stroke:rgba(255,255,255,.7) !important;
+    fill:rgba(96,84,64,.34) !important;
+    stroke:rgba(58,46,30,.5) !important;
     stroke-width:2 !important; stroke-dasharray:none !important;
   }
   .main-label{ fill:#a9d4ff; font-size:11px; }
@@ -148,10 +150,13 @@
     background:rgba(255,255,255,.62) !important; border-color:#9aa8bd !important;
     color:#22304a !important;
   }
+  /* 주변이 전부 금색 버튼인데 이것만 파란 웹버튼이라 튀었다 */
   body.skin .tut-nav-btn.primary{
-    background:linear-gradient(180deg,#2f7fd6,#1c5fae) !important;
-    border-color:#12406f !important; color:#fff !important;
+    background:linear-gradient(180deg,#ffd257,#f0a01c) !important;
+    border-color:#a75f04 !important; color:#3d2600 !important;
+    box-shadow:0 3px 0 #a75f04;
   }
+  body.skin .tut-nav-btn.primary:active{ transform:translateY(2px); box-shadow:0 1px 0 #a75f04; }
   body.skin .tut-nav-btn:disabled{ opacity:.4; }
   body.skin .tut-title{ color:#12556f !important; }
   body.skin .key-badge{
@@ -203,10 +208,19 @@
   /* 제작자 표기: PC는 일러스트 위에 앉으므로 대비를 조금 준다.
      폰은 사용자가 "흐릿하지만 보이게"를 요청한 상태이므로 건드리지 않는다. */
   body.skin:not(.mobile-landscape) .credit-tag{ color:#dfe7f2 !important; text-shadow:0 1px 3px rgba(0,0,0,.85); }
+  /* 랭킹 머리글의 두 버튼이 회색 웹 위젯처럼 보였다 — 다른 버튼과 같은 크림+금색으로 */
   body.skin .rank-detail-btn{
-    background:rgba(255,255,255,.5) !important; border-color:rgba(180,150,90,.5) !important;
-    color:#3a4a66 !important;
+    background:linear-gradient(180deg,#fffdf5,#eadfc2) !important;
+    border:2px solid #c9a86a !important;
+    box-shadow:0 2px 0 #b09257 !important;
+    color:#3a4a66 !important; font-weight:800;
     position:relative;
+  }
+  body.skin .rank-detail-btn:active{ transform:translateY(2px); box-shadow:none !important; }
+  body.skin .admin-close-btn{
+    background:linear-gradient(180deg,#fffdf5,#eadfc2) !important;
+    border:2px solid #c9a86a !important; border-radius:8px;
+    box-shadow:0 2px 0 #b09257; line-height:1;
   }
   body.mobile-landscape .rank-detail-btn{ padding:5px 12px !important; }
   /* 보이는 크기는 그대로 두고 손가락이 닿는 범위만 넓힌다 */
@@ -282,8 +296,12 @@
   /* 지반 배경판 — 데스크톱은 원래 어두운 배경이라 필요 없다 */
   #groundGroup{ display:none; }
   body.skin #groundGroup{ display:block; }
-    /* 흰색으로 아주 옅게 — 배경 일러스트가 그대로 보이면서 선로 영역만 살짝 밝아진다 */
-  .ground-plate{ fill:rgba(255,255,255,.30); stroke:none; }
+  /* 흙 바탕 + 도상(자갈) 무늬로 야드 지반을 그린다.
+     테두리는 살짝 어두운 선으로 도상 어깨를 흉내내 배경에 얹힌 판이 아니라
+     땅으로 읽히게 한다. */
+  /* 테두리선은 넣지 않는다 — 하늘 쪽에 또렷한 경계가 생겨 다시 "얹은 판"으로 보인다 */
+  .ground-plate{ fill:url(#groundEarth); stroke:none; }
+  .ground-ballast{ fill:url(#ballastTex); opacity:.45; stroke:none; pointer-events:none; }
   /* 밝은 배경 위에서는 어두운 글자가 묻힌다 — 흰 글자에 진한 외곽선 */
   /* 원·화차 위에 얹히는 흰 글자들은 흰 외곽선을 쓰면 사라진다 — 어두운 외곽선으로 */
   body.skin .switch-num,
@@ -861,14 +879,71 @@
     display:none; align-items:center; justify-content:center;
   }
   .admin-pw-box.show{ display:flex; }
+  /* 비밀번호 창은 Admin 전용이지만 🛠 버튼은 누구나 누를 수 있어 실제로 마주치는 화면이다.
+     게임의 다른 카드(크림 바탕 + 금색 테두리)와 같은 옷을 입힌다. */
   .admin-pw-card{
-    background:#101828; border:1px solid #2a3350; border-radius:14px; padding:26px 28px;
-    width:min(320px,90vw); text-align:center; color:#e8edf3;
+    width:min(320px,90vw); text-align:center; padding:24px 26px 20px;
+    background:linear-gradient(180deg,#fffaea,#f6e8c4);
+    border:3px solid #d9a441; border-radius:18px;
+    box-shadow:0 8px 0 #b98630, 0 16px 34px rgba(0,0,0,.45);
+    color:#22304a;
   }
   .admin-pw-card input{
     width:100%; text-align:center; letter-spacing:6px; font-size:20px; padding:10px;
-    border-radius:8px; border:1px solid #2a3350; background:#1a2338; color:#fff; margin:14px 0;
+    border-radius:10px; border:2px solid #c9a86a; margin:14px 0;
+    background:#fffdf6; color:#22304a; font-family:inherit; font-weight:800;
   }
+  .admin-pw-card input:focus{ outline:none; border-color:#d9a441; }
+  /* 카드 안의 안내문은 어두운 패널용 회색이라 크림 위에서 안 보인다 */
+  .admin-pw-title{ font-size:15px; font-weight:900; margin-bottom:4px; color:#22304a; }
+  .admin-pw-sub{ font-size:12px; color:#5a6a86; }
+  .admin-pw-card .admin-note{ color:#a03030 !important; }
+  .admin-pw-card .admin-btn{
+    background:linear-gradient(180deg,#ffd257,#f0a01c); color:#3d2600;
+    border:2.5px solid #a75f04; box-shadow:0 4px 0 #a75f04;
+    border-radius:12px; padding:9px 10px; font-weight:900;
+  }
+  .admin-pw-card .admin-btn.ghost{
+    background:linear-gradient(180deg,#fffdf5,#e9dcc0); color:#4a4030;
+    border:2.5px solid #b9a072; box-shadow:0 4px 0 #9c8455;
+  }
+  .admin-pw-card .admin-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.4); }
+
+  /* ---- 게임풍 확인창 (브라우저 기본 alert/confirm 대체) ---- */
+  .game-dialog-box{
+    position:fixed; inset:0; z-index:95; background:rgba(5,8,15,.6);
+    display:none; align-items:center; justify-content:center; padding:16px;
+  }
+  .game-dialog-box.show{ display:flex; }
+  .game-dialog-card{
+    width:min(360px,92vw); text-align:center; padding:22px 22px 18px;
+    background:linear-gradient(180deg,#fffaea,#f6e8c4);
+    border:3px solid #d9a441; border-radius:18px;
+    box-shadow:0 8px 0 #b98630, 0 16px 34px rgba(0,0,0,.45);
+    color:#22304a;
+  }
+  .game-dialog-msg{
+    font-size:15px; font-weight:700; line-height:1.6; white-space:pre-line;
+    margin-bottom:18px; word-break:keep-all;
+  }
+  .game-dialog-btns{ display:flex; gap:10px; justify-content:center; }
+  .game-dialog-btn{
+    min-width:96px; padding:10px 20px; border-radius:14px; cursor:pointer;
+    font-size:14px; font-weight:900; font-family:inherit;
+  }
+  .game-dialog-btn.primary{
+    background:linear-gradient(180deg,#ffd257,#f0a01c); color:#3d2600;
+    border:2.5px solid #a75f04; box-shadow:0 4px 0 #a75f04;
+  }
+  .game-dialog-btn.ghost{
+    background:linear-gradient(180deg,#fffdf5,#e9dcc0); color:#4a4030;
+    border:2.5px solid #b9a072; box-shadow:0 4px 0 #9c8455;
+  }
+  .game-dialog-btn.danger{
+    background:linear-gradient(180deg,#e04a4a,#b21f1f); color:#fff3f3;
+    border:2.5px solid #8a1414; box-shadow:0 4px 0 #7a1212;
+  }
+  .game-dialog-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.4); }
   /* ---- 모바일 전용 오버레이 조작바 (게임 화면 위에 반투명) ---- */
   .mobile-pad{
     display:none;
@@ -1926,14 +2001,25 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
 
   <div class="admin-pw-box" id="adminPwBox">
     <div class="admin-pw-card">
-      <div style="font-size:15px;font-weight:800;margin-bottom:4px;">Admin 인증</div>
-      <div style="font-size:12px;color:#8b98a8;">비밀번호 4자리를 입력하세요</div>
-      <input type="password" id="adminPwInput" maxlength="4" inputmode="numeric" placeholder="****">
+      <div class="admin-pw-title">🛠 관리자 인증</div>
+      <div class="admin-pw-sub">비밀번호 4자리를 입력하세요</div>
+      <input type="password" id="adminPwInput" maxlength="4" inputmode="numeric" placeholder="••••">
       <div class="admin-row">
         <button class="admin-btn ghost" id="adminPwCancel">취소</button>
         <button class="admin-btn" id="adminPwOk">확인</button>
       </div>
-      <div class="admin-note" id="adminPwError" style="color:#ff8a8a;"></div>
+      <div class="admin-note" id="adminPwError"></div>
+    </div>
+  </div>
+
+  <!-- 게임풍 확인창. 브라우저 기본 alert()/confirm() 대신 gameAlert()/gameConfirm()이 쓴다. -->
+  <div class="game-dialog-box" id="gameDialog">
+    <div class="game-dialog-card">
+      <div class="game-dialog-msg" id="gameDialogMsg"></div>
+      <div class="game-dialog-btns">
+        <button class="game-dialog-btn ghost" id="gameDialogCancel">취소</button>
+        <button class="game-dialog-btn primary" id="gameDialogOk">확인</button>
+      </div>
     </div>
   </div>
 
@@ -2348,6 +2434,43 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <div class="map-wrap">
     <div class="action-toast" id="actionToast"></div>
     <svg id="trackSvg" viewBox="0 -140 1550 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- 지반판 재질: 흙 바탕 + 도상(자갈) 무늬.
+             예전에는 흰색 30% 단색이라 일러스트 위에 반투명 판때기를 얹은 것처럼 보였다.
+             필터(blur)는 쓰지 않는다 — 넓은 면적에 걸면 아이폰에서 비싸다. -->
+        <!-- 지반판 윗부분은 배경 일러스트의 하늘 위에 걸친다. 위로 갈수록 투명해지게 해서
+             하늘에 흙판이 떠 있는 것처럼 보이지 않게 한다(위쪽 경계선도 자연히 사라진다). -->
+        <linearGradient id="groundEarth" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#c2b396" stop-opacity="0"/>
+          <stop offset=".34" stop-color="#b5a68a" stop-opacity=".03"/>
+          <stop offset=".56" stop-color="#a89877" stop-opacity=".30"/>
+          <stop offset=".74" stop-color="#98886a" stop-opacity=".58"/>
+          <stop offset=".88" stop-color="#8d7d61" stop-opacity=".54"/>
+          <stop offset="1"   stop-color="#87775c" stop-opacity=".20"/>
+        </linearGradient>
+        <!-- 자갈 무늬도 같은 비율로 위쪽을 걷어낸다 (필터 없이 그라데이션 마스크만 사용) -->
+        <linearGradient id="groundFadeGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset=".14" stop-color="#000"/>
+          <stop offset=".55" stop-color="#000"/>
+          <stop offset=".70" stop-color="#777"/>
+          <stop offset=".78" stop-color="#fff"/>
+          <stop offset=".80" stop-color="#c8c8c8"/>
+          <stop offset=".82" stop-color="#333"/>
+        </linearGradient>
+        <mask id="groundFade" maskUnits="userSpaceOnUse" x="0" y="-140" width="1550" height="900">
+          <rect x="0" y="-140" width="1550" height="900" fill="url(#groundFadeGrad)"/>
+        </mask>
+        <!-- 자갈은 잘게. 타일이 크면 모바일처럼 확대된 화면에서 벽지 무늬처럼 반복이 보인다. -->
+        <pattern id="ballastTex" width="13" height="13" patternUnits="userSpaceOnUse">
+          <path d="M1.5,2 l2.4,-1 1.4,2 -2,1.4 z"   fill="#6f6350" opacity=".5"/>
+          <path d="M7,1 l2.8,.5 -.5,2.4 -2.4,-.5 z" fill="#8d8069" opacity=".45"/>
+          <path d="M10.6,5 l1.9,1.4 -1.4,1.9 -1.4,-1.4 z" fill="#5f5544" opacity=".42"/>
+          <path d="M3.2,6 l2.4,1 -1,2.4 -1.9,-1 z"  fill="#9a8c73" opacity=".45"/>
+          <path d="M7.8,6.4 l2.4,-.5 .5,2.4 -2.4,.5 z" fill="#655a48" opacity=".45"/>
+          <path d="M.5,9.4 l2.4,.5 -.5,2.4 -1.9,-.5 z" fill="#82755f" opacity=".45"/>
+          <path d="M5.4,10 l2.4,1 -1.4,1.9 -1.9,-1 z" fill="#5b5140" opacity=".4"/>
+        </pattern>
+      </defs>
       <rect class="map-bg" x="0" y="-140" width="1550" height="900" fill="#0f1626"/>
       <text x="20" y="650" class="zone-label">◀ 양회기지(의왕방향)</text>
       <text x="1290" y="650" class="zone-label">본선(터널방향) ▶</text>
@@ -2358,6 +2481,14 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
              두 사각형을 겹쳐 두면 경계선이 화면 한가운데를 가로질러 어색하므로,
              모서리를 둥글린 단일 path로 그리고 반투명하게 깐다. -->
         <path class="ground-plate" d="
+          M 40,-10 H 700
+          C 782,-10 800,70 806,300
+          C 812,336 848,342 892,342
+          H 1500 Q 1540,342 1540,382
+          V 552 Q 1540,592 1500,592
+          H 40 Q 0,592 0,552
+          V 30 Q 0,-10 40,-10 Z"/>
+        <path class="ground-ballast" mask="url(#groundFade)" d="
           M 40,-10 H 700
           C 782,-10 800,70 806,300
           C 812,336 848,342 892,342
@@ -3852,6 +3983,7 @@ function triggerBooster(){
   showToast('🚀 부스터!', 900);
 }
 window.addEventListener('keydown', e=>{
+  if(gameDialogOpen) return;
   if(e.key==='f' || e.key==='F' || e.key==='ㄹ') triggerBooster();
 });
 
@@ -4666,8 +4798,8 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
 // ---- 앱 종료 버튼 (폰 시작화면 전용) ----
 // 설치형 앱(TWA/PWA)에서는 window.close()로 창이 닫힌다.
 // 일반 브라우저 탭은 스크립트가 연 창이 아니면 닫히지 않으므로, 그때는 안내만 한다.
-document.getElementById('quitAppBtn').addEventListener('click', ()=>{
-  if(!confirm('게임을 종료할까요?')) return;
+document.getElementById('quitAppBtn').addEventListener('click', async ()=>{
+  if(!await gameConfirm('게임을 종료할까요?', {okText:'종료', danger:true})) return;
   window.close();
   // 위 호출이 막혔다면 창이 그대로 남는다 — 잠시 뒤에도 살아 있으면 안내한다.
   setTimeout(()=>{
@@ -4742,6 +4874,7 @@ function updateEngineSound(){
 window.addEventListener('keydown', e=>{
   const activeTag = document.activeElement && document.activeElement.tagName;
   if(activeTag==='INPUT' || activeTag==='SELECT' || activeTag==='TEXTAREA') return;
+  if(gameDialogOpen) return;   // 확인창이 떠 있는 동안에는 기관차가 움직이면 안 된다
   if(!gameStarted || gameOver) return;
   if(document.getElementById('missionSuccessOverlay').style.display === 'flex') return;
   if(e.key==='Tab'){ e.preventDefault(); selectNextSwitch(); return; }
@@ -5110,6 +5243,45 @@ function showToast(msg, ms){
   clearTimeout(showToast._t);
   showToast._t = setTimeout(()=> actionToastEl.classList.remove('show'), ms||1200);
 }
+
+// ---- 게임풍 확인창 (브라우저 기본 alert/confirm 대체) ----
+// 기본 대화상자는 게임 화면 위에 OS 위젯이 그대로 떠서 몰입이 깨진다.
+// 사용법: await gameAlert('...') / if(!await gameConfirm('...')) return;
+let gameDialogOpen = false;
+function openGameDialog(msg, opts){
+  const o = opts || {};
+  return new Promise(resolve=>{
+    const box = document.getElementById('gameDialog');
+    const ok  = document.getElementById('gameDialogOk');
+    const cancel = document.getElementById('gameDialogCancel');
+    document.getElementById('gameDialogMsg').textContent = msg;
+    ok.textContent = o.okText || '확인';
+    ok.className = 'game-dialog-btn ' + (o.danger ? 'danger' : 'primary');
+    cancel.style.display = o.withCancel ? '' : 'none';
+    box.classList.add('show');
+    gameDialogOpen = true;   // 열려 있는 동안 주행 키 입력을 막는다
+    const done = v=>{
+      box.classList.remove('show');
+      gameDialogOpen = false;
+      ok.removeEventListener('click', onOk);
+      cancel.removeEventListener('click', onCancel);
+      document.removeEventListener('keydown', onKey, true);
+      resolve(v);
+    };
+    const onOk = ()=>done(true);
+    const onCancel = ()=>done(false);
+    const onKey = e=>{
+      if(e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); done(true); }
+      else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); done(o.withCancel ? false : true); }
+    };
+    ok.addEventListener('click', onOk);
+    cancel.addEventListener('click', onCancel);
+    document.addEventListener('keydown', onKey, true);
+    setTimeout(()=>{ try{ ok.focus(); }catch(e){} }, 0);
+  });
+}
+const gameAlert   = msg => openGameDialog(msg, {});
+const gameConfirm = (msg, opts) => openGameDialog(msg, Object.assign({withCancel:true}, opts||{}));
 
 let COUPLE_TIME_MS = 600; // 연결/분리 소요시간(관리자 설정 가능)
 
@@ -5546,22 +5718,22 @@ document.getElementById('adminLockBtn').addEventListener('click', ()=>{
 });
 document.getElementById('adminCoupleTimeApplyBtn').addEventListener('click', ()=>{
   const v = parseFloat(document.getElementById('adminCoupleTimeInput').value);
-  if(!isFinite(v) || v <= 0){ alert('0보다 큰 초 단위 숫자를 입력하세요.'); return; }
+  if(!isFinite(v) || v <= 0){ gameAlert('0보다 큰 초 단위 숫자를 입력하세요.'); return; }
   COUPLE_TIME_MS = Math.round(v*1000);
   document.getElementById('adminCoupleTimeNote').textContent = `현재 설정: ${v}초`;
 });
 
 // ---- 시뮬레이션 관리 ----
-document.getElementById('adminResetCarsBtn').addEventListener('click', ()=>{
-  if(!confirm('모든 선로의 화차를 초기 배치 상태로 되돌릴까요? (연결된 화차도 모두 해제됩니다)')) return;
+document.getElementById('adminResetCarsBtn').addEventListener('click', async ()=>{
+  if(!await gameConfirm('모든 선로의 화차를 초기 배치 상태로 되돌릴까요?\n(연결된 화차도 모두 해제됩니다)', {okText:'되돌리기'})) return;
   Object.keys(trackCars).forEach(name=> trackCars[name] = []);
   attachedCars = [];
   clearCarSelection();
   seedCars();
   refreshAdminCarList();
 });
-document.getElementById('adminClearAllCarsBtn').addEventListener('click', ()=>{
-  if(!confirm('모든 화차를 삭제할까요? (초기 배치도 사라집니다)')) return;
+document.getElementById('adminClearAllCarsBtn').addEventListener('click', async ()=>{
+  if(!await gameConfirm('모든 화차를 삭제할까요?\n(초기 배치도 사라집니다)', {okText:'삭제', danger:true})) return;
   Object.keys(trackCars).forEach(name=> trackCars[name] = []);
   attachedCars = [];
   clearCarSelection();
@@ -5681,7 +5853,7 @@ document.getElementById('adminCarAddBtn').addEventListener('click', ()=>{
   const track = document.getElementById('adminTrackSelect').value;
   const arr = trackCars[track];
   if(!arr) return;
-  if(arr.length >= MAX_CARS_PER_TRACK){ alert(`이 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`); return; }
+  if(arr.length >= MAX_CARS_PER_TRACK){ gameAlert(`이 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`); return; }
   const val = document.getElementById('adminCarNumberInput').value.trim();
   placeNewParkedCar(track, makeCar(val || null, false));
   refreshAdminCarList();
@@ -5832,7 +6004,7 @@ function endCarDrag(clientX, clientY){
     const destTrack = trackEl.getAttribute('data-track');
     if(destTrack && trackCars[destTrack]){
       if(destTrack !== trackName && trackCars[destTrack].length >= MAX_CARS_PER_TRACK){
-        alert(`대상 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`);
+        gameAlert(`대상 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`);
       } else {
         const i = arr.indexOf(car);
         if(i>=0) arr.splice(i,1);
@@ -5860,7 +6032,7 @@ trackSvg.addEventListener('drop', ev=>{
   const trackName = trackEl.getAttribute('data-track');
   const arr = trackCars[trackName];
   if(!arr) return;
-  if(arr.length >= MAX_CARS_PER_TRACK){ alert(`이 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`); return; }
+  if(arr.length >= MAX_CARS_PER_TRACK){ gameAlert(`이 선로는 이미 최대 ${MAX_CARS_PER_TRACK}량입니다.`); return; }
   const car = makeCar(null,false);
   const dropXY = screenToSVG(ev.clientX, ev.clientY);
   setCarOnTrack(car, trackName, projectOntoEdge(deadEndEdgeOf[trackName], dropXY.x, dropXY.y));
@@ -6373,7 +6545,7 @@ document.getElementById('adminRecordApplyBtn').addEventListener('click', ()=>{
   const sel = document.getElementById('adminRecordSelect');
   const oldName = sel.value;
   const newName = document.getElementById('adminRecordNameInput').value.trim();
-  if(!newName){ alert('이름을 입력하세요.'); return; }
+  if(!newName){ gameAlert('이름을 입력하세요.'); return; }
   if(oldName && oldName !== newName) removeRankRecord(oldName);
   writeRankRecord(newName, {
     totalTime: Math.max(0, Number(document.getElementById('adminRecordTimeInput').value)||0),
@@ -6388,16 +6560,16 @@ document.getElementById('adminRecordApplyBtn').addEventListener('click', ()=>{
   if(typeof renderRankTable === 'function') renderRankTable();
   showToast('✅ 기록이 저장되었습니다', 1200);
 });
-document.getElementById('adminRecordDeleteBtn').addEventListener('click', ()=>{
+document.getElementById('adminRecordDeleteBtn').addEventListener('click', async ()=>{
   const name = document.getElementById('adminRecordSelect').value;
   if(!name) return;
-  if(!confirm(`"${name}" 기록을 삭제할까요?`)) return;
+  if(!await gameConfirm(`"${name}" 기록을 삭제할까요?`, {okText:'삭제', danger:true})) return;
   removeRankRecord(name);
   renderAdminRecordsList();
   if(typeof renderRankTable === 'function') renderRankTable();
 });
-document.getElementById('adminRecordClearAllBtn').addEventListener('click', ()=>{
-  if(!confirm('모든 랭킹 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
+document.getElementById('adminRecordClearAllBtn').addEventListener('click', async ()=>{
+  if(!await gameConfirm('모든 랭킹 기록을 삭제할까요?\n되돌릴 수 없습니다.', {okText:'전체 삭제', danger:true})) return;
   clearAllRankRecords();
   renderAdminRecordsList();
   if(typeof renderRankTable === 'function') renderRankTable();
@@ -6883,8 +7055,8 @@ document.getElementById('adminMissionClearBtn').addEventListener('click', ()=>{
   document.getElementById('adminMissionTasksInput').value = '';
   showToast('🔄 무작위로 되돌렸습니다', 1200);
 });
-document.getElementById('adminMissionHistoryClearBtn').addEventListener('click', ()=>{
-  if(!confirm('미션 기록을 전체 삭제할까요?')) return;
+document.getElementById('adminMissionHistoryClearBtn').addEventListener('click', async ()=>{
+  if(!await gameConfirm('미션 기록을 전체 삭제할까요?', {okText:'전체 삭제', danger:true})) return;
   localStorage.removeItem(MISSION_HISTORY_KEY);
   renderMissionHistoryAdmin();
 });
