@@ -1325,7 +1325,9 @@
     left:-22.9%; top:-13.6%; width:152.7%; height:131.0%;
     object-fit:fill;
     pointer-events:none; z-index:-1;
-    opacity:.88;                                   /* 반투명(뒤 선로가 살짝 비치는 정도) */
+    /* ◐ 버튼(4단계: .86/.5/.25/.12)이 --panel-alpha를 바꾸면 노트도 같이 흐려진다.
+       기본값 .86일 때 예전과 같은 .88이 되도록 살짝 보정한다. */
+    opacity:calc(var(--panel-alpha, .86) * 1.02);
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.3));
   }
   /* 노트 그림이 배경 역할을 하므로 패널 자체의 카드 스타일은 지운다. */
@@ -1340,8 +1342,12 @@
      노트 그림이 같이 늘었다 줄었다 한다. */
   /* 가운데 상단. 폭이 186px로 고정이라 transform 없이 계산해서 놓는다
      (transform을 쓰면 드래그로 옮길 때 인라인 left와 어긋난다) */
-  body.mobile-landscape .mission-panel.overlay-panel{
+  /* 기본은 상단 가운데. 단, 사용자가 드래그로 옮긴 뒤에는 위치를 강제하지 않는다.
+     (!important가 걸려 있으면 JS가 넣는 인라인 left/top이 무시돼 드래그가 안 먹는다) */
+  body.mobile-landscape .mission-panel.overlay-panel:not([data-user-moved="1"]){
     top:6px !important; bottom:auto !important; left:calc(50% - 93px) !important;
+  }
+  body.mobile-landscape .mission-panel.overlay-panel{
     width:186px !important; max-width:186px !important;
     max-height:min(200px, 40vh);
   }
@@ -1350,6 +1356,8 @@
   body.skin:not(.mobile-landscape) .mission-panel.overlay-panel{
     width:236px !important; max-width:236px !important;
     max-height:min(340px, 48vh);
+  }
+  body.skin:not(.mobile-landscape) .mission-panel.overlay-panel:not([data-user-moved="1"]){
     top:19% !important; left:58% !important; bottom:auto !important; right:auto !important;
   }
   /* 화차선택 패널은 미션 패널 오른쪽에 놓이므로, 그 시작 위치를 뺀 만큼만 폭을 허용해
@@ -1382,7 +1390,9 @@
   }
   body.skin .mission-panel .ov-head *{ color:#3b2f1c !important; }
   /* 노트에는 투명도 버튼을 두지 않지만, 접기 버튼은 보이게 둔다 */
-  body.skin .mission-panel #missionOpacityBtn{ display:none; }
+  /* 미션(작업계획서)은 노트 그림이 배경이라 투명도 조절이 특히 쓸모 있다 — 폰에서도 남긴다.
+     다른 패널의 ◐는 body.is-mobile 규칙에서 계속 숨겨진다. */
+  body.is-mobile .mission-panel .ov-btns #missionOpacityBtn{ display:inline-block !important; }
   body.skin .mission-panel .ov-btns{ display:flex; }
   body.skin .mission-panel #missionMinBtn{
     background:rgba(255,255,255,.45) !important;
@@ -6572,6 +6582,9 @@ document.getElementById('missionMinBtn').addEventListener('click', (ev)=>{
   ev.stopPropagation();
   document.getElementById('missionPanel').classList.toggle('collapsed');
 });
+// 헤더 자체가 드래그 핸들이라, 버튼을 눌렀을 때 pointerdown이 헤더까지 올라가면
+// "탭 = 접기"가 함께 돌아 두 번 토글되어 아무 일도 일어나지 않는다. 여기서 끊는다.
+document.getElementById('missionMinBtn').addEventListener('pointerdown', ev=> ev.stopPropagation());
 bindOpacityBtn('missionOpacityBtn', document.getElementById('missionPanel'));
 
 // ---- 관리자 미션 탭 ----
