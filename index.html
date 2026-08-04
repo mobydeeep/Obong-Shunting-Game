@@ -1121,6 +1121,12 @@
   }
   body.skin .music-toggle-btn.muted{ color:#8b7d63 !important; }
   /* 앱 종료 버튼: 폰 시작화면에서만 보인다 (PC는 브라우저 탭을 닫으면 되므로 불필요) */
+  .fps-meter{
+    position:fixed; top:4px; left:50%; transform:translateX(-50%); z-index:500;
+    background:rgba(0,0,0,.72); color:#7CFC9A; font:700 11px/1.35 ui-monospace,Menlo,monospace;
+    padding:4px 10px; border-radius:8px; white-space:pre; pointer-events:none;
+    text-align:center;
+  }
   .quit-app-btn{ display:none; }
   body.is-mobile .quit-app-btn{
     display:flex; align-items:center; justify-content:center;
@@ -1539,6 +1545,27 @@
   }
   body.skin .mini-btn:hover{ background:rgba(255,255,255,.8) !important; }
 
+  /* ---- iOS 성능: 움직이는 지도 위의 backdrop-filter 제거 ----
+     게임 중 항상 떠 있는 요소들(미션 노트·조작 버튼·제작자 표기)에 blur가 걸려 있고
+     그 아래에서 지도가 매 프레임 움직인다. iOS Safari는 이때 프레임마다 화면을
+     다시 읽어와 블러를 계산한다(크롬은 최적화해버려 측정에 안 잡혔다).
+     조작 버튼은 그림·그라데이션이 배경을 이미 덮고 있어 블러가 보이지도 않았다.
+     패널은 반투명 크림색만으로도 충분히 구분된다. */
+  body.is-mobile .overlay-panel,
+  body.is-mobile .mpad-btn,
+  body.is-mobile .mpad-btn-small,
+  body.is-mobile .credit-tag,
+  body.is-mobile .action-toast{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+  }
+  /* 블러가 빠진 만큼 패널 배경을 아주 조금 더 진하게 해 가독성을 유지한다 */
+  body.is-mobile .overlay-panel{
+    background:linear-gradient(180deg,
+        rgba(255,244,205, calc(var(--panel-alpha,.86) * .62)),
+        rgba(250,232,178, calc(var(--panel-alpha,.86) * .66))) !important;
+  }
+
   /* ---- PC 전용 크롬 ---- */
   /* 제목: 청록 그라데이션 글자는 하늘 배경 위에서 안 읽힌다 — 크림 알약으로.
      주의: fitMapToViewport가 h1의 getBoundingClientRect().top으로 지도 높이를 잡으므로
@@ -1845,6 +1872,8 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   <button class="music-toggle-btn" id="musicToggleBtn">🔊</button>
   <!-- 폰 시작화면에서만 보이는 앱 종료 버튼 -->
   <button class="quit-app-btn" id="quitAppBtn" title="종료">✕</button>
+  <!-- 성능 확인용 표시기. 주소 끝에 ?fps=1 을 붙이면 나온다 (평소엔 숨김) -->
+  <div class="fps-meter" id="fpsMeter" hidden></div>
   <button class="game-toggle-btn" id="gameStartBtn" style="display:none;">🎯 <span class="btn-short">시작</span><span class="btn-label">게임 시작</span></button>
   <button class="game-toggle-btn danger" id="gameEndBtn" style="display:none;">⏹ <span class="btn-short">종료</span><span class="btn-label">게임 종료</span></button>
   <button id="installBtn">📥 앱 설치하기</button>
@@ -4459,6 +4488,32 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
     btn.classList.add('muted');
   }
 });
+
+// ---- 성능 표시기 (?fps=1) ----
+// 아이폰 실기기에서 실제 프레임을 볼 수 있어야 최적화가 추측이 아니라 측정이 된다.
+(function initFpsMeter(){
+  if(!/[?&]fps=1/.test(location.search)) return;
+  const el = document.getElementById('fpsMeter');
+  if(!el) return;
+  el.hidden = false;
+  let frames = 0, last = performance.now(), worst = 0, prev = last;
+  let minFps = 999;
+  function tick(){
+    const now = performance.now();
+    const gap = now - prev; prev = now;
+    if(gap > worst) worst = gap;
+    frames++;
+    if(now - last >= 1000){
+      const fps = Math.round(frames * 1000 / (now - last));
+      if(fps < minFps) minFps = fps;
+      el.textContent =
+        `${fps} fps   최악프레임 ${worst.toFixed(0)}ms\n최저 ${minFps} fps   화면배율 ${window.devicePixelRatio}`;
+      frames = 0; last = now; worst = 0;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 // ---- 앱 설치 QR ----
 // QR 이미지는 나중에 넣을 예정이라, 하나라도 실제로 불러와졌을 때만 영역을 보여준다.
