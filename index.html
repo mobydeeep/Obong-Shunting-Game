@@ -2517,11 +2517,26 @@ function clampCameraToYard(){
   CAMERA.y = clampCameraY(CAMERA.y);
 }
 
+// viewBox를 바꾸면 SVG 전체(선로·글자·화차 수백 개)가 다시 래스터화된다.
+// 아이폰은 화면 배율이 3배라 이 비용이 특히 크다. 실측(CPU 20배 감속)에서
+// 이 한 줄이 프레임 시간의 약 23%를 차지했다.
+// 그래서 (1) 좌표를 0.5 단위로 반올림해 미세한 흔들림으로는 다시 그리지 않게 하고,
+//        (2) 결과 문자열이 직전과 같으면 아예 쓰지 않는다.
+let _lastViewBox = '';
+let _svgEl = null;
+const VIEWBOX_QUANTUM = 0.5;
 function applyCameraViewBox(){
-  const halfW = CAMERA.w/2, halfH = CAMERA.h/2;
-  const svg = document.getElementById('trackSvg');
+  const svg = _svgEl || (_svgEl = document.getElementById('trackSvg'));
   if(!svg) return;
-  svg.setAttribute('viewBox', `${(CAMERA.x-halfW).toFixed(1)} ${(CAMERA.y-halfH).toFixed(1)} ${CAMERA.w} ${CAMERA.h}`);
+  const q = v => Math.round(v / VIEWBOX_QUANTUM) * VIEWBOX_QUANTUM;
+  const x = q(CAMERA.x - CAMERA.w/2);
+  const y = q(CAMERA.y - CAMERA.h/2);
+  const w = q(CAMERA.w);
+  const h = q(CAMERA.h);
+  const vb = `${x} ${y} ${w} ${h}`;
+  if(vb === _lastViewBox) return;      // 바뀐 게 없으면 다시 그리지 않는다
+  _lastViewBox = vb;
+  svg.setAttribute('viewBox', vb);
 }
 
 function updateCamera(dt){
