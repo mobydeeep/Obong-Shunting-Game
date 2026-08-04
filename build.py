@@ -66,7 +66,7 @@ def main():
         html = html.replace(f"url('{path}')", f"url('data:{mime};base64,{b64}')")
 
     # 앱 설치 QR 인라인 (없으면 건너뛴다)
-    for name in ['qr-android', 'qr-ios', 'korail-logo']:
+    for name in ['qr-android', 'korail-logo']:
         path = f'assets/{name}.png'
         if not os.path.exists(path):
             continue

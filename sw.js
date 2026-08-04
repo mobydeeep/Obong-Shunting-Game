@@ -13,7 +13,7 @@
 //
 // 주의: 자산을 추가했다면 아래 CACHE 이름의 숫자를 올려야 이전 캐시가 정리된다.
 
-const CACHE = 'obong-game-v27';
+const CACHE = 'obong-game-v28';
 
 const PRECACHE = [
   './',
@@ -23,7 +23,7 @@ const PRECACHE = [
   './assets/bgm-start.mp3',
   './assets/bgm2.mp3',
   './assets/qr-android.png',
-  './assets/qr-ios.png',
+
   './assets/korail-logo.png',
   './assets/engine-move.mp3',
   './assets/horn.mp3',
