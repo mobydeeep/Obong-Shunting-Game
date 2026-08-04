@@ -13,11 +13,21 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        # XcodeGen이 만드는 프로젝트 형식(77)은 Xcode 16 이상이라야 읽는다.
+        # 러너에 깔린 것 중 가장 최신을 고른다.
+        run: |
+          ls -d /Applications/Xcode*.app
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "선택: $NEWEST"
+          sudo xcode-select -s "$NEWEST/Contents/Developer"
+          xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
