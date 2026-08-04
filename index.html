@@ -4489,6 +4489,31 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
   }
 });
 
+// ---- 성능 실험 스위치 (?t=...) ----
+// 아이폰에서 무엇이 실제로 비싼지 직접 재보기 위한 임시 스위치.
+// 주소 끝에 ?fps=1&t=이름 을 붙이면 해당 항목만 꺼진 상태로 실행된다.
+//   nostroke : SVG 글자의 외곽선만 제거(글자는 그대로 보임)
+//   notext   : SVG 글자 전부 숨김(상한 확인용)
+//   nocar    : 화차·기관차 그림 숨김
+//   noplate  : 지반 배경판 숨김
+//   nobg     : 배경 일러스트 숨김
+(function initPerfSwitch(){
+  const m = /[?&]t=([a-z,]+)/.exec(location.search);
+  if(!m) return;
+  const on = m[1].split(',');
+  const css = {
+    nostroke: '#trackSvg text{ paint-order:normal !important; stroke:none !important; }',
+    notext:   '#trackSvg text{ display:none !important; }',
+    nocar:    '#carGroup,#engineNode{ display:none !important; }',
+    noplate:  '#groundGroup{ display:none !important; }',
+    nobg:     'body.skin::before{ display:none !important; }',
+  };
+  const st = document.createElement('style');
+  st.textContent = on.map(k=>css[k]||'').join('\n');
+  document.head.appendChild(st);
+  console.log('성능 실험 스위치:', on.join(','));
+})();
+
 // ---- 성능 표시기 (?fps=1) ----
 // 아이폰 실기기에서 실제 프레임을 볼 수 있어야 최적화가 추측이 아니라 측정이 된다.
 (function initFpsMeter(){
@@ -4506,8 +4531,10 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
     if(now - last >= 1000){
       const fps = Math.round(frames * 1000 / (now - last));
       if(fps < minFps) minFps = fps;
+      const sw = (/[?&]t=([a-z,]+)/.exec(location.search)||[])[1];
       el.textContent =
-        `${fps} fps   최악프레임 ${worst.toFixed(0)}ms\n최저 ${minFps} fps   화면배율 ${window.devicePixelRatio}`;
+        `${fps} fps   최악프레임 ${worst.toFixed(0)}ms\n최저 ${minFps} fps   배율 ${window.devicePixelRatio}` +
+        (sw ? `   [${sw}]` : '');
       frames = 0; last = now; worst = 0;
     }
     requestAnimationFrame(tick);
