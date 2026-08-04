@@ -26,7 +26,12 @@ jobs:
         working-directory: ios
         run: |
           xcodegen generate
-          ls -la
+          echo "=== 사용 중인 Xcode ==="
+          xcodebuild -version
+          echo "=== 프로젝트 형식(objectVersion) ==="
+          grep -m1 objectVersion ObongShunting.xcodeproj/project.pbxproj
+          echo "=== 스킴 목록 ==="
+          xcodebuild -list -project ObongShunting.xcodeproj
 
       - name: Build (unsigned)
         working-directory: ios
