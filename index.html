@@ -2508,6 +2508,14 @@ const CAMERA = {
 const CAMERA_W_PORTRAIT = 360;
 const CAMERA_W_LANDSCAPE = 580;
 const CAMERA_LERP = 0.14;
+// 계단식 카메라를 쓸지. 아이폰/아이패드(WebKit)에서만 기본으로 켠다.
+// iPadOS는 자신을 Mac이라고 보고하므로 터치 지원 여부로 함께 판정한다.
+// 주소에 ?t=stepcam / ?t=nostepcam 을 붙이면 기기와 무관하게 강제할 수 있다(비교용).
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let USE_STEP_CAMERA = IS_IOS;
+if(/[?&]t=[a-z,]*\bnostepcam\b/.test(location.search)) USE_STEP_CAMERA = false;
+else if(/[?&]t=[a-z,]*\bstepcam\b/.test(location.search)) USE_STEP_CAMERA = true;
 // 데스크톱 기본 viewBox("0 -140 1550 900")와 동일한 영역.
 // 좁게 잡으면 좌측 선로명(x=20)·우측 터널선·상단 현대선이 화면 밖으로 잘려 도달할 수 없다.
 const YARD_BOUNDS = { minX: 0, maxX: 1550, minY: -140, maxY: 760 };
@@ -2568,8 +2576,34 @@ function applyCameraViewBox(){
   svg.setAttribute('viewBox', vb);
 }
 
+// ---- 계단식 카메라 (아이폰 기본) ----
+// 실기기 측정 결과, WebKit은 viewBox를 바꾸는 것 자체가 내용량과 무관하게 비싸다.
+// (글자·화차를 전부 숨겨도 fps가 그대로였고, 카메라를 멈추면 항상 60fps였다)
+// 그래서 매 프레임 조금씩 따라가는 대신, 기관차가 화면 가운데 영역 안에 있는 동안은
+// 카메라를 아예 고정하고(= viewBox 안 바뀜 = 60fps), 그 영역을 벗어날 때만 한 번에 옮긴다.
+// 초당 60번 내던 비용을 몇 초에 한 번으로 줄이는 방식이다.
+const STEP_CAM_DEADZONE_X = 0.30;  // 화면 가로의 ±30% (가운데 60%)
+const STEP_CAM_DEADZONE_Y = 0.32;
+const STEP_CAM_LEAD = 0.24;        // 옮길 때 진행 방향으로 이 만큼 앞을 더 보여준다
 function updateCamera(dt){
   if(!CAMERA.active || CAMERA.overviewMode || MAP_PAN.manual){ return; }
+
+  if(USE_STEP_CAMERA){
+    const dx = engineXY.x - CAMERA.x;
+    const dy = engineXY.y - CAMERA.y;
+    const limX = CAMERA.w * STEP_CAM_DEADZONE_X;
+    const limY = CAMERA.h * STEP_CAM_DEADZONE_Y;
+    // 가운데 영역 안이면 아무것도 하지 않는다 — viewBox를 건드리지 않는 게 핵심이다
+    if(Math.abs(dx) <= limX && Math.abs(dy) <= limY) return;
+    // 벗어난 쪽으로 여유를 두고 한 번에 이동(다음 이동까지의 간격을 벌린다)
+    const lead = CAMERA.w * STEP_CAM_LEAD * (dx >= 0 ? 1 : -1);
+    CAMERA.x = clampCameraX(engineXY.x + lead);
+    CAMERA.y = clampCameraY(engineXY.y);
+    CAMERA.targetX = CAMERA.x; CAMERA.targetY = CAMERA.y;
+    applyCameraViewBox();
+    return;
+  }
+
   CAMERA.targetX = clampCameraX(engineXY.x);
   CAMERA.targetY = clampCameraY(engineXY.y);
   const k = 1 - Math.pow(1-CAMERA_LERP, dt*60);
@@ -4559,7 +4593,7 @@ document.getElementById('musicToggleBtn').addEventListener('click', ()=>{
       const sw = (/[?&]t=([a-z,]+)/.exec(location.search)||[])[1];
       el.textContent =
         `${fps} fps   최악프레임 ${worst.toFixed(0)}ms\n최저 ${minFps} fps   배율 ${window.devicePixelRatio}` +
-        (sw ? `   [${sw}]` : '');
+        `   ${USE_STEP_CAMERA ? '계단' : '추적'}` + (sw ? `   [${sw}]` : '');
       frames = 0; last = now; worst = 0;
     }
     requestAnimationFrame(tick);
