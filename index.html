@@ -112,6 +112,9 @@
   .track-line.yuchi.dim{ stroke:#2d5f78; }
   .track-line-outline.yuchi{ stroke:#2a5a72; }
   .track-line-outline.dim{ stroke:#1a2032; }
+  /* 본선: 개통 전에는 어둡게. 아래 .open 규칙이 뒤에 있어 개통 시에는 초록이 이긴다. */
+  .track-line.mainline{ stroke:#2c3448; }
+  .track-line-outline.mainline{ stroke:#1a2032; }
   .track-line.open{ stroke:var(--sw-open); stroke-width:6; }
   .track-line-outline.open{ stroke:#0d3d20; stroke-width:10; }
   .track-label{ fill:#e8edf3; font-size:13px; font-weight:bold; }
@@ -659,12 +662,11 @@
     pointer-events:none; user-select:none;
     text-shadow:0 1px 2px rgba(0,0,0,.6);
   }
-  .credit-tag .korail-mark{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:14px; height:14px; border-radius:50%;
-    background:#005BAC; color:#fff; font-size:8px; font-weight:800;
+  /* 코레일 로고 이미지 (예전엔 파란 원 안의 K + "Korail" 글자였다) */
+  .credit-tag .korail-logo{
+    height:13px; width:auto; display:inline-block; vertical-align:middle;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));
   }
-  .credit-tag .korail-name{ color:#c7d0dc; font-weight:800; }
   .admin-panel{
     position:fixed; top:60px; left:60px; width:min(360px,92vw); max-height:80vh; z-index:80;
     background:rgba(16,24,40,.94); color:#e8edf3; box-shadow:0 12px 34px rgba(0,0,0,.5);
@@ -1707,7 +1709,7 @@
     font-size:11px; font-weight:800; color:#dce8f7; margin-bottom:6px;
     text-shadow:0 2px 6px rgba(0,0,0,.8);
   }
-  .app-qr-row{ display:flex; gap:14px; justify-content:center; }
+  .app-qr-row{ display:flex; gap:34px; justify-content:center; }
   .app-qr-item{
     display:flex; flex-direction:column; align-items:center; gap:3px;
     background:rgba(255,253,245,.92); border:2px solid #d9a441; border-radius:10px;
@@ -1795,7 +1797,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
      화면 크기·터치 사정에 따른 규칙은 skin이 아니라 mobile-landscape / is-mobile 을 쓴다.
      자세한 규약은 CLAUDE.md "CSS 접두사 규약" 참고. -->
 <body class="skin">
-  <div class="credit-tag">제작 : <span class="korail-mark">K</span><span class="korail-name">Korail</span> 임승진</div>
+  <div class="credit-tag">제작 : <img class="korail-logo" src="assets/korail-logo.png?v=18" alt="Korail"> 임승진</div>
   <button class="admin-toggle-btn" id="adminToggleBtn" title="관리자 기능">🛠️</button>
   <button class="rank-toggle-btn" id="rankToggleBtn">🏆<span class="btn-label"> 랭킹</span></button>
   <button class="tutorial-toggle-btn" id="tutorialToggleBtn">🎓<span class="btn-label"> 튜토리얼</span></button>
@@ -2957,11 +2959,19 @@ const mainState = {};
 Object.keys(mainTree).forEach(id=> mainState[id]='a');
 
 const mainLeafLine = {}, mainEdgeLine = {};
+// 본선 계열 선로는 "개통 전"에도 어두운 색으로 남아야 한다.
+// 양회기지는 .dim 클래스로 어둡게 하지만 본선은 .open만 붙였다 뗐다 하므로,
+// 기본 상태를 어둡게 만드는 표식을 따로 준다.
+function markMainline(seg){
+  seg.line.classList.add('mainline');
+  seg.outline.classList.add('mainline');
+}
 const LEAF_TRACK_X = mainX[45] + 60;
 const LEAF_TRACK_END = LEAF_TRACK_X + 100; // 본선 길이를 좀 더 길게
 
 Object.entries(mainLeafY).forEach(([name,y])=>{
   const full = poly([[LEAF_TRACK_X-30,y],[LEAF_TRACK_END,y]], 'track-line');
+  markMainline(full);
   full.line.setAttribute('data-track', name);
   full.outline.setAttribute('data-track', name);
   full.outline.style.cursor = 'pointer';
@@ -2978,6 +2988,7 @@ function connectMainToLeaf(parentId, leafName){
   const p=[mainX[parentId], getMainY(parentId)];
   const c=[LEAF_TRACK_X-30, mainLeafY[leafName]];
   const seg = poly([p, c],'track-line'); // 구불거림 없이 단순 직선(대각선)
+  markMainline(seg);
   seg.line.setAttribute('data-track', leafName);
   seg.outline.setAttribute('data-track', leafName);
   seg.outline.style.cursor = 'pointer';
@@ -2990,6 +3001,7 @@ function connectMainToMain(parentId, childId){
   const p=[mainX[parentId], getMainY(parentId)];
   const c=[mainX[childId], getMainY(childId)];
   const seg = poly([c, p],'track-line'); // 구불거림 없이 단순 직선(대각선)
+  markMainline(seg);
   mainEdgeLine[childId]=seg;
 }
 Object.keys(mainTree).forEach(idStr=>{
@@ -2999,6 +3011,7 @@ Object.keys(mainTree).forEach(idStr=>{
 });
 
 const trunkSeg = poly([[switchX[301],switchY[301]],[mainX[31],getMainY(31)]], 'track-line');
+markMainline(trunkSeg);
 
 function toggleMainSwitch(id){
   if(isNodeOccupied(id)){ showToast('🚫 전환기 위에 차량이 있습니다', 1400); return; }
@@ -3281,6 +3294,7 @@ Object.entries(mainLeafFar).forEach(([name, far])=>{
   // 기존에 막다른 끝으로 그려졌던 지점(edge의 마지막 점)에서 새 전환기까지 선을 연장해서 그린다
   const lastPt = e.points[e.points.length-1];
   const seg = polySmooth(lastPt, farXY, 'track-line');
+  markMainline(seg);
   seg.line.setAttribute('data-track', name);
   seg.outline.setAttribute('data-track', name);
   seg.outline.style.cursor = 'pointer';
@@ -3307,6 +3321,7 @@ const rightChain = [
 const rightChainLine = {};
 rightChain.forEach(({from,to})=>{
   const seg = polySmooth(rightSwitchXY[from], rightSwitchXY[to], 'track-line');
+  markMainline(seg);
   rightChainLine[from+'_'+to] = seg;
 });
 const rightLeafLine = {};
