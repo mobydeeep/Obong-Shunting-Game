@@ -2232,7 +2232,7 @@ firebaseDb.ref('rankRecords').get().then((snapshot) => {
   </div>
 
   <!-- 시작화면 전용 배경음악. 게임에 들어가면 bgMusic으로 넘어간다 -->
-  <audio id="bgMusicStart" loop preload="auto"><source src="assets/bgm-start.mp3" type="audio/mpeg"></audio>
+  <audio id="bgMusicStart" loop preload="metadata"><source src="assets/bgm-start.mp3" type="audio/mpeg"></audio>
   <!-- 게임 배경음악 2곡을 순서대로 재생하고 다시 처음으로 돌아간다.
        loop 속성을 쓰면 첫 곡만 반복되므로 JS에서 ended로 넘긴다. -->
   <audio id="bgMusic" preload="auto"></audio>
@@ -4533,14 +4533,20 @@ function startGameMusic(){
 // 움직이는 동안 반복 재생하고, 속도가 빠를수록 조금 더 크고 빠르게 들리도록 한다.
 // 효과음이므로 음소거 버튼(배경음악 전용)의 영향을 받지 않는다.
 const ENGINE_SFX_MIN_V = 2;   // 이 속도 미만은 정차로 보고 소리를 끈다
+// 주행음. volume/playbackRate를 매 프레임(초당 60회) 새로 쓰면 오디오 파이프라인이
+// 그때마다 리샘플링을 다시 잡는다 — 특히 iOS에서 눈에 띄게 버벅인다.
+// 귀로 구분되지 않는 수준(0.05 / 0.03)으로 양자화해서, 값이 실제로 달라질 때만 쓴다.
+let _sfxVol = -1, _sfxRate = -1;
 function updateEngineSound(){
   const el = document.getElementById('engineSfx');
   if(!el) return;
   const moving = !gameOver && Math.abs(vScreen) > ENGINE_SFX_MIN_V;
   if(moving){
     const ratio = Math.min(1, Math.abs(vScreen) / MAX_V);
-    el.volume = Math.min(1, 0.20 + ratio * 0.55);
-    el.playbackRate = 0.88 + ratio * 0.28;
+    const vol  = Math.round(Math.min(1, 0.20 + ratio * 0.55) / 0.05) * 0.05;
+    const rate = Math.round((0.88 + ratio * 0.28) / 0.03) * 0.03;
+    if(vol !== _sfxVol){ _sfxVol = vol; el.volume = vol; }
+    if(rate !== _sfxRate){ _sfxRate = rate; el.playbackRate = rate; }
     if(el.paused) el.play().catch(()=>{});
   } else if(!el.paused){
     el.pause();
