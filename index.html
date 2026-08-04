@@ -1392,7 +1392,7 @@
     padding:4px 5px !important;
   }
   body.mobile-landscape .mission-panel .ov-head{
-    font-size:7.5px !important; gap:2px; padding:0 1px 1px !important;
+    font-size:9.5px !important; gap:2px; padding:0 1px 1px !important;
     white-space:nowrap;            /* 제목이 두 줄로 접히지 않게 */
   }
   body.mobile-landscape .mission-panel .mission-icon{ font-size:8px; }
@@ -1404,7 +1404,7 @@
   }
   body.mobile-landscape .mission-panel .mini-btn::after{ content:''; position:absolute; inset:-9px; }
   body.mobile-landscape .mission-format-line{
-    font-size:6.5px !important; line-height:1.3; padding:2px 1px; gap:3px;
+    font-size:8.5px !important; line-height:1.3; padding:2px 1px; gap:3px;
   }
   /* 한 묶음이 한 줄에 들어가도록: 두 칸 모두 줄바꿈을 막고 부호칸은 내용만큼만 차지한다 */
   body.mobile-landscape .mission-col-track{ flex:1 1 auto !important; white-space:nowrap; }
@@ -1863,22 +1863,33 @@ const FIREBASE_CONFIG = {
 };
 let firebaseDb = null;
 let firebaseReady = false;
+// 최초 로드가 성공했을 때만 true. 이 값이 false면 랭킹에 아무것도 쓰지 않는다.
+// (오프라인 등으로 로드에 실패한 채 저장하면 빈 캐시가 공용 랭킹을 덮어써 전체가 날아간다)
+let rankInitialLoadOk = false;
 const rankRecordsCache = {};
+// 서버 상태를 그대로 반영한다. 병합(Object.assign)이 아니라 교체여야
+// 다른 기기에서 지운 기록이 여기서도 사라지고, 되살아나 다시 써지지 않는다.
+function replaceRankCache(data){
+  Object.keys(rankRecordsCache).forEach(k=>{ if(!(k in data)) delete rankRecordsCache[k]; });
+  Object.assign(rankRecordsCache, data);
+}
 firebase.initializeApp(FIREBASE_CONFIG);
 firebaseDb = firebase.database();
 firebaseDb.ref('rankRecords').get().then((snapshot) => {
-  const data = snapshot.val() || {};
-  Object.assign(rankRecordsCache, data);
+  replaceRankCache(snapshot.val() || {});
   console.log('Firebase: Initial data loaded', rankRecordsCache);
   firebaseReady = true;
+  rankInitialLoadOk = true;
   firebaseDb.ref('rankRecords').on('value', (snapshot) => {
-    const data = snapshot.val() || {};
-    Object.assign(rankRecordsCache, data);
-    console.log('Firebase: Real-time update', rankRecordsCache);
+    replaceRankCache(snapshot.val() || {});
+    // 랭킹 표가 열려 있으면 다른 기기의 기록이 실시간으로 반영되게 다시 그린다
+    const rp = document.getElementById('rankPanel');
+    if(typeof renderRankTable === 'function' && rp && rp.style.display !== 'none') renderRankTable();
   });
 }).catch((error) => {
   console.error('Firebase init error:', error);
-  firebaseReady = true;
+  firebaseReady = true;      // 화면은 진행시키되
+  rankInitialLoadOk = false;  // 쓰기는 계속 막아 둔다
 });
 </script>
 </head>
@@ -6167,33 +6178,54 @@ const RANK_STORAGE_KEY = 'obong_operator_rank_v1';
 function loadRankRecords(){
   return rankRecordsCache;
 }
-// 주의: 이 함수는 로컬 캐시뿐 아니라 Firebase의 공용 랭킹 노드를 통째로 덮어쓴다(.set).
-// 빈 객체를 넘기면 전체 기록이 지워진다. 테스트/디버깅 목적으로 호출하지 말 것.
-function saveRankRecords(records){
-  Object.assign(rankRecordsCache, records);
-  if (firebaseDb) {
-    console.log('Firebase: Saving records...', records);
-    firebaseDb.ref('rankRecords').set(records)
-      .then(() => console.log('Firebase: Save successful'))
-      .catch(err => console.error('Firebase save error:', err));
-  } else {
-    console.warn('Firebase not ready yet');
-  }
+// Firebase 키에 쓸 수 없는 문자를 걸러낸다. 이 문자가 들어간 이름은 예전에도 저장 자체가
+// 실패했으므로, 기존 기록의 키는 전부 그대로 통과한다(마이그레이션 불필요).
+function rankKey(name){ return String(name).replace(/[.#$\[\]\/]/g, '_'); }
+const EMPTY_RECORD = { totalTime:0, plays:0, totalOps:0, derailCount:0, breachCount:0, fatalityCount:0 };
+function normalizeRecord(r){
+  const o = Object.assign({}, EMPTY_RECORD, r || {});
+  for(const k in EMPTY_RECORD) if(typeof o[k] !== 'number' || !isFinite(o[k])) o[k] = 0;
+  return o;
 }
+// 한 사람의 기록만 통째로 써넣는다(관리자 편집용). 다른 사람 기록에는 손대지 않는다.
+function writeRankRecord(name, record){
+  const key = rankKey(name);
+  rankRecordsCache[key] = normalizeRecord(record);
+  if(!firebaseDb || !rankInitialLoadOk) return;
+  firebaseDb.ref('rankRecords/' + key).set(rankRecordsCache[key])
+    .catch(err => console.error('Firebase save error:', err));
+}
+function removeRankRecord(name){
+  const key = rankKey(name);
+  delete rankRecordsCache[key];
+  if(!firebaseDb || !rankInitialLoadOk) return;
+  firebaseDb.ref('rankRecords/' + key).remove()
+    .catch(err => console.error('Firebase delete error:', err));
+}
+// 관리자 "전체 삭제" 전용. 이름 그대로 공용 랭킹을 통째로 지운다 — 다른 곳에서 호출하지 말 것.
+function clearAllRankRecords(){
+  Object.keys(rankRecordsCache).forEach(k=>delete rankRecordsCache[k]);
+  if(!firebaseDb || !rankInitialLoadOk) return;
+  firebaseDb.ref('rankRecords').set(null)
+    .catch(err => console.error('Firebase clear error:', err));
+}
+// 기록 증가는 반드시 그 사람의 노드에 대한 transaction으로 처리한다.
+//  - 다른 사람 기록을 건드리지 않으므로, 두 기기가 동시에 저장해도 서로 지워지지 않는다.
+//  - 서버의 최신 값을 받아 더하고 충돌 시 자동 재시도하므로,
+//    같은 이름을 두 기기에서 써도 증가분이 합산된다(로컬 캐시 기준 덮어쓰기와 다름).
 function updateRankRecord(name, {timeDelta=0, opsDelta=0, playInc=0, derailInc=0, breachInc=0, fatalityInc=0}){
   if(!name) return;
-  const records = loadRankRecords();
-  if(!records[name]) records[name] = { totalTime:0, plays:0, totalOps:0, derailCount:0, breachCount:0, fatalityCount:0 };
-  if(records[name].derailCount===undefined) records[name].derailCount = 0; // 이전 버전 기록 호환
-  if(records[name].breachCount===undefined) records[name].breachCount = 0;
-  if(records[name].fatalityCount===undefined) records[name].fatalityCount = 0;
-  records[name].totalTime += timeDelta;
-  records[name].plays += playInc;
-  records[name].totalOps += opsDelta;
-  records[name].derailCount += derailInc;
-  records[name].breachCount += breachInc;
-  records[name].fatalityCount += fatalityInc;
-  saveRankRecords(records);
+  const key = rankKey(name);
+  const add = cur => {
+    const r = normalizeRecord(cur);
+    r.totalTime += timeDelta; r.plays += playInc; r.totalOps += opsDelta;
+    r.derailCount += derailInc; r.breachCount += breachInc; r.fatalityCount += fatalityInc;
+    return r;
+  };
+  rankRecordsCache[key] = add(rankRecordsCache[key]); // 화면이 즉시 반응하도록 로컬에도 반영
+  if(!firebaseDb || !rankInitialLoadOk) return;
+  firebaseDb.ref('rankRecords/' + key).transaction(add)
+    .catch(err => console.error('Firebase update error:', err));
 }
 function getLevelInfo(r){
   const net = (r.totalOps||0) - ((r.derailCount||0)+(r.breachCount||0)+(r.fatalityCount||0));
@@ -6333,17 +6365,15 @@ document.getElementById('adminRecordApplyBtn').addEventListener('click', ()=>{
   const oldName = sel.value;
   const newName = document.getElementById('adminRecordNameInput').value.trim();
   if(!newName){ alert('이름을 입력하세요.'); return; }
-  const records = loadRankRecords();
-  if(oldName && oldName !== newName) delete records[oldName];
-  records[newName] = {
+  if(oldName && oldName !== newName) removeRankRecord(oldName);
+  writeRankRecord(newName, {
     totalTime: Math.max(0, Number(document.getElementById('adminRecordTimeInput').value)||0),
     plays: Math.max(0, Number(document.getElementById('adminRecordPlaysInput').value)||0),
     totalOps: Math.max(0, Number(document.getElementById('adminRecordOpsInput').value)||0),
     derailCount: Math.max(0, Number(document.getElementById('adminRecordDerailInput').value)||0),
     breachCount: Math.max(0, Number(document.getElementById('adminRecordBreachInput').value)||0),
     fatalityCount: Math.max(0, Number(document.getElementById('adminRecordFatalityInput').value)||0),
-  };
-  saveRankRecords(records);
+  });
   renderAdminRecordsList();
   document.getElementById('adminRecordSelect').value = newName;
   if(typeof renderRankTable === 'function') renderRankTable();
@@ -6353,15 +6383,13 @@ document.getElementById('adminRecordDeleteBtn').addEventListener('click', ()=>{
   const name = document.getElementById('adminRecordSelect').value;
   if(!name) return;
   if(!confirm(`"${name}" 기록을 삭제할까요?`)) return;
-  const records = loadRankRecords();
-  delete records[name];
-  saveRankRecords(records);
+  removeRankRecord(name);
   renderAdminRecordsList();
   if(typeof renderRankTable === 'function') renderRankTable();
 });
 document.getElementById('adminRecordClearAllBtn').addEventListener('click', ()=>{
   if(!confirm('모든 랭킹 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
-  saveRankRecords({});
+  clearAllRankRecords();
   renderAdminRecordsList();
   if(typeof renderRankTable === 'function') renderRankTable();
 });

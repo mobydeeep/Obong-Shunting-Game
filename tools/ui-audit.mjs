@@ -449,8 +449,10 @@ async function main(){
           };
         });
         // 이 하네스는 실서비스 Firebase 랭킹에 절대 쓰면 안 된다.
-        // S10(사고)이나 미션 완료가 updateRankRecord -> saveRankRecords -> firebaseDb.set 을 타고
-        // 공용 기록을 덮어쓴 적이 있다. SDK를 window.firebase 수준에서 감싸는 방식은
+        // S10(사고)이나 미션 완료가 updateRankRecord를 타고 공용 기록에 가짜 이름을 남긴다.
+        // (예전에는 노드 전체 .set이라 남의 기록을 통째로 덮어쓰기까지 했다. 지금은
+        //  그 사람 노드만 건드리는 transaction이지만, 그래도 쓰면 안 되는 건 마찬가지다.)
+        // SDK를 window.firebase 수준에서 감싸는 방식은
         // 게임이 먼저 firebase.database()를 잡아가면 늦어서 막지 못했다.
         // 확실한 방법은 SDK와 DB 통신 자체를 네트워크에서 끊는 것이다.
         // firebaseDb가 없으면 게임은 경고만 남기고 정상 동작한다(랭킹은 비어 보인다).

@@ -63,7 +63,7 @@ node tools/ui-audit.mjs --profile ip14-land --state S6
 
 - 모바일 판정이 UA 기반이라 반드시 `devices[]` 디스크립터로 컨텍스트를 만든다. `viewport`만 주면 `mobile-landscape`가 안 켜진다.
 - 스크린샷 직전 애니메이션을 정지시키므로 PNG 단순 비교로 회귀를 잡을 수 있다.
-- **`ctx.route(...)`의 Firebase 네트워크 차단을 절대 제거하지 말 것.** 상태 S10(사고)이 `updateRankRecord → saveRankRecords → .set()`을 타고 공용 랭킹을 통째로 덮어쓴다. 실제로 기록을 날린 적이 있다. `window.firebase`를 감싸는 방식은 게임이 먼저 `firebase.database()`를 잡아가서 막지 못한다.
+- **`ctx.route(...)`의 Firebase 네트워크 차단을 절대 제거하지 말 것.** 상태 S10(사고)·미션완료가 `updateRankRecord`를 타고 공용 랭킹에 가짜 기록을 남긴다. (예전에는 노드 전체 `.set()`이라 남의 기록까지 통째로 날렸고, 실제로 날린 적이 있다.) `window.firebase`를 감싸는 방식은 게임이 먼저 `firebase.database()`를 잡아가서 막지 못한다.
 
 ## UI 패널 시스템 (중요한 아키텍처 패턴)
 
@@ -88,7 +88,12 @@ node tools/ui-audit.mjs --profile ip14-land --state S6
 - **주의기적**: `Shift` 키 → `triggerWarningHorn()` → 기관차 지붕 위에 스피커+음파 SVG 아이콘(`hornFxG`, class `horn-fx.show`)이 잠깐 표시됨
 - **이례사항 NPC**: 양회수송원(301~310호 배회, 무작위 전환기 취급), 본선직원(본선 배회, 이동 중인 차량과 접촉 시 사상사고 — `isNearMovingVehicle()`이 정차 중인 화차는 제외하고 판정)
 - **레벨 시스템**: `getLevelInfo(record)` — 레벨 = 1 + floor((해결한 입환수 − (탈선+후부돌파+사상사고)) / 10). 구간별 색상: Lv1-5 흰색, 6-10 초록(#4ade80), 11-15 보라(#a78bfa), 16-20 파랑(#60a5fa), 21-25 갈색(#b5651d), 26-30 밝은주황(#ff9f1c), 31-35 밝은분홍(#ff6fb0), 36+ 연노랑(#fff59d). 랭킹 이름 앞에 표시, "이름" 헤더 클릭 시 레벨 기준 정렬.
-- **랭킹 저장**: `loadRankRecords()`/`saveRankRecords()` — localStorage 기반. Admin의 "📋 기록" 탭에서 직접 값 수정/삭제 가능 (`renderAdminRecordsList()` 등).
+- **랭킹 저장**: Firebase Realtime DB(`rankRecords`)를 여러 기기가 공유한다. `rankRecordsCache`가 서버 사본이고 `loadRankRecords()`가 그걸 돌려준다.
+  - **쓰기는 반드시 사람 단위 경로(`rankRecords/<이름>`)로만 한다.** 노드 전체 `.set()`은 다른 기기가 방금 만든 기록을 통째로 지운다(실제로 재현됨). 증가는 `updateRankRecord()`의 `transaction()` — 서버 최신값 기준이라 같은 이름을 두 기기에서 써도 합산된다. 통째 편집/삭제는 `writeRankRecord()`/`removeRankRecord()`.
+  - **`clearAllRankRecords()`는 Admin "전체 삭제" 전용.** 공용 랭킹을 통째로 지운다. 다른 데서 부르지 말 것.
+  - `rankInitialLoadOk`가 false면(최초 로드 실패, 예: 오프라인) **아무것도 쓰지 않는다.** 빈 캐시로 저장해서 전체를 날리는 사고를 막는 장치다.
+  - `on('value')` 콜백은 `replaceRankCache()`로 **교체**한다. `Object.assign` 병합으로 두면 다른 기기가 지운 기록이 안 사라지고 다음 저장 때 되살아난다.
+  - Admin의 "📋 기록" 탭에서 직접 값 수정/삭제 가능 (`renderAdminRecordsList()` 등).
 - **Admin 패널**: 비밀번호 4231. 탭: 화차·선로·미션·설정·이례사항·기록.
 - **본선 진로**: 전환기를 하나씩 조작하지 않고, 본선 라벨(예: 본17)을 마우스로 클릭하면 `selectQuickRoute(name)`이 필요한 전환기를 전부 맞추고 진로를 초록색으로 표시.
 
