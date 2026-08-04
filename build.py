@@ -65,6 +65,15 @@ def main():
             b64 = base64.b64encode(f.read()).decode()
         html = html.replace(f"url('{path}')", f"url('data:{mime};base64,{b64}')")
 
+    # 앱 설치 QR 인라인 (없으면 건너뛴다)
+    for name in ['qr-android', 'qr-ios']:
+        path = f'assets/{name}.png'
+        if not os.path.exists(path):
+            continue
+        with open(path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        html = re.sub(re.escape(path) + r'(\?v=\d+)?', f'data:image/png;base64,{b64}', html)
+
     # 조작 버튼 아이콘 인라인 (img src 참조)
     for name in ['stop', 'horn', 'couple']:
         path = f'assets/icons/btn-{name}.png'
