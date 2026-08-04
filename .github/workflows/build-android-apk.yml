@@ -194,7 +194,9 @@ jobs:
           SIGNED=$(find twa -name "*signed*.apk" ! -name "*unsigned*" | head -1)
           if [ -z "$SIGNED" ]; then SIGNED=$(find twa -name "*.apk" ! -name "*unsigned*" | head -1); fi
           if [ -z "$SIGNED" ]; then echo "서명된 APK를 찾지 못했습니다"; find twa -name "*.apk"; exit 1; fi
-          cp "$SIGNED" "release/오봉입환게임.apk"
+          # 파일명은 반드시 ASCII로. 한글 이름을 쓰면 GitHub 릴리스에 올라갈 때
+          # 이름이 통째로 날아가 default.apk 가 된다(실제로 그렇게 올라갔다).
+          cp "$SIGNED" "release/obong-shunting-game.apk"
           ls -la release
 
       - name: Create Release
