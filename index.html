@@ -1190,8 +1190,13 @@
     body.skin:not(.mobile-landscape) .facility-label{ stroke-width:1.8px !important; }
   }
   /* 배경 일러스트. 지도(SVG)는 이 위에 투명하게 얹힌다. */
-  body.skin{
-    background:#7ec8f0 url('assets/bg-game.jpg') center/cover no-repeat fixed !important;
+  /* iOS Safari는 background-attachment:fixed 를 렌더하지 않는다.
+     그래서 아이폰에서는 그림이 통째로 사라지고 대체색(#7ec8f0 하늘색)만 보였다.
+     배경을 body가 아니라 화면에 고정된 별도 레이어로 그린다. */
+  body.skin{ background:#7ec8f0 !important; }
+  body.skin::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:url('assets/bg-game.jpg') center/cover no-repeat;
   }
   /* 디자인: 배경 일러스트가 비치도록 지도 상자를 투명하게. 크기·위치는 건드리지 않는다.
      데스크톱은 overflow:hidden(기본값)을 유지해야 오버레이 패널이 상자 밖으로 안 삐져나온다. */
@@ -1202,7 +1207,10 @@
   /* 폰 레이아웃: 지도를 화면 전체로. z-index는 절대 주지 말 것(위 z 계층표 주석 참고) */
   body.mobile-landscape .map-wrap{
     position:fixed !important; inset:0;
-    width:100vw !important; height:100vh !important; margin:0 !important;
+    /* iOS Safari의 100vh는 "주소창이 숨은 상태"의 높이라 실제 보이는 영역보다 커서
+       화면 아래가 잘린다. dvh(동적 뷰포트 높이)를 쓰고, 미지원 브라우저는 vh로 떨어진다. */
+    width:100vw !important; height:100vh !important;
+    height:100dvh !important; margin:0 !important;
     border-radius:0 !important;
     overflow:visible !important;
   }
@@ -1210,7 +1218,7 @@
   /* 좌우 조작 스트립 */
   body.mobile-landscape .mobile-pad{
     display:flex !important; flex-direction:row; align-items:flex-end; justify-content:space-between;
-    position:fixed; inset:0; width:100vw; height:100vh;
+    position:fixed; inset:0; width:100vw; height:100vh; height:100dvh;
     padding:16px; gap:12px; z-index:30;
     background:none; border:none; box-shadow:none;
     pointer-events:none;
@@ -1234,6 +1242,28 @@
     display:flex; flex-direction:row; gap:8px;
     order:1; margin-bottom:4px;
   }
+  /* 조작 버튼을 담는 상자들이 pointer-events:auto 였다.
+     그래서 버튼 사이·주변의 빈 공간까지 탭을 먹어버려, 그 아래 선로를 고를 수 없었다.
+     상자는 통과시키고 실제 버튼만 받게 한다. */
+  body.mobile-landscape .pad-left,
+  body.mobile-landscape .pad-right,
+  body.mobile-landscape .pad-actions{ pointer-events:none; }
+  /* 노치·홈 인디케이터 영역을 피한다(meta viewport-fit=cover와 짝).
+     이게 없으면 아이폰 가로에서 버튼 일부가 화면 밖·홈바 아래로 들어간다. */
+  body.mobile-landscape .pad-left{
+    left:calc(16px + env(safe-area-inset-left));
+    bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+  body.mobile-landscape .pad-right{
+    right:calc(16px + env(safe-area-inset-right));
+    bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+  body.mobile-landscape .credit-tag{ bottom:calc(6px + env(safe-area-inset-bottom)); }
+  body.mobile-landscape .action-toast{ bottom:calc(28px + env(safe-area-inset-bottom)) !important; }
+  body.mobile-landscape .pad-left .mpad-btn,
+  body.mobile-landscape .pad-right .mpad-btn,
+  body.mobile-landscape .pad-actions .mpad-btn-small,
+  body.mobile-landscape .mpad-recenter{ pointer-events:auto; }
   /* 정지·기적·연결: 손가락으로 확실히 눌리도록 44px */
   /* 정지·기적·연결: 그림 자체가 버튼 모양(라벨 포함)이라 배경·테두리를 지우고 그림만 띄운다 */
   .mpad-icon{ display:none; }
