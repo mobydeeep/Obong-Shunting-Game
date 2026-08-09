@@ -1,0 +1,217 @@
+name: Build Android APK Simple
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'release-*'
+
+permissions:
+  contents: write        # 릴리스 생성에 필요
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || echo "Licenses already accepted"
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Bubblewrap globally
+        run: npm install -g @bubblewrap/cli
+
+      - name: Configure Bubblewrap paths (skip interactive JDK/SDK prompts)
+        run: |
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          EOF
+          cat ~/.bubblewrap/config.json
+
+      - name: Check if keystore Secrets exist
+        id: keystore_check
+        run: |
+          if [ -z "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "has_keystore=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_keystore=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate keystore (first time)
+        if: steps.keystore_check.outputs.has_keystore == 'false'
+        run: |
+          keytool -genkey -v -keystore release.keystore \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias release_key \
+            -storepass "releasepass123" \
+            -keypass "releasepass123" \
+            -dname "CN=Obong,O=Obong,L=Seoul,ST=Seoul,C=KR"
+
+          echo "Keystore generated. Download from artifacts and register as GitHub Secrets:"
+          echo "ANDROID_KEYSTORE_BASE64: $(base64 -w 0 < release.keystore)"
+          echo "ANDROID_KEYSTORE_PASSWORD: releasepass123"
+          echo "ANDROID_KEY_ALIAS: release_key"
+          echo "ANDROID_KEY_PASSWORD: releasepass123"
+
+      - name: Upload keystore for first run
+        if: steps.keystore_check.outputs.has_keystore == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: keystore
+          path: release.keystore
+          retention-days: 7
+
+      - name: Restore keystore from Secrets
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+          echo "KEYSTORE_PATH=$(pwd)/release.keystore" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Create TWA manifest (non-interactive, no bubblewrap wizard)
+        run: |
+          mkdir -p twa
+          cat > twa/twa-manifest.json <<'EOF'
+          {
+            "packageId": "com.obong.shuntinggame",
+            "host": "mobydeeep.github.io",
+            "name": "오봉 입환게임",
+            "launcherName": "오봉 입환게임",
+            "display": "fullscreen",
+            "orientation": "landscape",
+            "themeColor": "#0a0d16",
+            "navigationColor": "#0a0d16",
+            "navigationColorDark": "#0a0d16",
+            "navigationDividerColor": "#0a0d16",
+            "navigationDividerColorDark": "#0a0d16",
+            "backgroundColor": "#0a0d16",
+            "enableNotifications": false,
+            "startUrl": "/Obong-Shunting-Game/index.html",
+            "iconUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/assets/icons/icon-512.png",
+
+            "signingKey": {
+              "path": "../release.keystore",
+              "alias": "release_key"
+            },
+            "splashScreenFadeOutDuration": 300,
+            "appVersionName": "1.2.0",
+            "appVersionCode": 3,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/manifest.webmanifest",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {
+              "enabled": false
+            },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://mobydeeep.github.io/Obong-Shunting-Game/",
+            "minSdkVersion": 21
+          }
+          EOF
+          echo "=== twa-manifest.json ==="
+          cat twa/twa-manifest.json
+
+      - name: Show SHA256 fingerprint (for assetlinks.json)
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        run: |
+          echo "=============================================="
+          echo "아래 SHA256 값을 assetlinks.json에 넣어야 합니다"
+          echo "=============================================="
+          keytool -list -v \
+            -keystore release.keystore \
+            -alias "${{ secrets.ANDROID_KEY_ALIAS }}" \
+            -storepass "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            | grep "SHA256:"
+
+      - name: Generate Android project from manifest
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd twa
+          # update는 twa-manifest.json에서 안드로이드 프로젝트를 생성하고 체크섬 파일도 기록한다.
+          # --skipVersionUpgrade가 versionName/versionCode 프롬프트를 막는다.
+          npx @bubblewrap/cli update --skipVersionUpgrade
+          echo "=== 생성된 파일 ==="
+          ls -la
+
+      - name: Build APK
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd twa
+          # 체크섬 파일이 있으므로 프롬프트 없이 진행된다. 비밀번호는 환경변수로 전달.
+          npx @bubblewrap/cli build --skipPwaValidation
+
+          echo "=== 생성된 APK/AAB 파일 목록 ==="
+          find . -name "*.apk" -o -name "*.aab" | head -20
+
+      - name: Upload APK
+        if: steps.keystore_check.outputs.has_keystore == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: |
+            twa/*.apk
+            twa/*.aab
+            twa/dist/*.apk
+          if-no-files-found: error
+
+      - name: Collect signed APK for release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p release
+          # bubblewrap은 서명본(app-release-signed.apk)과 미서명본을 함께 만든다.
+          # QR로 받는 사람이 헷갈리지 않도록 서명본만 골라 이름을 붙여 올린다.
+          SIGNED=$(find twa -name "*signed*.apk" ! -name "*unsigned*" | head -1)
+          if [ -z "$SIGNED" ]; then SIGNED=$(find twa -name "*.apk" ! -name "*unsigned*" | head -1); fi
+          if [ -z "$SIGNED" ]; then echo "서명된 APK를 찾지 못했습니다"; find twa -name "*.apk"; exit 1; fi
+          # 파일명은 반드시 ASCII로. 한글 이름을 쓰면 GitHub 릴리스에 올라갈 때
+          # 이름이 통째로 날아가 default.apk 가 된다(실제로 그렇게 올라갔다).
+          cp "$SIGNED" "release/obong-shunting-game.apk"
+          ls -la release
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 오봉역 양회기지 입환게임
+          body: |
+            안드로이드 설치 파일입니다.
+
+            1. 아래 **오봉입환게임.apk** 를 눌러 내려받으세요.
+            2. "출처를 알 수 없는 앱" 설치를 허용하면 설치됩니다.
+
+            아이폰은 설치 파일 대신 [게임 링크](https://mobydeeep.github.io/Obong-Shunting-Game/)를
+            Safari로 열고 공유 → "홈 화면에 추가" 를 하시면 됩니다.
+          files: release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

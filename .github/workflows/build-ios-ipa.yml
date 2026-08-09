@@ -1,0 +1,75 @@
+name: Build iOS IPA
+
+# 주의: 여기서 나오는 .ipa는 "서명되지 않은" 파일이다.
+# 아이폰은 안드로이드처럼 파일을 그냥 설치할 수 없고, 아래 셋 중 하나가 필요하다.
+#   1) AltStore / Sideloadly 로 본인 Apple ID 서명 후 설치 (무료, 7일마다 갱신)
+#   2) Apple Developer Program($99/년) + TestFlight 로 배포
+#   3) App Store 심사 후 정식 배포
+# 그냥 나눠줄 목적이라면 아이폰에서는 Safari로 열고 "홈 화면에 추가"가 가장 간단하다
+# (주소창 없는 전체화면으로 뜨고, 설치 과정이 필요 없다).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        # XcodeGen이 만드는 프로젝트 형식(77)은 Xcode 16 이상이라야 읽는다.
+        # 러너에 깔린 것 중 가장 최신을 고른다.
+        run: |
+          ls -d /Applications/Xcode*.app
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "선택: $NEWEST"
+          sudo xcode-select -s "$NEWEST/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: |
+          xcodegen generate
+          echo "=== 사용 중인 Xcode ==="
+          xcodebuild -version
+          echo "=== 프로젝트 형식(objectVersion) ==="
+          grep -m1 objectVersion ObongShunting.xcodeproj/project.pbxproj
+          echo "=== 스킴 목록 ==="
+          xcodebuild -list -project ObongShunting.xcodeproj
+
+      - name: Build (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild \
+            -project ObongShunting.xcodeproj \
+            -scheme ObongShunting \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package .ipa
+        working-directory: ios
+        run: |
+          APP_PATH="build/Build/Products/Release-iphoneos/ObongShunting.app"
+          if [ ! -d "$APP_PATH" ]; then echo "빌드 산출물을 찾을 수 없습니다"; find build -name "*.app"; exit 1; fi
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -qry ObongShunting-unsigned.ipa Payload
+          ls -la ObongShunting-unsigned.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-unsigned
+          path: ios/ObongShunting-unsigned.ipa
+          if-no-files-found: error

@@ -1,0 +1,54 @@
+# XcodeGen 설정. .xcodeproj는 손으로 관리하기 어렵고 충돌이 잦아
+# 이 파일 하나로 생성한다 (CI에서 `xcodegen generate` 실행).
+name: ObongShunting
+options:
+  bundleIdPrefix: com.obong
+  deploymentTarget:
+    iOS: "14.0"
+  createIntermediateGroups: true
+  # 참고: options.objectVersion 으로 형식을 낮추려 했으나 최신 XcodeGen이 무시하고
+  # 항상 77로 쓴다. 그래서 워크플로에서 형식 77을 읽을 수 있는 Xcode 16 이상을
+  # 쓰도록 맞췄다(.github/workflows/build-ios-ipa.yml 참고).
+
+targets:
+  ObongShunting:
+    type: application
+    platform: iOS
+    sources:
+      - path: ObongShunting
+    info:
+      path: ObongShunting/Info.plist
+      properties:
+        CFBundleDisplayName: 오봉 입환게임
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        UILaunchStoryboardName: LaunchScreen
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: false
+        # 가로모드 전용 — 게임이 가로 화면 기준으로 만들어져 있다
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # 배경음악·효과음이 자동으로 재생되도록
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        PRODUCT_BUNDLE_IDENTIFIER: com.obong.shuntinggame
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+
+schemes:
+  ObongShunting:
+    build:
+      targets:
+        ObongShunting: all
+    run:
+      config: Debug
+    archive:
+      config: Release
