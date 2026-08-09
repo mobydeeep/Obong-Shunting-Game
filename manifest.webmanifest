@@ -1,6 +1,6 @@
 {
-  "name": "오봉역 양회기지 입환게임",
-  "short_name": "오봉 입환게임",
+  "name": "입환 게임",
+  "short_name": "입환 게임",
   "description": "코레일 오봉역 양회기지 입환수송원 교육용 웹 게임",
   "start_url": "./index.html",
   "scope": "./",
