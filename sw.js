@@ -13,7 +13,7 @@
 //
 // 주의: 자산을 추가했다면 아래 CACHE 이름의 숫자를 올려야 이전 캐시가 정리된다.
 
-const CACHE = 'obong-game-v40';
+const CACHE = 'obong-game-v41';
 
 const PRECACHE = [
   './',
@@ -23,21 +23,23 @@ const PRECACHE = [
   './assets/bgm-start.mp3',
   './assets/bgm2.mp3',
   './assets/qr-android.png',
-  './assets/cursor-worker.png',
-  './assets/cursor-worker-active.png',
-  './assets/cursor-worker-l.png',
-  './assets/cursor-worker-active-l.png',
   './assets/worker/walk1.png',
   './assets/worker/walk2.png',
   './assets/worker/walk3.png',
   './assets/worker/walk4.png',
   './assets/worker/walk5.png',
   './assets/worker/think.png',
-  './assets/worker/run.png',
   './assets/worker/surprise.png',
   './assets/worker/back1.png',
   './assets/worker/back2.png',
   './assets/worker/wave.png',
+  './assets/cursor-hand.png',
+  './assets/cursor-hand-active.png',
+  './assets/worker-main/walk1.png',
+  './assets/worker-main/walk2.png',
+  './assets/worker-main/walk3.png',
+  './assets/worker-main/walk4.png',
+  './assets/worker-main/walk5.png',
 
   './assets/korail-logo.png',
   './assets/engine-move.mp3',
